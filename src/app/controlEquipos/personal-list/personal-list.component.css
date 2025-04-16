@@ -1,0 +1,282 @@
+
+
+
+.search-container {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+
+  }
+  
+  .search-container label {
+    margin-right: 10px;
+  }
+  
+  .search-container input[type="text"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 5px;
+    width: 300px; 
+      }
+  
+  .search-container button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+   /* background-color: #007bff;*/
+    color: white;
+    cursor: pointer;
+    margin-right: 5px;
+  }
+  
+ /* .search-container button:hover {
+    background-color: #0056b3;
+  }*/
+  .modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); 
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+    width: 90%; 
+    max-width: 800px;
+    height: auto; 
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+  }
+  
+  /* Estilos para el botón de cerrar */
+  .close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #888;
+  }
+  
+  .close:hover {
+    color: #333;
+  }
+  
+  /* Estilos para el título del modal */
+  h3 {
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    color: #333;
+  }
+  
+  /* Estilos para los campos del formulario */
+  form div {
+    margin-bottom: 15px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+  }
+  
+  input[type="text"],
+  input[type="date"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+  }
+  
+  input[type="text"]:focus,
+  input[type="date"]:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+  
+  /* Estilos para los botones */
+  .buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn-success {
+    background-color: #28a745;
+    color: #fff;
+  }
+  
+  .btn-success:hover {
+    background-color: #218838;
+  }
+  
+  .btn-danger {
+    background-color: #dc3545;
+    color: #fff;
+  }
+  
+  .btn-danger:hover {
+    background-color: #c82333;
+  }
+
+ 
+
+
+/* Estilos base para las notificaciones */
+.notification {
+  padding: 15px 20px;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateX(100%);
+  animation: slideIn 0.5s ease-out forwards, fadeOut 0.5s ease-in 2.5s forwards;
+}
+
+/* Animación para mostrar la notificación */
+@keyframes slideIn {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Animación para ocultar la notificación */
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+  }
+}
+
+/* Estilos específicos para notificaciones de éxito */
+.notification.success {
+  background-color: #28a745; /* Verde */
+  border-left: 5px solid #218838; /* Borde izquierdo más oscuro */
+}
+
+/* Estilos específicos para notificaciones de error */
+.notification.error {
+  background-color: #dc3545; /* Rojo */
+  border-left: 5px solid #c82333; /* Borde izquierdo más oscuro */
+}
+
+/* Iconos opcionales para notificaciones */
+.notification-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  vertical-align: middle;
+  background-size: cover;
+}
+
+.notification.success .notification-icon {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>');
+}
+
+.notification.error .notification-icon {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>');
+}
+
+/* Estilos para el modal de confirmación */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro semi-transparente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+}
+
+.modal-container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 400px;
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #888;
+}
+
+.close-btn:hover {
+  color: #333;
+}
+
+.modal-title {
+  font-size: 20px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-danger {
+  background-color: #dc3545; /* Rojo */
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background-color: #c82333; /* Rojo más oscuro */
+}
+
+.btn-secondary {
+  background-color: #6c757d; /* Gris */
+  color: #fff;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268; /* Gris más oscuro */
+}

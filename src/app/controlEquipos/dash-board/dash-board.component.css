@@ -1,0 +1,74 @@
+.dashboard-container {
+    padding: 20px;
+    
+  }
+  
+  .card {
+    transition: transform 0.3s ease;
+    border-radius: 8px;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+  }
+  
+  .text-primary {
+    color: #4e73df;
+  }
+  
+  .overview-section {
+    margin-top: 2rem;
+  }
+  
+  .quick-access-card {
+    background-color: #f8f9fc;
+    border-radius: 8px;
+    padding: 15px;
+    position: relative;
+    border: 1px solid #e3e6f0;
+    height: 100%;
+    transition: all 0.3s ease;
+  }
+  
+  .quick-access-card:hover {
+    background-color: #eaecf4;
+    border-color: #d1d3e2;
+  }
+  
+  .quick-access-card h5 {
+    color: #5a5c69;
+    font-weight: 600;
+  }
+  
+  .quick-access-card p {
+    color: #858796;
+    margin-bottom: 0;
+  }
+  
+  .stretched-link::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    content: "";
+  }
+  
+  /* Estilos adicionales para mejorar la apariencia */
+  .text-gray-800 {
+    color: #5a5c69;
+  }
+  
+  .font-weight-bold {
+    font-weight: 700;
+  }
+  
+  .text-uppercase {
+    text-transform: uppercase;
+  }
+  
+  .shadow {
+    box-shadow: 0 .15rem 1.75rem 0 rgba(58,59,69,.15)!important;
+  }

@@ -1,0 +1,188 @@
+<h2 class="text-center mt-3 mb-3 bi bi-card-checklist"> Licencias</h2>
+
+
+<div class="search-container m-3">
+  <label for="searchNombre">Buscar por Nombre:</label>
+  <input type="text" id="searchNombre" name="searchNombre" [(ngModel)]="searchNombre" (keyup.enter)="buscarPorNombre()" placeholder="Ingrese nombre a buscar">
+  <button type="button" class="btn btn-primary bi bi-search" (click)="buscarPorNombre()"></button>
+  <button type="button" class="btn btn-secondary" (click)="cargarLicencias()">Mostrar Todos</button> 
+</div>
+
+
+<div class="d-flex justify-content-between align-items-start">
+
+  <!-- Botón para agregar personal (solo visible para administradores) -->
+  <div *ngIf="isAdmin" class="m-3 w-25">
+   <button class="btn btn-success m-3 w-100 bi bi-plus-circle" (click)="abrirModalAgregar()"> Agregar</button>
+ </div>
+
+ <!-- Botones alineados a la izquierda -->
+ <div>
+   <!-- Botón para alternar orden -->
+   <button class="btn btn-secondary bi bi-arrow-down-up m-3" (click)="alternarOrden()"></button>
+   <!-- Botón para ir al Dashboard -->
+   <button class="btn btn-primary m-3 bi bi-house-fill" (click)="irAlDashboard()"> Inicio</button>
+   <!-- Botón para cerrar sesión -->
+   <button class="btn btn-danger m-3 bi bi-door-closed-fill" (click)="cerrarSesion()"> Salir</button>
+   
+ </div>
+
+</div>
+<!-- Mensajes de éxito -->
+<!-- Contenedor de notificaciones -->
+<div class="notifications-container">
+  <!-- Notificación de éxito -->
+  <div *ngIf="mensajeExito" class="notification success">
+    <span class="notification-icon"></span>
+    {{ mensajeExito }}
+  </div>
+
+  <!-- Notificación de error -->
+  <div *ngIf="mensajeError" class="notification error">
+    <span class="notification-icon"></span>
+    {{ mensajeError }}
+  </div>
+</div>
+
+<table class="table table-striped m-3">
+  <thead>
+    <tr>
+      <th>Tipo de software</th>
+      <th>Nombre</th>
+      <th>No. Serie</th>
+     <!-- <th>Usuarios soportados</th>-->
+      <th>Tipo de subscripción</th>
+      <th>Fecha Expiración</th>
+  <!--<th>Username</th>-->
+    <!--  <th>Password</th>-->
+      <th>Acciones</th> 
+    </tr>
+  </thead>
+  <tbody class="table-group-divider">
+    <tr *ngFor="let licencia of licenciaList">
+      <td>{{ licencia.tipoSw}}</td>
+      <td>{{ licencia.nombreLicencia }}</td>
+      <td>{{ licencia.numeroSerie}}</td>
+     <!-- <td>{{licencia.numeroUsuarios}}</td>-->
+      <td>{{licencia.subcripcion}}</td>
+      <td>{{ licencia.esPermanente ? 'PERMANENTE' : licencia.fechaVencimiento }}</td>
+
+    <!--  <td>{{licencia.usuario}}</td>-->
+    <!--    <td>{{licencia.contrasena}}</td>-->
+      <td>
+        <button *ngIf="isAdminOrModerador"  class="btn btn-info me-3" (click)="abrirModalEditar(licencia)"><i class="bi bi-pencil"></i></button>
+        <button *ngIf="isAdmin"  class="btn btn-danger me-3" (click)="eliminarLicencia(licencia.id!)"><i class="bi bi-trash"></i></button> 
+        <button class="btn btn-primary" (click)="abrirModalVer(licencia)"><i class="bi bi-eye"></i></button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Modal para agregar o editar licencia -->
+
+<div *ngIf="isModalVisible" class="modal">
+  <div class="modal-content">
+    <span class="close" (click)="cerrarModal()">×</span>
+    <h3>{{ isEditMode ? 'Editar Licencia' : 'Agregar Licencia' }}</h3>
+
+    <form (ngSubmit)="guardarLicencia()" *ngIf="selectedLicencia">
+      <input type="hidden" [(ngModel)]="selectedLicencia.id" name="id">
+      
+      <div>
+        <label for="tiposw">Tipo de software:</label>
+        <input type="text" id="tiposw" name="tiposw" [(ngModel)]="selectedLicencia.tipoSw" required>
+      </div>
+      <div>
+        <label for="nombrelic">Nombre de la licencia:</label>
+        <input type="text" id="nombrelic" name="nombrelic" [(ngModel)]="selectedLicencia.nombreLicencia" required>
+      </div>
+      <div>
+        <label for="noserie">Número de serie:</label>
+        <input type="text" id="noserie" name="noserie" [(ngModel)]="selectedLicencia.numeroSerie" required>
+      </div>
+      <div>
+        <label for="soportados">Usuarios soportados:</label>
+        <input type="number" id="soportados" name="soportados" [(ngModel)]="selectedLicencia.numeroUsuarios" required>
+      </div>
+
+      <div>
+        <label for="subscripcion">Tipo de subscripción:</label>
+        <select class="custom-select" id="subscripcion" name="subscripcion" [(ngModel)]="selectedLicencia.subcripcion" required>
+          <option value="ANUAL">ANUAL</option>
+          <option value="MENSUAL">MENSUAL</option>
+          <option value="PERMANENTE">PERMANENTE</option>
+        </select>
+      </div>
+
+
+      <div>
+        <label for="fechaExpiracion">Fecha Expiración:</label>
+        <input 
+        
+          type="date" 
+          id="fechaExpiracion" 
+          name="fechaExpiracion" 
+          [(ngModel)]="selectedLicencia.fechaVencimiento" 
+          [disabled]="selectedLicencia.esPermanente || false"
+          required
+        >
+      </div>
+      
+      <div>
+        <label>
+          <input 
+            type="checkbox" 
+            [(ngModel)]="selectedLicencia.esPermanente"
+            name="esPermanente"
+          >
+          Permanente
+        </label>
+      </div>
+      
+      <div>
+        <label for="descripcion">Username:</label>
+        <input type="text" id="descripcion" name="descripcion" [(ngModel)]="selectedLicencia.usuario" required>
+      </div>
+      <div>
+        <label for="descripcion">Password:</label>
+        <input type="text" id="descripcion" name="descripcion" [(ngModel)]="selectedLicencia.contrasena" required>
+      </div>
+
+      <div class="buttons">
+        <button class="btn btn-success me-3" type="submit">Guardar</button>
+        <button class="btn btn-danger" type="button" (click)="cancelarEdicion()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- Modal para visualizar detalles  -->
+<div *ngIf="isViewModalVisible" class="modal">
+  <div class="modal-content">
+    <span class="close" (click)="cerrarModalVer()">&times;</span>
+    <h3 class="text-center">Detalles de la Licencia</h3>
+    <p><strong>Tipo de software:</strong> {{ selectedLicencia?.tipoSw }}</p>
+    <p><strong>Nombre:</strong> {{ selectedLicencia?.nombreLicencia }}</p>
+    <p><strong>Numero de serie:</strong> {{ selectedLicencia?.numeroSerie }}</p>
+    <p><strong>Usuarios soportados:</strong> {{ selectedLicencia?.numeroUsuarios }}</p>
+    <p><strong>Tipo de subscripción:</strong> {{ selectedLicencia?.subcripcion }}</p>
+    <p><strong>Fecha Expiración:</strong> {{ selectedLicencia?.esPermanente ? 'PERMANENTE' : selectedLicencia?.fechaVencimiento }}</p>
+    <p><strong>Username:</strong> {{ selectedLicencia?.usuario }}</p>
+    <p><strong>Password:</strong> {{ selectedLicencia?.contrasena }}</p>
+  </div>
+</div>
+
+
+<!-- Modal de confirmación para eliminar -->
+<div *ngIf="isConfirmDeleteVisible" class="modal-overlay">
+  <div class="modal-container">
+    <span class="close-btn" (click)="cancelarEliminacion()">&times;</span>
+    <h3 class="modal-title">Confirmar Eliminación</h3>
+    <p>¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.</p>
+    <div class="modal-buttons">
+      <button class="btn btn-danger" (click)="confirmarEliminacion()">Eliminar</button>
+      <button class="btn btn-secondary" (click)="cancelarEliminacion()">Cancelar</button>
+    </div>
+  </div>
+</div>

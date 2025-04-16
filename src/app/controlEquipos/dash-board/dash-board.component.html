@@ -1,0 +1,45 @@
+<div class="dashboard-container">
+  <h1 class="text-center my-4 bi bi-house-fill"> Inicio</h1>
+
+
+<!-- Botón para cerrar sesión -->
+<button class="btn btn-danger m-3 bi bi-box-arrow-right" (click)="cerrarSesion()"> Cerrar Sesión</button>
+  <!-- Sección principal con tarjetas de módulos -->
+  <div class="row">
+    <div class="col-md-6 col-lg-4 mb-4" *ngFor="let module of modules">
+      <div class="card h-100 shadow" [style.border-left]="'5px solid ' + module.color">
+        <div class="card-body d-flex flex-column align-items-center text-center">
+          <i [class]="module.icon" [style.font-size]="'2.5rem'" [style.color]="module.color"></i>
+          <h5 class="font-weight-bold mt-2">{{ module.title }}</h5>
+          <p class="text-muted text-center">{{ module.description }}</p>
+          <a [routerLink]="module.routerLink" class="btn btn-primary btn-sm mt-auto">
+            Acceder <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección Vista Rápida 
+  <div class="overview-section mt-5">
+    <div class="card shadow mb-4">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Vista Rápida</h6>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6 col-lg-4 mb-3" *ngFor="let module of modules">
+            <div class="quick-access-card d-flex align-items-center p-3 shadow rounded">
+              <i [class]="module.icon" [style.color]="module.color" style="font-size: 1.5rem;"></i>
+              <div class="ml-3">
+                <h6>{{ module.title }}</h6>
+                <p class="text-muted small">{{ module.description }}</p>
+              </div>
+              <a [routerLink]="module.routerLink" class="stretched-link"></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>-->

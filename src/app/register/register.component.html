@@ -1,0 +1,63 @@
+<div class="form-container ">
+  <h2 class="form-title bi bi-person-plus"> Nuevo Usuario</h2>
+
+<div class="d-flex justify-content-center align-items-center">
+
+<!-- Botón para cerrar sesión -->
+<button class="btn btn-danger m-3 bi bi-door-closed-fill" (click)="cerrarSesion()"> Salir</button>
+
+    <!-- Botón para ir al Dashboard -->
+    <button class="btn btn-primary m-3 bi bi-house-fill" (click)="irAlDashboard()"> Inicio</button>
+</div>
+
+
+
+
+  <form [formGroup]="form" (ngSubmit)="register()" class="user-form">
+    <div class="form-group">
+      <label class="form-label">Usuario:</label>
+      <input type="text" formControlName="username" class="form-input" 
+             [class.invalid]="form.get('username')?.invalid && form.get('username')?.touched" />
+      <div *ngIf="form.get('username')?.invalid && form.get('username')?.touched" class="error-message">
+        <i class="fas fa-exclamation-circle"></i> Campo obligatorio
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Nombre:</label>
+      <input type="text" formControlName="firstName" class="form-input" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Apellido:</label>
+      <input type="text" formControlName="lastName" class="form-input" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Contraseña:</label>
+      <input type="password" formControlName="password" class="form-input" 
+             [class.invalid]="form.get('password')?.invalid && form.get('password')?.touched" />
+      <div *ngIf="form.get('password')?.invalid && form.get('password')?.touched" class="error-message">
+        <i class="fas fa-exclamation-circle"></i> Mínimo 6 caracteres
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Rol:</label>
+      <select formControlName="role" class="form-select">
+        <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+      </select>
+    </div>
+
+    <button type="submit" [disabled]="form.invalid" class="submit-btn">
+      Registrarse
+    </button>
+  </form>
+
+  <div *ngIf="successMessage" class="alert success">
+    <i class="fas fa-check-circle"></i> {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="alert error">
+    <i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}
+  </div>
+</div>

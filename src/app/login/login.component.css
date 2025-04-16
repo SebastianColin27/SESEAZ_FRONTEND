@@ -1,0 +1,81 @@
+.container {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 20px;
+  border: 1px solid;
+  border-radius: 20px;
+  color: #ebebeb;
+  background-color: #ebebeb;
+}
+
+#Titulo1 {
+  text-align: center;
+  color: #2d67d3;
+}
+
+#Titulo2 {
+  text-align: center;
+  color: #545454;
+}
+
+#recuperar-contrasena {
+  margin-top: 8px;
+  text-align: center;
+  color: #2d67d3;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  color: #2d67d3;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}   
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  box-sizing: border-box;
+  margin-top: 10px;
+
+  border-radius: 20px;
+  /* Esquinas muy redondeadas */
+  padding: 12px 20px;
+  border: 2px;
+  outline: none;
+  /* Elimina el borde al enfocar */
+}
+
+.btn {
+  background-color: #2d67d3;
+  color: white;
+  border-radius: 100px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 20px;
+
+}
+
+.btn:hover {
+  background-color: #2d67d3;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+}
+
+.ng-valid:not(form).ng-touched {
+  border-left: 5px solid #42A948;
+}
+
+.ng-invalid:not(form).ng-touched {
+  border-left: 5px solid #a94442;
+}
