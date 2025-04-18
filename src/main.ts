@@ -12,7 +12,7 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
 export function tokenGetter() {
   
-  return sessionStorage.getItem("token"); // <-- Probablemente sea esto, basado en tu LoginService
+  return sessionStorage.getItem("token");
 }
 
 bootstrapApplication(AppComponent, {

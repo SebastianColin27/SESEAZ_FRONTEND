@@ -9,7 +9,8 @@ import { Licencia } from '../models/licencia';
   providedIn: 'root'
 })
 export class LicenciaService {
-  private apiUrl = 'http://localhost:8080/api/licencias';
+  //private apiUrl = 'http://localhost:8080/api/licencias';
+  private apiUrl = 'https://seseaz-backend.onrender.com/api/licencias';
 
   constructor(private http: HttpClient) {}
 
