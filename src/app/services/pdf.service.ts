@@ -6,8 +6,10 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class PdfService {
-  private apiUrlAsignaciones = 'http://localhost:8080/api/pdf/asignaciones';
-  private apiUrlBitacora = 'http://localhost:8080/api/pdf/mantenimientos'; 
+ // private apiUrlAsignaciones = 'http://localhost:8080/api/pdf/asignaciones';
+  //private apiUrlBitacora = 'http://localhost:8080/api/pdf/mantenimientos'; 
+  private apiUrlAsignaciones = 'https://seseaz-backend.onrender.com/api/pdf/asignaciones';
+  private apiUrlBitacora = 'https://seseaz-backend.onrender.com/api/pdf/mantenimientos';
 
 
   constructor(private http: HttpClient) {}

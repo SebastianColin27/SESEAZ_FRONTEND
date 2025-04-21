@@ -6,12 +6,13 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LoginService } from '../../auth/login.service';
 import { AuthService } from '../../auth/auth.service';
 import { Router } from '@angular/router';
+import { LoadingComponent } from "../loading/loading.component";
 
 
 @Component({
   selector: 'app-personal-list',
   standalone: true,
-  imports: [FormsModule, CommonModule, ReactiveFormsModule],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule, LoadingComponent],
   templateUrl: './personal-list.component.html',
   styleUrl: './personal-list.component.css',
 })
@@ -34,7 +35,7 @@ mensajeError: string = '';
 isConfirmDeleteVisible: boolean = false;
 idParaEliminar: string | null = null;
 
-
+loading = true;
 
 
 
@@ -56,7 +57,7 @@ idParaEliminar: string | null = null;
   
   ngOnInit(): void {
     this.cargarPersonal();
-
+    this.loading = false;
   
   }
 
@@ -258,6 +259,10 @@ alternarOrden(): void {
   this.ordenDescendente = !this.ordenDescendente;
   this.personalList.reverse(); // invierte el orden actual del array
 }
+
+
+
+
 
 
 }

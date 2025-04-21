@@ -8,7 +8,7 @@ import { Equipo } from '../models/equipo';
 })
 export class EquipoService {
   //private apiUrl = 'http://localhost:8080/api/equipos'; 
-  private apiUrl = 'https://seseaz-backend.onrender.com/api/equipos';
+ private apiUrl = 'https://seseaz-backend.onrender.com/api/equipos';
 
   constructor(private http: HttpClient) { }
 

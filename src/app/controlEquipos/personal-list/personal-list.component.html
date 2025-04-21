@@ -1,5 +1,5 @@
 
-<h2 class="text-center mt-3 mb-3 bi bi-people"> Personal</h2>
+<h2 class="text-center mt-3 mb-3  bi bi-people"> Personal</h2>
 
 
 
@@ -52,8 +52,9 @@
 
 
  <!-- Tabla de personal -->
- 
-<table class="table table-striped m-3">
+<!-- Spinner de carga -->
+<app-loading [loading]="loading"></app-loading>
+<table class="table table-striped m-3" *ngIf="!loading">
   <thead>
     <tr >
       <th>Nombre</th>

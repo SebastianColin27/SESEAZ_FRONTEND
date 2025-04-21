@@ -7,7 +7,7 @@ import { Asignacion } from '../models/asignacion';
   providedIn: 'root'
 })
 export class AsignacionService {
-  //private apiUrl = 'http://localhost:8080/api/asignaciones';
+ // private apiUrl = 'http://localhost:8080/api/asignaciones';
   private apiUrl = 'https://seseaz-backend.onrender.com/api/asignaciones';
 
   constructor(private http: HttpClient) {}
