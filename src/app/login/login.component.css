@@ -18,15 +18,10 @@
   color: #545454;
 }
 
-#recuperar-contrasena {
-  margin-top: 8px;
-  text-align: center;
-  color: #2d67d3;
-}
+
 
 .form-group {
   margin-bottom: 15px;
-  color: #2d67d3;
 }
 
 label {
@@ -78,4 +73,20 @@ input[type="password"] {
 
 .ng-invalid:not(form).ng-touched {
   border-left: 5px solid #a94442;
+}
+
+.btn-efecto {
+  transition: all 0.3s ease-in-out;
+  box-shadow: none;
+}
+
+.btn-efecto:hover {
+  background-color: #0056b3; /* un azul más oscuro */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: scale(1.03);
+}
+
+.btn-efecto:active {
+  transform: scale(0.98);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }

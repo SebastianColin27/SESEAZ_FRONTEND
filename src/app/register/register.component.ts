@@ -5,15 +5,17 @@ import { AuthService } from '../auth/auth.service';
 import { Router } from '@angular/router';
 import { RegisterRequest } from '../models/RegisterRequest';
 import { LoginService } from '../auth/login.service';
+import { LoadingComponent } from '../controlEquipos/loading/loading.component';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, LoadingComponent],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css']
 })
 export class RegisterComponent {
+  loading = true;
   form: FormGroup;
   roles = ['LECTOR', 'MODERADOR', 'ADMIN'];
   successMessage = '';
@@ -33,7 +35,11 @@ export class RegisterComponent {
       role: ['', [Validators.required]]
     });
   }
-
+ ngOnInit(): void {
+    setTimeout(() => this.loading = false, 500); // Simula carga
+    
+  
+  }
   register(): void {
     if (this.form.invalid) return;
 

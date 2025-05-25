@@ -1,4 +1,6 @@
 import { Asignacion } from './asignacion';
+import { Equipo } from './equipo';
+import { Personal } from './personal';
 export class Mantenimiento {
     
     id?: any;
@@ -6,5 +8,8 @@ export class Mantenimiento {
     fecha: string = '';
     actividadRealizada: string = '';
     evidencia: string = '';
-    asignacion: Asignacion[] = [];  
+
+    equipo: Equipo | null = null;
+    personal: Personal | null = null;
+ 
 }

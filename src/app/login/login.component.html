@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+<app-loading [loading]="loading"></app-loading>
 
 <head>
   <title>Iniciar sesión</title>
@@ -7,6 +8,7 @@
 
 <body>
 
+<div *ngIf="!loading">
   <div class="container">
     <h2 id="Titulo1">SESEAZ</h2>
     <p id="Titulo2">Sistema de Control de Equipos</p>
@@ -35,11 +37,12 @@
         </div>
       </div>
       <div class="d-grid gap-2">
-        <button type="submit" class="btn btn-primary" (click)="login()">Iniciar sesión</button>
+        <button type="submit" class="btn btn-primary btn-efecto" (click)="login()">Iniciar sesión</button>
       </div>
    <!--   <p><a class="link-opacity-100-hover" href="#" id="recuperar-contrasena">Olvidé mi contraseña</a></p>-->
 
     </form>
+  </div>
   </div>
 </body>
 

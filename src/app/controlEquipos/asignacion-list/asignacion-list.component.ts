@@ -1,6 +1,6 @@
 import { Component, OnInit,  ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AsignacionService } from '../../services/asignacion.service';
 import { EquipoService } from '../../services/equipo.service';
 import { PersonalService } from '../../services/personal.service';
@@ -13,26 +13,37 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
 import { LoginService } from '../../auth/login.service';
 import { PdfService } from '../../services/pdf.service';
+import { catchError, debounceTime, distinctUntilChanged, EMPTY, filter, map, of, Subscription, switchMap } from 'rxjs';
+import { LoadingComponent } from '../loading/loading.component';
 
 @Component({
   selector: 'app-asignacion-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule,  LoadingComponent],
   templateUrl: './asignacion-list.component.html',
   styleUrl: './asignacion-list.component.css',
 })
 export class AsignacionComponent implements OnInit {
+    loading = true;
   getLicenciaNames(asignacion: Asignacion): string {
-    return asignacion.licencias && asignacion.licencias.length > 0
-      ? asignacion.licencias.map(l => l.nombreLicencia).join(', ')
-      : 'Sin asignar';
+    if (asignacion.licencias && asignacion.licencias.length > 0) {
+      return asignacion.licencias
+        .filter(l => l?.nombreLicencia)  // Filtra solo licencias con nombre
+        .map(l => l.nombreLicencia)
+        .join(', ');
+    }
+    return 'Sin asignar';
   }
   
-getPersonalNames(asignacion: Asignacion): string {
-  return asignacion.personal && asignacion.personal.length > 0
-    ? asignacion.personal.map(p => p.nombre).join(', ')
-    : 'Sin asignar';
-}
+  getPersonalName(asignacion: Asignacion): string {
+    if (asignacion.personal) {
+      return asignacion.personal.nombre || 'Sin asignar'; // Asegura que el nombre no sea nulo
+    }
+    return 'Sin asignar';
+  }
+  
+  
+  
   asignacionList: Asignacion[] = [];
   equipoList: Equipo[] = [];
   personalList: Personal[] = [];
@@ -48,6 +59,9 @@ getPersonalNames(asignacion: Asignacion): string {
 mensajeError: string = '';
 isConfirmDeleteVisible: boolean = false;
 idParaEliminar: string | null = null;
+
+searchControl = new FormControl('');
+  private searchSubscription?: Subscription;
 
   constructor(
     private cd: ChangeDetectorRef,
@@ -75,10 +89,47 @@ idParaEliminar: string | null = null;
   }
 
   ngOnInit(): void {
+    setTimeout(() => this.loading = false, 2000); // Simula carga
     this.cargarAsignaciones();
     this.cargarEquipos();
     this.cargarPersonal();
     this.cargarLicencias();
+    
+
+  this.searchSubscription = this.searchControl.valueChanges
+  .pipe(
+    debounceTime(300),
+    distinctUntilChanged(),
+    switchMap((value) => {
+      const trimmedValue = value?.trim();
+      if (!trimmedValue) {
+        // Recarga todas las asignaciones y retorna un observable vacío
+        this.cargarAsignaciones(); // O this.cargarEquipos() según corresponda
+        return EMPTY; // No hace nada más en el flujo
+      }
+
+      return this.asignacionService.buscarPorNumeroSerie(trimmedValue).pipe(
+        catchError(err => {
+          console.error('Error al buscar asignaciones:', err);
+          this.mensajeError = 'Ocurrió un error al buscar asignaciones.';
+          return of([]); // Retorna un arreglo vacío en caso de error
+        })
+      );
+    })
+  )
+  .subscribe((asignaciones) => {
+    if (asignaciones.length > 0) {
+      this.asignacionList = asignaciones;
+      this.mensajeError = '';
+    } else {
+      this.asignacionList = [];
+      this.mensajeError = 'No se encontró ninguna asignación con esa serie.';
+    }
+  });
+  }
+
+  ngOnDestroy(): void {
+    this.searchSubscription?.unsubscribe();
   }
 
   cargarAsignaciones(): void {
@@ -112,7 +163,7 @@ idParaEliminar: string | null = null;
   abrirModalAgregar(): void {
     this.selectedAsignacion = {
       equipo: null,
-      personal: [],
+      personal: null,
       licencias: [],
       ubicacionFisica: '',
       nombreEquipo: '',
@@ -141,6 +192,11 @@ idParaEliminar: string | null = null;
 
   guardarAsignacion(): void {
     if (this.selectedAsignacion) {
+      // ⚠️ Arreglo defensivo: en caso de que accidentalmente venga como array
+      if (Array.isArray(this.selectedAsignacion.personal)) {
+        this.selectedAsignacion.personal = this.selectedAsignacion.personal[0];
+      }
+  
       if (this.isEditMode && this.selectedAsignacion.id) {
         this.asignacionService.actualizarAsignacion(this.selectedAsignacion.id, this.selectedAsignacion).subscribe(
           () => {
@@ -149,8 +205,9 @@ idParaEliminar: string | null = null;
             this.cd.detectChanges();
             this.mostrarNotificacion('Asignación actualizada con éxito', 'success');
           },
-          (error) => {console.error('Error al actualizar asignación:', error);
-          this.mostrarNotificacion('Error al actualizar asignación', 'error');
+          (error) => {
+            console.error('Error al actualizar asignación:', error);
+            this.mostrarNotificacion('Error al actualizar asignación', 'error');
           }
         );
       } else {
@@ -160,13 +217,15 @@ idParaEliminar: string | null = null;
             this.cerrarModal();
             this.mostrarNotificacion('Asignación agregada con éxito', 'success');
           },
-          (error) =>{ console.error('Error al crear asignación:', error);
-          this.mostrarNotificacion('Error al crear asignación', 'error'); 
+          (error) => {
+            console.error('Error al crear asignación:', error);
+            this.mostrarNotificacion('Error al crear asignación', 'error'); 
           }
         );
       }
     }
   }
+  
 
  // Método para abrir el modal de confirmación
  abrirModalConfirmacionEliminar(id: any): void {
@@ -254,16 +313,105 @@ alternarOrden(): void {
   this.asignacionList.reverse(); // invierte el orden actual del array
 }
 
-descargarPdf() {
-  this.pdfService.downloadAsignacionesPdf().subscribe(blob => {
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'asignaciones.pdf';
-    a.click();
-    window.URL.revokeObjectURL(url);
-  }, error => {
-    console.error('Error al descargar el PDF:', error);
-  });
+// Método para descargar el reporte general de Asignaciones
+descargarPdf(): void { // Asumiendo que este es el método para el reporte GENERAL de asignaciones
+  this.pdfService.downloadAsignacionesPdfGeneral().subscribe( // Asegúrate de usar el método correcto del PdfService
+    blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'reporte_asignaciones_general.pdf'; // Nombre de archivo más descriptivo para general
+      a.click();
+      window.URL.revokeObjectURL(url);
+      // **Añade la notificación de éxito aquí:**
+      this.mostrarNotificacion('Reporte general de asignaciones generado con éxito.', 'success');
+    },
+    error => {
+      console.error('Error al descargar el reporte general de asignaciones:', error);
+      // La notificación de error ya está probablemente en el catchError, si no, añádela:
+      this.mostrarNotificacion('Error al generar el reporte general de asignaciones.', 'error');
+    }
+  );
 }
+
+// Método para descargar el reporte de Asignaciones por Equipo
+descargarReporteAsignacionesPorEquipo(asignacion: Asignacion): void {
+  if (asignacion.equipo && asignacion.equipo.id) {
+
+    const equipoIdString = typeof asignacion.equipo.id === 'string' ? asignacion.equipo.id : asignacion.equipo.id.$oid; // Ajusta según cómo esté representado el ObjectId en tu modelo Equipo en Angular
+
+    if (equipoIdString) {
+      this.pdfService.downloadAsignacionesPdfPorEquipo(equipoIdString).subscribe(
+        blob => {
+          // Lógica para descargar el blob como archivo PDF
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `reporte_asignaciones_equipo_${equipoIdString}.pdf`; // Nombre del archivo
+          a.click();
+          window.URL.revokeObjectURL(url); // Limpiar la URL del blob
+          this.mostrarNotificacion('Reporte de asignaciones generado con éxito.', 'success');
+        },
+        error => {
+          console.error('Error al descargar el reporte de asignaciones:', error);
+          this.mostrarNotificacion('Error al generar el reporte de asignaciones.', 'error');
+        }
+      );
+    } else {
+       console.error('ID de equipo no válido para generar reporte.');
+       this.mostrarNotificacion('No se pudo generar el reporte: ID de equipo inválido.', 'error');
+    }
+
+  } else {
+    console.warn('No hay equipo asociado a esta asignación para generar reporte.');
+    this.mostrarNotificacion('Esta asignación no tiene un equipo asociado para generar reporte.', 'error');
+  }
+}
+
+// Método para descargar el reporte de Asignaciones por Personal
+descargarReporteAsignacionesPorPersonal(asignacion: Asignacion): void {
+  if (asignacion.personal && asignacion.personal.id) {
+
+    const personalIdString = typeof asignacion.personal.id === 'string' 
+      ? asignacion.personal.id 
+      : asignacion.personal.id.$oid; // Ajusta según cómo esté representado el ObjectId en tu modelo Personal en Angular
+
+    if (personalIdString) {
+      this.pdfService.downloadAsignacionesPdfPorPersonal(personalIdString).subscribe(
+        blob => {
+          // Lógica para descargar el blob como archivo PDF
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `reporte_asignaciones_personal_${personalIdString}.pdf`; // Nombre del archivo
+          a.click();
+          window.URL.revokeObjectURL(url); // Limpiar la URL del blob
+          this.mostrarNotificacion('Reporte de asignaciones generado con éxito.', 'success');
+        },
+        error => {
+          console.error('Error al descargar el reporte de asignaciones:', error);
+          this.mostrarNotificacion('Error al generar el reporte de asignaciones.', 'error');
+        }
+      );
+    } else {
+       console.error('ID de personal no válido para generar reporte.');
+       this.mostrarNotificacion('No se pudo generar el reporte: ID de personal inválido.', 'error');
+    }
+
+  } else {
+    console.warn('No hay personal asociado a esta asignación para generar reporte.');
+    this.mostrarNotificacion('Esta asignación no tiene un personal asociado para generar reporte.', 'error');
+  }
+}
+
+// TypeScript (componente)
+removeItem(item: any) {
+  const index = this.selectedAsignacion?.licencias.indexOf(item);
+  if (index !== undefined && index > -1) {
+    this.selectedAsignacion?.licencias.splice(index, 1);
+  }   
+  this.cd.detectChanges(); // Asegúrate de que Angular detecte el cambio
+}
+  
+
 }

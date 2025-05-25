@@ -1,21 +1,23 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LicenciaService } from '../../services/licencia.service';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Licencia } from '../../models/licencia';
 import { Router } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
 import { LoginService } from '../../auth/login.service';
+import { catchError, debounceTime, distinctUntilChanged, of, Subscription, switchMap } from 'rxjs';
+import { LoadingComponent } from '../loading/loading.component';
 
 @Component({
   selector: 'app-licencia-list',
   standalone: true,
-  imports: [FormsModule, CommonModule, ReactiveFormsModule],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule, LoadingComponent],
   templateUrl: './licencia-list.component.html',
   styleUrl: './licencia-list.component.css',
 })
 export class LicenciaListComponent implements OnInit {
-
+ loading = true;
   licenciaList: Licencia[] = [];
   selectedLicencia: Licencia | null = null;
   isModalVisible = false;
@@ -28,7 +30,10 @@ export class LicenciaListComponent implements OnInit {
   mensajeError: string = '';
   isConfirmDeleteVisible: boolean = false;
   idParaEliminar: string | null = null;
+  ultimaFechaVencimiento: string | null = null;
   
+  searchControl = new FormControl('');
+    private searchSubscription?: Subscription;
 
   constructor(private licenciaService: LicenciaService,
     private loginService: LoginService, public authService: AuthService,
@@ -52,7 +57,37 @@ export class LicenciaListComponent implements OnInit {
 
   
   ngOnInit(): void {
+    setTimeout(() => this.loading = false, 500); // Simula carga
     this.cargarLicencias();
+    
+this.searchSubscription = this.searchControl.valueChanges
+  .pipe(
+    debounceTime(300),
+    distinctUntilChanged(),
+    switchMap((value) => {
+      if (!value || !value.trim()) {
+        this.cargarLicencias();
+        return of(null);
+      }
+      return this.licenciaService.buscarLicenciasPorNombre(value.trim()).pipe(
+        catchError(err => {
+          console.error('Error al buscar licencia:', err);
+          this.mensajeError = 'No se encontró la licencia con la serie ingresada.';
+          return of(null);
+        })
+      );
+    })
+  )
+  .subscribe((licencia) => {
+    if (licencia) {
+      this.licenciaList = licencia || [];
+      this.mensajeError = '';
+    }
+  });
+  }
+
+  ngOnDestroy(): void {
+    this.searchSubscription?.unsubscribe();
   }
 
   cargarLicencias(): void { 
@@ -68,12 +103,13 @@ export class LicenciaListComponent implements OnInit {
   }
 
   abrirModalAgregar(): void { 
-    this.selectedLicencia = { tipoSw:'', nombreLicencia:'', numeroSerie:'', numeroUsuarios:0, subcripcion:'', fechaVencimiento:'', usuario:'', contrasena:'',   esPermanente: false };
+    this.selectedLicencia = { tipoSw:'', nombreLicencia:'', numeroSerie:'', numeroUsuarios:0, subcripcion:'', fechaVencimiento:'' , usuario:'', contrasena:'',   esPermanente: false };
     this.isEditMode = false;
     this.isModalVisible = true;
   }
 
   abrirModalEditar(licencia: Licencia): void {
+    this.selectedLicencia = JSON.parse(JSON.stringify(licencia));
     this.selectedLicencia = { ...licencia };
     this.isFechaDeshabilitada = licencia.esPermanente || false;
     this.isEditMode = true;
@@ -88,9 +124,9 @@ export class LicenciaListComponent implements OnInit {
   guardarLicencia(): void { 
     if (this.selectedLicencia) {
       // Si la licencia es permanente, eliminamos la fecha para evitar errores
-      if (this.selectedLicencia.esPermanente) {
+     /*if (this.selectedLicencia.esPermanente) {
         this.selectedLicencia.fechaVencimiento = undefined;
-      }
+      }*/
   
       if (this.isEditMode && this.selectedLicencia.id) {
         this.licenciaService.actualizarLicencia(this.selectedLicencia.id, this.selectedLicencia).subscribe(
@@ -131,11 +167,11 @@ export class LicenciaListComponent implements OnInit {
   this.isConfirmDeleteVisible = true; // Muestra el modal
 }
 
-  toggleFechaExpiracion(): void {
+ /* toggleFechaExpiracion(): void {
     if (this.isFechaDeshabilitada) {
       this.selectedLicencia!.fechaVencimiento = 'Permanente';
     }
-  }
+  }*/
 
   
   cancelarEdicion(): void { 
@@ -191,6 +227,7 @@ eliminarLicencia(id: any): void {
   isViewModalVisible = false;
 
   abrirModalVer(licencia: Licencia): void {
+    this.selectedLicencia = JSON.parse(JSON.stringify(licencia));
     this.selectedLicencia = { ...licencia };
     this.isViewModalVisible = true;
   }
@@ -227,5 +264,15 @@ cerrarSesion(): void {
 alternarOrden(): void {
   this.ordenDescendente = !this.ordenDescendente;
   this.licenciaList.reverse(); // invierte el orden actual del array
+}
+
+// Método llamado cuando cambia la selección de suscripción
+onSubscriptionChange(): void {
+  if (this.selectedLicencia && this.selectedLicencia.subcripcion === 'PERMANENTE') {
+    // Si la suscripción es permanente, borramos el valor de la fecha de vencimiento en el modelo
+    this.selectedLicencia.fechaVencimiento = undefined; // O null
+  }
+  // Si la suscripción NO es permanente, no hacemos nada aquí.
+  // El input de fecha se habilita automáticamente y el usuario puede ingresar una fecha.
 }
 }

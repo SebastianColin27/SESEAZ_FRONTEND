@@ -11,7 +11,7 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 export class LoginService {
 
   currentUserLoginOn: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  currentUserData: BehaviorSubject<any> = new BehaviorSubject<any>(null); // Cambia a any para almacenar el payload
+  currentUserData: BehaviorSubject<any> = new BehaviorSubject<any>(null);
   currentUserRole: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
 

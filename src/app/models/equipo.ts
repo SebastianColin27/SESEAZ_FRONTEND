@@ -8,11 +8,14 @@ export class Equipo {
     tipo?: string;
     procesador?: string;
     ram?: number;
-    almacenamiento?: number;
+    hdd?: number;
+    sdd?: number;
     puertos?: Puertos;
     estado?: string;
     fechaCompra?: string;
-    imagenUrl?: string;
+
+     imagenGridFsId?: string; 
+    imagenUrl?: string; 
 }
 
 export class Puertos {

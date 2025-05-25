@@ -280,3 +280,39 @@
 .btn-secondary:hover {
   background-color: #5a6268; /* Gris más oscuro */
 }
+
+/* --- Notifications Styling (Optional - based on your existing styles) --- */
+.notifications-container {
+    position: fixed; /* Or absolute if within a container */
+    top: 10px; /* Adjust position */
+    right: 10px; /* Adjust position */
+    z-index: 1100; /* Above modals */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.notification {
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.notification.success {
+    background-color: #28a745; /* Green */
+}
+
+.notification.error {
+    background-color: #dc3545; /* Red */
+}
+
+.notification-icon {
+    font-size: 1.2em;
+    margin-right: 10px;
+    display: inline-flex; /* Use flex for centering icon */
+    align-items: center;
+}

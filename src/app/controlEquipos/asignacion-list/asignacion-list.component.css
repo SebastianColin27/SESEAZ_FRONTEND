@@ -164,26 +164,69 @@
   }
   
   /* Estilos para los select múltiples */
-  .custom-select[multiple] {
-    height: auto;
-    min-height: 100px;
-    padding: 8px;
-    background-image: none; 
-  }
-  
-  .custom-select[multiple] option {
-    padding: 8px;
-    margin: 4px 0;
-    background-color: #f9f9f9;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .custom-select[multiple] option:hover {
-    background-color: #007bff;
-    color: #fff;
-  }
+  .custom-select:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.custom-select[multiple] option {
+  padding: 8px;
+  margin: 2px 0;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.custom-select[multiple] option:hover, 
+.custom-select[multiple] option:checked {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.selected-items {
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+  cursor: pointer;
+}
+
+.selected-items:hover {
+  border-color: #999;
+}
+
+.selected-tag {
+  background-color: #e0e0e0;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.remove-tag {
+  cursor: pointer;
+  font-size: 1.1em;
+  line-height: 1;
+  color: #666;
+}
+
+.remove-tag:hover {
+  color: #ff0000;
+}
+
+.placeholder {
+  color: #999;
+  font-style: italic;
+} 
   
   /* Estilos para el hover y focus en selects */
   .custom-select:hover {
@@ -448,3 +491,40 @@
 .btn-secondary:hover {
   background-color: #5a6268; /* Gris más oscuro */
 }
+
+/* --- Notifications Styling (Optional - based on your existing styles) --- */
+.notifications-container {
+    position: fixed; /* Or absolute if within a container */
+    top: 10px; /* Adjust position */
+    right: 10px; /* Adjust position */
+    z-index: 1100; /* Above modals */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.notification {
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.notification.success {
+    background-color: #28a745; /* Green */
+}
+
+.notification.error {
+    background-color: #dc3545; /* Red */
+}
+
+.notification-icon {
+    font-size: 1.2em;
+    margin-right: 10px;
+    display: inline-flex; /* Use flex for centering icon */
+    align-items: center;
+}
+

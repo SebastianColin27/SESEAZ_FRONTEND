@@ -5,7 +5,7 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { provideRouter } from '@angular/router';
 import { routes } from './app/app.routes';
 import { JwtHelperService, JWT_OPTIONS } from '@auth0/angular-jwt';
-import { environment } from './environments/environment'; // Importa environment si lo usas
+import { environment } from './environments/environment'; 
 
 import { JwtInterceptor } from './app/auth/jwt.interceptor'; 
 import { HTTP_INTERCEPTORS } from '@angular/common/http';

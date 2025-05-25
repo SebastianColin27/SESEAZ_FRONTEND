@@ -4,18 +4,19 @@ import { FormBuilder, FormControl, FormGroup, Validators, ReactiveFormsModule } 
 import { CommonModule } from '@angular/common';
 import { LoginService } from '../../app/auth/login.service';
 import { LoginRequest } from '../../app/auth/loginRequest';
-// Quita HttpClientModule si ya lo provees en main.ts (provideHttpClient)
-// import { HttpClientModule } from '@angular/common/http';
+import { LoadingComponent } from '../controlEquipos/loading/loading.component';
+
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  // Quita HttpClientModule de imports si se provee en main.ts
-  imports: [ReactiveFormsModule, CommonModule],
+
+  imports: [ReactiveFormsModule, CommonModule, LoadingComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
 export class LoginComponent {
+    loading = false;  
   loginError: string = "";
   isSubmitting = false; // Para evitar doble submit
 
@@ -40,6 +41,7 @@ export class LoginComponent {
   }
 
   login() {
+     this.loading = true;
     // Marca todos los campos como tocados para mostrar errores si es necesario
     this.loginForm.markAllAsTouched();
 
@@ -60,6 +62,7 @@ export class LoginComponent {
           } else {
             console.error('[LoginComponent] ¡ERROR CRÍTICO! El token no se encontró en sessionStorage inmediatamente después de que el servicio lo procesó.');
             this.loginError = "Error inesperado al iniciar sesión. Intente de nuevo.";
+           
             this.isSubmitting = false; // Permite reintentar
           }
         },
@@ -73,6 +76,7 @@ export class LoginComponent {
             // Mensaje más específico si es posible detectar un 401/403 vs otros errores
             this.loginError = 'Error de autenticación. Verifique su usuario y contraseña.';
           }
+          this.loading = false;
           this.isSubmitting = false; // Permite reintentar
         },
         complete: () => {
@@ -89,6 +93,7 @@ export class LoginComponent {
             if (!this.loginError) {
               this.loginError = "No se pudo completar el inicio de sesión.";
             }
+            this.loading = false;
             this.isSubmitting = false; // Permite reintentar
           }
         }

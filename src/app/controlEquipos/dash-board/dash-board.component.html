@@ -1,7 +1,9 @@
 <div class="dashboard-container">
   <h1 class="text-center my-4 bi bi-house-fill"> Inicio</h1>
 
+  <app-loading [loading]="loading"></app-loading>
 
+<div *ngIf="!loading">
 <!-- Botón para cerrar sesión -->
 <button class="btn btn-danger m-3 bi bi-box-arrow-right" (click)="cerrarSesion()"> Cerrar Sesión</button>
   <!-- Sección principal con tarjetas de módulos -->
@@ -19,7 +21,7 @@
       </div>
     </div>
   </div>
-
+</div>
   <!-- Sección Vista Rápida 
   <div class="overview-section mt-5">
     <div class="card shadow mb-4">

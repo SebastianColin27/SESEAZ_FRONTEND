@@ -1,6 +1,9 @@
 <div class="form-container ">
   <h2 class="form-title bi bi-person-plus"> Nuevo Usuario</h2>
 
+  <app-loading [loading]="loading"></app-loading>
+<!-- Spinner de carga -->
+
 <div class="d-flex justify-content-center align-items-center">
 
 <!-- Botón para cerrar sesión -->
@@ -12,6 +15,7 @@
 
 
 
+<div *ngIf="!loading">
 
   <form [formGroup]="form" (ngSubmit)="register()" class="user-form">
     <div class="form-group">
@@ -60,4 +64,5 @@
   <div *ngIf="errorMessage" class="alert error">
     <i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}
   </div>
+</div>
 </div>

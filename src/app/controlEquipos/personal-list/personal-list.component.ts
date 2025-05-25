@@ -56,8 +56,8 @@ loading = true;
   }
   
   ngOnInit(): void {
+    setTimeout(() => this.loading = false, 500); // Simula carga
     this.cargarPersonal();
-    this.loading = false;
   
   }
 

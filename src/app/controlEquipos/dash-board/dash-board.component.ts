@@ -4,16 +4,18 @@ import { Router, RouterModule } from '@angular/router';
 
 import { AuthService } from '../../auth/auth.service';
 import { LoginService } from '../../auth/login.service';
+import { LoadingComponent } from '../loading/loading.component';
 
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, LoadingComponent],
   templateUrl: './dash-board.component.html',
   styleUrl: './dash-board.component.css'
 })
 export class DashboardComponent {
+    loading = true;
   modules = [
     {
       title: 'Personal',
@@ -59,6 +61,7 @@ constructor(private loginService: LoginService, private router: Router) {}
 
 
 ngOnInit(): void {
+  setTimeout(() => this.loading = false, 500); // Simula carga
   this.checkIfAdmin();
 }
 

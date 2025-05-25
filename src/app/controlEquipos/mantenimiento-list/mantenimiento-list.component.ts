@@ -4,27 +4,35 @@ import { MantenimientoService } from '../../services/mantenimiento.service';
 import { AsignacionService } from '../../services/asignacion.service';
 import { Mantenimiento } from '../../models/mantenimiento';
 import { Asignacion } from '../../models/asignacion';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LoginService } from '../../auth/login.service';
 import { AuthService } from '../../auth/auth.service';
 import { Router } from '@angular/router';
 import { PdfService } from '../../services/pdf.service';
+import { Equipo } from '../../models/equipo';
+import { EquipoService } from '../../services/equipo.service';
+import { catchError, debounceTime, distinctUntilChanged, EMPTY, filter, of, Subscription, switchMap } from 'rxjs';
+import { Personal } from '../../models/personal';
+import { PersonalService } from '../../services/personal.service';
+import { LoadingComponent } from '../loading/loading.component';
 
 @Component({
   selector: 'app-mantenimiento-list',
   standalone: true,
-  imports: [FormsModule, CommonModule, ReactiveFormsModule],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule, LoadingComponent],
   templateUrl: './mantenimiento-list.component.html',
   styleUrl: './mantenimiento-list.component.css',
 })
 export class MantenimientoListComponent implements OnInit {
   
   protected Array = Array;
+  loading = true;
+ 
+  equiposList: Equipo[] = [];
+  personalList: Personal[] = [];
   
-  asignaciones: Asignacion[] = []; 
-  asignacionList: Asignacion[] = []; 
-  searchEquipo: string = '';
-  mantenimientos: Mantenimiento[] = [];
+  mantenimientosList: Mantenimiento[] = [];
+
   selectedMantenimiento: Mantenimiento | null = null;
   isModalVisible = false;
   isEditMode = false;
@@ -35,9 +43,16 @@ export class MantenimientoListComponent implements OnInit {
   isConfirmDeleteVisible: boolean = false;
   idParaEliminar: string | null = null;
 
+  searchControl = new FormControl();
+searchSubscription!: Subscription;
+
+  
+
   constructor(
     private mantenimientoService: MantenimientoService,
     private asignacionService: AsignacionService,
+    private equipoService: EquipoService, 
+    private personalService: PersonalService,
     private loginService: LoginService, public authService: AuthService,
         private router: Router,
         private pdfService: PdfService
@@ -60,48 +75,73 @@ export class MantenimientoListComponent implements OnInit {
 
 
   ngOnInit(): void {
+    setTimeout(() => this.loading = false, 1000); // Simula carga
+
     this.cargarMantenimientos();
-    this.cargarAsignaciones();
+
+    this.cargarEquipos();
+
+    this.cargarPersonal();
+
+
+this.searchSubscription = this.searchControl.valueChanges
+  .pipe(
+    debounceTime(300),
+    distinctUntilChanged(),
+    switchMap((value) => {
+      const trimmedValue = value?.trim();
+      if (!trimmedValue) {
+        // Recarga todas las asignaciones y retorna un observable vacío
+        this.cargarMantenimientos(); // O this.cargarEquipos() según corresponda
+        return EMPTY; // No hace nada más en el flujo
+      }
+
+      return this.mantenimientoService.buscarPorNumeroSerie(trimmedValue).pipe(
+        catchError(err => {
+          console.error('Error al buscar asignaciones:', err);
+          this.mensajeError = 'Ocurrió un error al buscar asignaciones.';
+          return of([]); // Retorna un arreglo vacío en caso de error
+        })
+      );
+    })
+  )
+  .subscribe((mantenimientos) => {
+    if (mantenimientos.length > 0) {
+      this.mantenimientosList = mantenimientos;
+      this.mensajeError = '';
+    } else {
+      this.mantenimientosList= [];
+      this.mensajeError = 'No se encontró ninguna asignación con esa serie.';
+    }
+  });
+  
+
+
+
   }
 
-  cargarAsignaciones(): void {
-    this.asignacionService.obtenerTodasLasAsignaciones().subscribe(
-      (data) => {
-        this.asignacionList = data;
-        this.asignaciones = data; 
-      },
-      (error) => console.error('Error al cargar asignaciones:', error)
+ 
+
+  cargarEquipos(): void {
+    this.equipoService.obtenerTodosLosEquipos().subscribe(
+      (data) => (this.equiposList = data),
+      (error) => console.error('Error al cargar equipos:', error)
     );
   }
 
-  buscarPorEquipo(): void {
-    if (this.searchEquipo.trim() !== '') {
-      // Opcional: Añadir un indicador de carga
-      // this.isLoading = true;
-      
-      this.mantenimientoService.getMantenimientosByEquipo(this.searchEquipo).subscribe({
-        next: (data: Mantenimiento[]) => {
-          this.mantenimientos = data;
-          console.log('Resultados encontrados:', data.length);
-          // this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error al buscar mantenimientos por equipo:', error);
-          
-          alert('Error al buscar. Por favor intente nuevamente.');
-          // this.isLoading = false;
-        }
-      });
-    } else {
-      this.cargarMantenimientos();
-    }
+  cargarPersonal(): void {
+    this.personalService.obtenerTodoElPersonal().subscribe(
+      (data) => (this.personalList = data),
+      (error) => console.error('Error al cargar personal:', error)
+    );
   }
+  
 
   cargarMantenimientos(): void {
     this.mantenimientoService.getMantenimientos().subscribe(
       (data: Mantenimiento[]) => {
-        this.mantenimientos = data;
-        console.log('Lista de mantenimientos cargada:', this.mantenimientos);
+        this.mantenimientosList = data;
+        console.log('Lista de mantenimientos cargada:', this.mantenimientosList);
       },
       (error) => {
         console.error('Error cargando mantenimientos:', error);
@@ -115,7 +155,9 @@ export class MantenimientoListComponent implements OnInit {
       fecha: '', 
       actividadRealizada: '', 
       evidencia: '', 
-      asignacion: [] as Asignacion[] 
+       equipo: {} as Equipo, 
+       personal: {} as Personal
+  
     };
     this.isEditMode = false;
     this.isModalVisible = true;
@@ -126,9 +168,7 @@ export class MantenimientoListComponent implements OnInit {
     this.selectedMantenimiento = { 
       ...mantenimiento,
       
-      asignacion: Array.isArray(mantenimiento.asignacion) ? 
-        [...mantenimiento.asignacion] as Asignacion[] : 
-        (mantenimiento.asignacion ? [mantenimiento.asignacion] as Asignacion[] : [] as Asignacion[])
+      equipo: mantenimiento.equipo ? { ...mantenimiento.equipo } as Equipo : {} as Equipo
     };
     this.isEditMode = true;
     this.isModalVisible = true;
@@ -141,8 +181,12 @@ export class MantenimientoListComponent implements OnInit {
 
   guardarMantenimiento(): void {
     if (this.selectedMantenimiento) {
+      // Elimina la propiedad asignacion si existe
+      const mantenimientoParaGuardar = { ...this.selectedMantenimiento };
+      
+  
       if (this.isEditMode && this.selectedMantenimiento.id) {
-        this.mantenimientoService.updateMantenimiento(this.selectedMantenimiento.id, this.selectedMantenimiento).subscribe(
+        this.mantenimientoService.updateMantenimiento(this.selectedMantenimiento.id, mantenimientoParaGuardar).subscribe(
           () => {
             this.cargarMantenimientos();
             this.cerrarModal();
@@ -154,7 +198,7 @@ export class MantenimientoListComponent implements OnInit {
           }
         );
       } else {
-        this.mantenimientoService.createMantenimiento(this.selectedMantenimiento).subscribe(
+        this.mantenimientoService.createMantenimiento(mantenimientoParaGuardar).subscribe(
           () => {
             this.cargarMantenimientos();
             this.cerrarModal();
@@ -168,6 +212,7 @@ export class MantenimientoListComponent implements OnInit {
       }
     }
   }
+  
 
   // Método para abrir el modal de confirmación
  abrirModalConfirmacionEliminar(id: any): void {
@@ -268,21 +313,67 @@ cerrarSesion(): void {
 // Método para alternar el orden de la tabla
 alternarOrden(): void {
   this.ordenDescendente = !this.ordenDescendente;
-  this.mantenimientos.reverse(); // invierte el orden actual del array
+  this.mantenimientosList.reverse(); // invierte el orden actual del array
 }
 
 
-// Método para descargar PDF
-descargarPdfMantenimiento() {
-  this.pdfService.downloadBitacoraPdf().subscribe(blob => {
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'mantenimientos.pdf';
-    a.click();
-    window.URL.revokeObjectURL(url);
-  }, error => {
-    console.error('Error al descargar el PDF:', error);
-  });
+// Método para descargar el reporte general de Mantenimientos
+descargarPdfMantenimiento(): void { // Asumiendo que este es el método para el reporte GENERAL de mantenimientos
+  this.pdfService.downloadMantenimientosPdfGeneral().subscribe( // Asegúrate de usar el método correcto del PdfService
+    blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'reporte_mantenimientos_general.pdf'; // Nombre de archivo más descriptivo para general
+      a.click();
+      window.URL.revokeObjectURL(url);
+      // **Añade la notificación de éxito aquí:**
+      this.mostrarNotificacion('Reporte general de mantenimientos generado con éxito.', 'success');
+    },
+    error => {
+      console.error('Error al descargar el reporte general de mantenimientos:', error);
+      // La notificación de error ya está probablemente en el catchError, si no, añádela:
+      this.mostrarNotificacion('Error al generar el reporte general de mantenimientos.', 'error');
+    }
+  );
 }
+
+
+ // Método para descargar el reporte de Mantenimientos por Equipo
+ descargarReporteMantenimientosPorEquipo(mantenimiento: Mantenimiento): void {
+  // Verifica que el equipo y su ID existan en el mantenimiento
+ if (mantenimiento.equipo && mantenimiento.equipo.id) {
+   // Llama al servicio PDF para descargar el reporte por ID de equipo
+    // Asegúrate de que el ID del equipo sea un string válido
+    const equipoIdString = typeof mantenimiento.equipo.id === 'string' ? mantenimiento.equipo.id : mantenimiento.equipo.id.$oid; // Ajusta según cómo esté representado el ObjectId
+
+   if (equipoIdString) {
+      this.pdfService.downloadMantenimientosPdfPorEquipo(equipoIdString).subscribe(
+       blob => {
+         // Lógica para descargar el blob como archivo PDF
+         const url = window.URL.createObjectURL(blob);
+         const a = document.createElement('a');
+         a.href = url;
+         a.download = `reporte_mantenimientos_equipo_${equipoIdString}.pdf`; // Nombre del archivo
+         a.click();
+         window.URL.revokeObjectURL(url); // Limpiar la URL del blob
+         this.mostrarNotificacion('Reporte de mantenimientos generado con éxito.', 'success');
+       },
+       error => {
+         console.error('Error al descargar el reporte de mantenimientos:', error);
+         this.mostrarNotificacion('Error al generar el reporte de mantenimientos.', 'error');
+       }
+     );
+   } else {
+      console.error('ID de equipo no válido para generar reporte.');
+      this.mostrarNotificacion('No se pudo generar el reporte: ID de equipo inválido.', 'error');
+   }
+
+ } else {
+   console.warn('No hay equipo asociado a este mantenimiento para generar reporte.');
+   this.mostrarNotificacion('Este mantenimiento no tiene un equipo asociado para generar reporte.', 'error');
+ }
+}
+
+
 }

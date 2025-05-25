@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { catchError, Observable, of, throwError } from 'rxjs';
 import { Mantenimiento } from '../models/mantenimiento';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MantenimientoService {
-  //private apiUrl = 'http://localhost:8080/api/mantenimientos'; 
+  private apiUrl = 'http://localhost:8080/api/mantenimientos'; 
 
-  private apiUrl = 'https://seseaz-backend.onrender.com/api/mantenimientos';
+  //private apiUrl = 'https://seseaz-backend.onrender.com/api/mantenimientos';
 
   constructor(private http: HttpClient) {}
 
@@ -40,4 +40,11 @@ export class MantenimientoService {
   getMantenimientosByEquipo(equipoId: string): Observable<Mantenimiento[]> {
     return this.http.get<Mantenimiento[]>(`${this.apiUrl}/equipo/${equipoId}`);
   }
+
+ buscarPorNumeroSerie(numeroSerie: string): Observable<Mantenimiento[]> {
+  return this.http.get<Mantenimiento[]>(`${this.apiUrl}/buscar?numeroSerie=${encodeURIComponent(numeroSerie)}`);
+}
+
+
+
 }

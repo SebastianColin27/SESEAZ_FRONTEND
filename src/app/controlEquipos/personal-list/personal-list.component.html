@@ -1,13 +1,12 @@
 
 <h2 class="text-center mt-3 mb-3  bi bi-people"> Personal</h2>
 
-
+<app-loading [loading]="loading"></app-loading>
+<!-- Spinner de carga -->
 
 <div class="search-container m-3">
   <label for="searchNombre">Buscar por Nombre:</label>
   <input type="text" [(ngModel)]="searchNombre" (input)="buscarPorNombre()" placeholder="Buscar por nombre">
-
-  <button type="button" class="btn btn-primary bi bi-search"  (click)="buscarPorNombre()"></button>
   <button type="button" class="btn btn-secondary" (click)="cargarPersonal()">Mostrar Todos</button> 
 </div>
 
@@ -53,8 +52,8 @@
 
  <!-- Tabla de personal -->
 <!-- Spinner de carga -->
-<app-loading [loading]="loading"></app-loading>
-<table class="table table-striped m-3" *ngIf="!loading">
+<div *ngIf="!loading">
+<table class="table table-striped m-3 " >
   <thead>
     <tr >
       <th>Nombre</th>
@@ -79,7 +78,7 @@
     </tr>
   </tbody>
 </table>
-
+</div>
 
 <!-- Modal para agregar o editar personal -->
 <div *ngIf="isModalVisible" class="modal">
@@ -104,7 +103,7 @@
       </div>
       <div>
         <label for="fechaEgreso">Fecha Egreso:</label>
-        <input type="date" id="fechaEgreso" name="fechaEgreso">
+        <input type="date" id="fechaEgreso" name="fechaEgreso" [(ngModel)]="selectedPersonal.fechaEgreso">
       </div>
 
       <div class="buttons">

@@ -6,7 +6,7 @@ export class Asignacion {
     id?: string; 
     _id?: string;  
     equipo: Equipo | null = null; 
-    personal: Personal[] = [];  
+    personal: Personal | null = null;  
     ubicacionFisica: string = '';
     licencias: Licencia[] = [];  
     nombreEquipo: string = '';
