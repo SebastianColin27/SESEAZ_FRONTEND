@@ -8,41 +8,41 @@
 
 <body>
 
-<div *ngIf="!loading">
-  <div class="container">
-    <h2 id="Titulo1">SESEAZ</h2>
-    <p id="Titulo2">Sistema de Control de Equipos</p>
-    <form [formGroup]="loginForm">
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input formControlName="username" type="text" id="username" name="username"
-          placeholder="Ingrese su nombre de usuario">
-        <div *ngIf="username.invalid && (username.dirty || username.touched)" class="text-danger">
-          <div *ngIf="username.hasError('required')">
-            El nombre de usuarioes requerido.
-          </div>
-          <div *ngIf="username.hasError('username')">
-            El formato del nombre de usuario es incorrecto.
-          </div>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="password">Contraseña</label>
-        <input type="password" id="password" name="password" formControlName="password"
-          placeholder="Ingrese su contraseña">
-        <div *ngIf="password.invalid && (password.dirty || password.touched)" class="text-danger">
-          <div *ngIf="password.hasError('required')">
-            La contraseña es requerida.
+  <div *ngIf="!loading">
+    <div class="container">
+      <h2 id="Titulo1">SESEAZ</h2>
+      <p id="Titulo2">Sistema de Control de Equipos</p>
+      <form [formGroup]="loginForm">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input formControlName="username" type="text" id="username" name="username"
+            placeholder="Ingrese su nombre de usuario">
+          <div *ngIf="username.invalid && (username.dirty || username.touched)" class="text-danger">
+            <div *ngIf="username.hasError('required')">
+              El nombre de usuarioes requerido.
+            </div>
+            <div *ngIf="username.hasError('username')">
+              El formato del nombre de usuario es incorrecto.
+            </div>
           </div>
         </div>
-      </div>
-      <div class="d-grid gap-2">
-        <button type="submit" class="btn btn-primary btn-efecto" (click)="login()">Iniciar sesión</button>
-      </div>
-   <!--   <p><a class="link-opacity-100-hover" href="#" id="recuperar-contrasena">Olvidé mi contraseña</a></p>-->
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" name="password" formControlName="password"
+            placeholder="Ingrese su contraseña">
+          <div *ngIf="password.invalid && (password.dirty || password.touched)" class="text-danger">
+            <div *ngIf="password.hasError('required')">
+              La contraseña es requerida.
+            </div>
+          </div>
+        </div>
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-primary btn-efecto" (click)="login()">Iniciar sesión</button>
+        </div>
+        <!--   <p><a class="link-opacity-100-hover" href="#" id="recuperar-contrasena">Olvidé mi contraseña</a></p>-->
 
-    </form>
-  </div>
+      </form>
+    </div>
   </div>
 </body>
 

@@ -25,7 +25,7 @@ export class RegisterComponent {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-     private loginService: LoginService, 
+    private loginService: LoginService,
   ) {
     this.form = this.fb.group({
       username: ['', [Validators.required]],
@@ -35,37 +35,37 @@ export class RegisterComponent {
       role: ['', [Validators.required]]
     });
   }
- ngOnInit(): void {
+  ngOnInit(): void {
     setTimeout(() => this.loading = false, 500); // Simula carga
-    
-  
+
+
   }
   register(): void {
     if (this.form.invalid) return;
 
     const request: RegisterRequest = this.form.value;
-  this.authService.register(request).subscribe({
-    next: (res) => {
-      this.successMessage = 'Registro exitoso 🎉';
-      this.errorMessage = '';
-      setTimeout(() => this.router.navigate(['/login']), 1500);
-    },
-    error: (err) => {
-      this.errorMessage = 'Error al registrar. Intenta de nuevo.';
-      this.successMessage = '';
-      console.error(err);
-    }
-  });
+    this.authService.register(request).subscribe({
+      next: (res) => {
+        this.successMessage = 'Registro exitoso 🎉';
+        this.errorMessage = '';
+        setTimeout(() => this.router.navigate(['/login']), 1500);
+      },
+      error: (err) => {
+        this.errorMessage = 'Error al registrar. Intenta de nuevo.';
+        this.successMessage = '';
+        console.error(err);
+      }
+    });
   }
 
   // Método para redirigir al Dashboard
-irAlDashboard(): void {
-  this.router.navigate(['/dashboard']); // Cambia la ruta según tu configuración de rutas
-}
+  irAlDashboard(): void {
+    this.router.navigate(['/dashboard']); // Cambia la ruta según tu configuración de rutas
+  }
 
-// Método para cerrar sesión
-cerrarSesion(): void {
-  this.loginService.logout(); // Llama al método de logout de tu servicio
-  this.router.navigate(['/login']); // Redirige al login después del logout
-}
+  // Método para cerrar sesión
+  cerrarSesion(): void {
+    this.loginService.logout(); // Llama al método de logout de tu servicio
+    this.router.navigate(['/login']); // Redirige al login después del logout
+  }
 }

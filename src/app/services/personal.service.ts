@@ -7,10 +7,10 @@ import { Personal } from '../models/personal';
   providedIn: 'root'
 })
 export class PersonalService {
-  private apiUrl = 'http://localhost:8080/api/personal';
-//private apiUrl = 'https://seseaz-backend.onrender.com/api/personal';
+  //private apiUrl = 'http://localhost:8080/api/personal';
+  private apiUrl = 'https://seseaz-backend.onrender.com/api/personal';
 
-  
+
   constructor(private http: HttpClient) { }
 
   // Configuración de headers para solicitudes HTTP
@@ -33,7 +33,7 @@ export class PersonalService {
   }
 
   actualizarPersonal(id: string, personal: Personal): Observable<Personal> {
-    return this.http.put<Personal>(`${this.apiUrl}/${id}`, personal); 
+    return this.http.put<Personal>(`${this.apiUrl}/${id}`, personal);
   }
 
   eliminarPersonal(id: string): Observable<any> {
@@ -44,5 +44,5 @@ export class PersonalService {
     return this.http.get<Personal[]>(`${this.apiUrl}/buscar?nombre=${nombre}`);
   }
 
-  
+
 }

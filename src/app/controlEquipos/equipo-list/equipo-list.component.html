@@ -5,34 +5,30 @@
 <app-loading [loading]="loading"></app-loading>
 
 <div class="search-container m-3">
- <label for="searchControlInput">Buscar por Número de Serie:</label>
+  <label for="searchControlInput">Buscar por Número de Serie:</label>
   <input type="text" [formControl]="searchControl" placeholder="Buscar por serie.." />
+  <button type="button" class="btn btn-secondary" (click)="cargarEquipos()">Ver Todos</button>
+</div>
 
+<div class="d-flex justify-content-between align-items-start">
 
-
-     
-    <button type="button" class="btn btn-secondary" (click)="cargarEquipos()">Ver Todos</button> 
+  <!-- Botón para agregar personal (solo visible para administradores) -->
+  <div *ngIf="isAdmin" class="m-3 w-25">
+    <button class="btn btn-success m-3 w-100 bi bi-plus-circle" (click)="abrirModalAgregar()"> Agregar</button>
   </div>
 
-  <div class="d-flex justify-content-between align-items-start">
+  <!-- Botones alineados a la izquierda -->
+  <div>
+    <!-- Botón para alternar orden -->
+    <button class="btn btn-secondary bi bi-arrow-down-up m-3" (click)="alternarOrden()"></button>
+    <!-- Botón para ir al Dashboard -->
+    <button class="btn btn-primary m-3 bi bi-house-fill" (click)="irAlDashboard()"> Inicio</button>
+    <!-- Botón para cerrar sesión -->
+    <button class="btn btn-danger m-3 bi bi-door-closed-fill" (click)="cerrarSesion()"> Salir</button>
 
-    <!-- Botón para agregar personal (solo visible para administradores) -->
-    <div *ngIf="isAdmin" class="m-3 w-25">
-     <button class="btn btn-success m-3 w-100 bi bi-plus-circle" (click)="abrirModalAgregar()"> Agregar</button>
-   </div>
- 
-   <!-- Botones alineados a la izquierda -->
-   <div>
-     <!-- Botón para alternar orden -->
-     <button class="btn btn-secondary bi bi-arrow-down-up m-3" (click)="alternarOrden()"></button>
-     <!-- Botón para ir al Dashboard -->
-     <button class="btn btn-primary m-3 bi bi-house-fill" (click)="irAlDashboard()"> Inicio</button>
-     <!-- Botón para cerrar sesión -->
-     <button class="btn btn-danger m-3 bi bi-door-closed-fill" (click)="cerrarSesion()"> Salir</button>
-     
-   </div>
- 
- </div>
+  </div>
+
+</div>
 <!-- Mensajes de éxito -->
 <!-- Contenedor de notificaciones -->
 <div class="notifications-container">
@@ -50,35 +46,35 @@
 </div>
 
 <!-- Spinner de carga -->
- <div *ngIf="!loading">
-<table class="table table-striped m-3 ">
-  <thead>
-    <tr>
-      <th>Número de Serie</th>
-      <th>Tipo</th>
-      <th>Marca</th>
-  <!--    <th>Color</th>-->
-      <th>Modelo</th>
-  <!--    <th>Procesador</th>-->
-   <!--   <th>RAM</th>-->
-  <!--     <th>Almacenamiento</th>-->
-  <!--     <th>Puertos</th>-->
-   <!--   <th>Fecha de Compra</th>-->
-      <th>Estado</th>
-      <th>Acciones</th> 
-    </tr>
-  </thead>
-  <tbody class="table-group-divider">
-    <tr *ngFor="let equipo of equipoList">
-      <td>{{ equipo.numeroSerie }}</td>
-      <td>{{ equipo.tipo }}</td>
-      <td>{{ equipo.marca }}</td>
-     <!-- <td>{{ equipo.color }}</td>-->
-      <td>{{ equipo.modelo }}</td>
-     <!-- <td>{{ equipo.procesador }}</td>-->
-   <!--   <td>{{ equipo.ram }} GB</td>-->
-   <!--    <td>{{ equipo.almacenamiento }} GB</td>-->
-    <!--   <td>
+<div *ngIf="!loading">
+  <table class="table table-striped m-3 ">
+    <thead>
+      <tr>
+        <th>Número de Serie</th>
+        <th>Tipo</th>
+        <th>Marca</th>
+        <!--    <th>Color</th>-->
+        <th>Modelo</th>
+        <!--    <th>Procesador</th>-->
+        <!--   <th>RAM</th>-->
+        <!--     <th>Almacenamiento</th>-->
+        <!--     <th>Puertos</th>-->
+        <!--   <th>Fecha de Compra</th>-->
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody class="table-group-divider">
+      <tr *ngFor="let equipo of equipoList">
+        <td>{{ equipo.numeroSerie }}</td>
+        <td>{{ equipo.tipo }}</td>
+        <td>{{ equipo.marca }}</td>
+        <!-- <td>{{ equipo.color }}</td>-->
+        <td>{{ equipo.modelo }}</td>
+        <!-- <td>{{ equipo.procesador }}</td>-->
+        <!--   <td>{{ equipo.ram }} GB</td>-->
+        <!--    <td>{{ equipo.almacenamiento }} GB</td>-->
+        <!--   <td>
         <select class="form-select">
           <option disabled value="" disabled selected>Puertos</option>
           <option disabled *ngFor="let puerto of getPuertosList(equipo)" [value]="puerto.nombre">
@@ -86,122 +82,125 @@
           </option>
         </select>
       </td>-->
-      
-   <!--   <td>{{ equipo.fechaCompra }}</td>-->
-      <td>{{ equipo.estado }}</td>
-      <td>
-        <button *ngIf="isAdminOrModerador"  class="btn btn-info btn-sm me-3" (click)="abrirModalEditar(equipo)"><i class="bi bi-pencil"></i></button>
-        <button *ngIf="isAdmin"  class="btn btn-danger btn-sm me-3" (click)="eliminarEquipo(equipo.id!)"><i class="bi bi-trash"></i></button> 
-        <button class="btn btn-primary" (click)="abrirModalVer(equipo)"><i class="bi bi-eye"></i></button>
-      </td>
-    </tr>
-  </tbody>
-</table>
+
+        <!--   <td>{{ equipo.fechaCompra }}</td>-->
+        <td>{{ equipo.estado }}</td>
+        <td>
+          <button *ngIf="isAdminOrModerador" class="btn btn-info btn-sm me-3" (click)="abrirModalEditar(equipo)"><i
+              class="bi bi-pencil"></i></button>
+          <button *ngIf="isAdmin" class="btn btn-danger btn-sm me-3" (click)="eliminarEquipo(equipo.id!)"><i
+              class="bi bi-trash"></i></button>
+          <button class="btn btn-primary" (click)="abrirModalVer(equipo)"><i class="bi bi-eye"></i></button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 <!------------------------------------------ Modal-------------------------------- -->
 <div *ngIf="isModalVisible" class="modal">
-    <div class="modal-content">
-      <span class="close" (click)="cerrarModal()">×</span>
-      <h3>{{ isEditMode ? 'Editar Equipo' : 'Agregar Equipo' }}</h3>
-  
-      <form (ngSubmit)="guardarEquipo()" enctype="multipart/form-data" *ngIf="selectedEquipo" >
-        <input type="hidden" [(ngModel)]="selectedEquipo.id" name="id">
-        
-        
-        <div>
-          <label for="numeroSerie">Número de Serie:</label>
-          <input type="text" id="numeroSerie" name="numeroSerie" [(ngModel)]="selectedEquipo.numeroSerie" required>
-        </div>
+  <div class="modal-content">
+    <span class="close" (click)="cerrarModal()">×</span>
+    <h3>{{ isEditMode ? 'Editar Equipo' : 'Agregar Equipo' }}</h3>
 
-        
-        <div>
-          <label for="tipo">Tipo:</label>
-          <select class="custom-select" id="tipo" name="tipo" [(ngModel)]="selectedEquipo.tipo" required>
-            <option value="LAPTOP">LAPTOP</option>
-            <option value="PC ESCRITORIO">PC DE ESCRITORIO</option>
-            <option value="TABLETA">TABLETA</option>
-          </select>
-        </div>
+    <form (ngSubmit)="guardarEquipo()" enctype="multipart/form-data" *ngIf="selectedEquipo">
+      <input type="hidden" [(ngModel)]="selectedEquipo.id" name="id">
 
-        <div>
-          <label for="marca">Marca:</label>
-          <input type="text" id="marca" name="marca" [(ngModel)]="selectedEquipo.marca" required>
-        </div>
-        <div>
-          <label for="marca">Color:</label>
-          <input type="text" id="color" name="color" [(ngModel)]="selectedEquipo.color" required>
-        </div>
-        <div>
-          <label for="modelo">Modelo:</label>
-          <input type="text" id="modelo" name="modelo" [(ngModel)]="selectedEquipo.modelo" required>
-        </div>
-        <div>
-          <label for="procesador">Procesador:</label>
-          <input type="text" id="procesador" name="procesador" [(ngModel)]="selectedEquipo.procesador">
-        </div>
-        <div>
-          <label for="ram">RAM (GB):</label>
-          <input type="number" id="ram" name="ram" [(ngModel)]="selectedEquipo.ram" required>
-        </div>
-        <div>
-          <label for="almacenamiento">HDD (GB):</label>
-          <input type="number" id="almacenamientoHDD" name="almacenamientoHDD" [(ngModel)]="selectedEquipo.hdd" required>
-        </div>
-        <div>
-          <label for="almacenamiento">SDD (GB):</label>
-          <input type="number" id="almacenamientoSDD" name="almacenamientoSDD" [(ngModel)]="selectedEquipo.sdd" required>
-        </div>
-        <div>
-          <label for="estado">Estado:</label>
-          <select id="estado" name="estado" [(ngModel)]="selectedEquipo.estado">
-            <option value="DISPONIBLE">DISPONIBLE</option>
-            <option value="EN USO">EN USO</option>
-            <option value="EN REPARACIÓN">EN REPARACIÓN</option>
-            <option value="BAJA">BAJA</option>
-          </select>
-        </div>
-        <div>
-            <label for="fechaCompra">Fecha de compra:</label>
-            <input type="date" id="fechaCompra" name="fechaIngreso" [(ngModel)]="selectedEquipo.fechaCompra" required>
+
+      <div>
+        <label for="numeroSerie">Número de Serie:</label>
+        <input type="text" id="numeroSerie" name="numeroSerie" [(ngModel)]="selectedEquipo.numeroSerie" required>
+      </div>
+
+
+      <div>
+        <label for="tipo">Tipo:</label>
+        <select class="custom-select" id="tipo" name="tipo" [(ngModel)]="selectedEquipo.tipo" required>
+          <option value="LAPTOP">LAPTOP</option>
+          <option value="PC ESCRITORIO">PC DE ESCRITORIO</option>
+          <option value="TABLETA">TABLETA</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="marca">Marca:</label>
+        <input type="text" id="marca" name="marca" [(ngModel)]="selectedEquipo.marca" required>
+      </div>
+      <div>
+        <label for="marca">Color:</label>
+        <input type="text" id="color" name="color" [(ngModel)]="selectedEquipo.color" required>
+      </div>
+      <div>
+        <label for="modelo">Modelo:</label>
+        <input type="text" id="modelo" name="modelo" [(ngModel)]="selectedEquipo.modelo" required>
+      </div>
+      <div>
+        <label for="procesador">Procesador:</label>
+        <input type="text" id="procesador" name="procesador" [(ngModel)]="selectedEquipo.procesador">
+      </div>
+      <div>
+        <label for="ram">RAM (GB):</label>
+        <input type="number" id="ram" name="ram" [(ngModel)]="selectedEquipo.ram" required>
+      </div>
+      <div>
+        <label for="almacenamiento">HDD (GB):</label>
+        <input type="number" id="almacenamientoHDD" name="almacenamientoHDD" [(ngModel)]="selectedEquipo.hdd" required>
+      </div>
+      <div>
+        <label for="almacenamiento">SDD (GB):</label>
+        <input type="number" id="almacenamientoSDD" name="almacenamientoSDD" [(ngModel)]="selectedEquipo.sdd" required>
+      </div>
+      <div>
+        <label for="estado">Estado:</label>
+        <select id="estado" name="estado" [(ngModel)]="selectedEquipo.estado">
+          <option value="DISPONIBLE">DISPONIBLE</option>
+          <option value="EN USO">EN USO</option>
+          <option value="EN REPARACIÓN">EN REPARACIÓN</option>
+          <option value="BAJA">BAJA</option>
+        </select>
+      </div>
+      <div>
+        <label for="fechaCompra">Fecha de compra:</label>
+        <input type="date" id="fechaCompra" name="fechaIngreso" [(ngModel)]="selectedEquipo.fechaCompra" required>
+      </div>
+
+      <!-- Campos para los puertos -->
+      <div *ngIf="selectedEquipo.puertos">
+        <label>Puertos:</label>
+        <div class="puertos-container">
+          <div *ngFor="let port of ['usb', 'ethernet', 'hdmi', 'tipoC', 'jack_35', 'vga', 'sd']">
+            <label>
+              <input type="checkbox" [(ngModel)]="selectedEquipo.puertos[port + 'Check']" [name]="port + 'Check'">
+              {{ port.toUpperCase() }}
+            </label>
+            <input type="number" [id]="port" [name]="port" [(ngModel)]="selectedEquipo.puertos[port]"
+              [disabled]="!selectedEquipo.puertos[port + 'Check']">
           </div>
-  
-        <!-- Campos para los puertos -->
-        <div *ngIf="selectedEquipo.puertos">
-          <label>Puertos:</label>
-          <div class="puertos-container">
-            <div *ngFor="let port of ['usb', 'ethernet', 'hdmi', 'tipoC', 'jack_35', 'vga', 'sd']">
-              <label>
-                <input type="checkbox" [(ngModel)]="selectedEquipo.puertos[port + 'Check']" [name]="port + 'Check'">
-                {{ port.toUpperCase() }}
-              </label>
-              <input type="number" [id]="port" [name]="port" [(ngModel)]="selectedEquipo.puertos[port]" [disabled]="!selectedEquipo.puertos[port + 'Check']">
-            </div>
-          </div>
         </div>
+      </div>
 
-         <!-- Image Upload Field - Only visible if the user can upload images (e.g., Admin or Moderador) -->
-         <div class="form-group" *ngIf="isAdminOrModerador">
-          <label for="imagenFile">Imagen:</label>
-          <input type="file" id="imagenFile" (change)="onFileSelected($event)" accept="image/*" class="form-control">
-         </div>
+      <!-- Image Upload Field - Only visible if the user can upload images (e.g., Admin or Moderador) -->
+      <div class="form-group" *ngIf="isAdminOrModerador">
+        <label for="imagenFile">Imagen:</label>
+        <input type="file" id="imagenFile" (change)="onFileSelected($event)" accept="image/*" class="form-control">
+      </div>
 
-         <!-- Image Preview (Optional) -->
-         <div *ngIf="imagenPreview" class="form-group image-preview-container">
-             <label class="form-label">Previsualización:</label>
-             <img [src]="imagenPreview" alt="Imagen seleccionada" class="img-preview">
-         </div>
-  
-        
-        <div class="buttons">
-          <button class="btn btn-success me-3" type="submit">Guardar</button>
-          <button class="btn btn-danger" type="button" (click)="cancelarEdicion()">Cancelar</button>
-        </div>
-      </form>
-    </div>
+      <!-- Image Preview (Optional) -->
+      <div *ngIf="imagenPreview" class="form-group image-preview-container">
+        <label class="form-label">Previsualización:</label>
+        <img [src]="imagenPreview" alt="Imagen seleccionada" class="img-preview">
+      </div>
+
+
+      <div class="buttons">
+        <button class="btn btn-success me-3" type="submit">Guardar</button>
+        <button class="btn btn-danger" type="button" (click)="cancelarEdicion()">Cancelar</button>
+      </div>
+    </form>
   </div>
+</div>
 
 
-  <!-- Modal para visualizar detalles  -->
+<!-- Modal para visualizar detalles  -->
 <div *ngIf="isViewModalVisible" class="modal">
   <div class="modal-content">
     <span class="close" (click)="cerrarModalVer()">&times;</span>
@@ -230,12 +229,12 @@
       </span>
     </p>
     <p><strong>Imagen</strong></p>
-<div *ngIf="selectedEquipo?.imagenUrl">
-<p>Imagen disponible</p>
- <button (click)="cargarImagen()"  type="button" class="btn btn-secondary">Ver imagen</button>
-<img *ngIf="imagenPreview" [src]="imagenPreview" alt="..."  class="img-fluid">
-</div>
-     
+    <div *ngIf="selectedEquipo?.imagenUrl">
+      <p>Imagen disponible</p>
+      <button (click)="cargarImagen()" type="button" class="btn btn-secondary">Ver imagen</button>
+      <img *ngIf="imagenPreview" [src]="imagenPreview" alt="..." class="img-fluid">
+    </div>
+
     <p *ngIf="!selectedEquipo?.imagenUrl">No hay imagen disponible</p>
   </div>
 </div>

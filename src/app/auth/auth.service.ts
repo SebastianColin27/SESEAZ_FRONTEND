@@ -5,25 +5,25 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface RegisterRequest {
-    username: string;
-    firstName: string;
-    lastName: string;
-    password: string;
-    role: 'ADMIN' | 'MODERADOR' | 'LECTOR'; // o cualquier valor que tengas en tu enum
-  }
+  username: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+  role: 'ADMIN' | 'MODERADOR' | 'LECTOR'; // o cualquier valor que tengas en tu enum
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-    private apiUrl = 'http://localhost:8080/auth';
+ // private apiUrl = 'http://localhost:8080/auth';
 
-   // private apiUrl = 'https://seseaz-backend.onrender.com/auth'; 
-  
-  constructor(private jwtHelper: JwtHelperService, private http: HttpClient) {}
+   private apiUrl = 'https://seseaz-backend.onrender.com/auth'; 
+
+  constructor(private jwtHelper: JwtHelperService, private http: HttpClient) { }
 
   getToken(): string | null {
-    return sessionStorage.getItem('token'); // o localStorage si cambiaste
+    return sessionStorage.getItem('token');
   }
 
   getDecodedToken(): any {
@@ -42,5 +42,5 @@ export class AuthService {
   register(request: RegisterRequest): Observable<any> {
     return this.http.post<any>(`${environment.urlHost}auth/register`, request);
   }
-  
+
 }

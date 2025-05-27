@@ -6,24 +6,23 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class PdfService {
- private apiUrlAsignaciones = 'http://localhost:8080/api/pdf/asignaciones';
-  private apiUrlBitacora = 'http://localhost:8080/api/pdf/mantenimientos'; 
-  private apiUrlBase = 'http://localhost:8080/api/pdf';
-//  private apiUrlAsignaciones = 'https://seseaz-backend.onrender.com/api/pdf/asignaciones';
-//  private apiUrlBitacora = 'https://seseaz-backend.onrender.com/api/pdf/mantenimientos';
+  
+ // private apiUrlBase = 'http://localhost:8080/api/pdf';
 
+ 
+  private apiUrlBase = 'https://seseaz-backend.onrender.com/api/pdf';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   downloadAsignacionesPdfGeneral(): Observable<Blob> {
-    return this.http.get(`${this.apiUrlBase}/asignaciones`, { 
+    return this.http.get(`${this.apiUrlBase}/asignaciones`, {
       responseType: 'blob',
     });
   }
 
   // Método para descargar el reporte general de Mantenimientos
-  downloadMantenimientosPdfGeneral(): Observable<Blob> { 
-    return this.http.get(`${this.apiUrlBase}/mantenimientos`, { 
+  downloadMantenimientosPdfGeneral(): Observable<Blob> {
+    return this.http.get(`${this.apiUrlBase}/mantenimientos`, {
       responseType: 'blob',
     });
   }
@@ -36,17 +35,17 @@ export class PdfService {
   }
 
   // Método para descargar el reporte de Mantenimientos por Equipo
-  downloadMantenimientosPdfPorEquipo(equipoId: string): Observable<Blob> { 
+  downloadMantenimientosPdfPorEquipo(equipoId: string): Observable<Blob> {
     return this.http.get(`${this.apiUrlBase}/mantenimientos/equipo/${equipoId}`, {
       responseType: 'blob',
     });
   }
 
   // Método para descargar el reporte de Asignaciones por Personal
-downloadAsignacionesPdfPorPersonal(personalId: string): Observable<Blob> {
-  return this.http.get(`${this.apiUrlBase}/asignaciones/personal/${personalId}`, {
-    responseType: 'blob',
-  });
-}
+  downloadAsignacionesPdfPorPersonal(personalId: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrlBase}/asignaciones/personal/${personalId}`, {
+      responseType: 'blob',
+    });
+  }
 
 }

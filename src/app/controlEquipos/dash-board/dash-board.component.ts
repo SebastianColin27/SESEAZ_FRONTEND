@@ -15,7 +15,7 @@ import { LoadingComponent } from '../loading/loading.component';
   styleUrl: './dash-board.component.css'
 })
 export class DashboardComponent {
-    loading = true;
+  loading = true;
   modules = [
     {
       title: 'Personal',
@@ -52,45 +52,45 @@ export class DashboardComponent {
       routerLink: '/mantenimientos',
       color: '#e74a3b'
     },
-  
+
 
   ];
   isAdmin: boolean = false;
 
-constructor(private loginService: LoginService, private router: Router) {}
+  constructor(private loginService: LoginService, private router: Router) { }
 
 
-ngOnInit(): void {
-  setTimeout(() => this.loading = false, 500); // Simula carga
-  this.checkIfAdmin();
-}
+  ngOnInit(): void {
+    setTimeout(() => this.loading = false, 500); // Simula carga
+    this.checkIfAdmin();
+  }
 
-// Verifica si el usuario tiene el rol de admin
-checkIfAdmin(): void {
-  this.loginService.userRole$.subscribe((role) => {
-    if (role.includes('ADMIN')) {
-      this.isAdmin = true;
-      this.addRegisterModule(); // Agrega la opción de "Registrar Usuario" si es admin
-    } else {
-      this.isAdmin = false;
-    }
-  });
-}
+  // Verifica si el usuario tiene el rol de admin
+  checkIfAdmin(): void {
+    this.loginService.userRole$.subscribe((role) => {
+      if (role.includes('ADMIN')) {
+        this.isAdmin = true;
+        this.addRegisterModule(); // Agrega la opción de "Registrar Usuario" si es admin
+      } else {
+        this.isAdmin = false;
+      }
+    });
+  }
 
-// Agrega el módulo de "Registrar Usuario" si es admin
-addRegisterModule(): void {
-  this.modules.push({
-    title: 'Registrar Usuario',
-    description: 'Crea un nuevo perfil',
-    icon: 'bi bi-person-plus',
-    color: '#858796',
-    routerLink: '/register'
-  });
-}
+  // Agrega el módulo de "Registrar Usuario" si es admin
+  addRegisterModule(): void {
+    this.modules.push({
+      title: 'Registrar Usuario',
+      description: 'Crea un nuevo perfil',
+      icon: 'bi bi-person-plus',
+      color: '#858796',
+      routerLink: '/register'
+    });
+  }
 
-// Método para cerrar sesión
-cerrarSesion(): void {
-  this.loginService.logout(); // Llama al método de logout de tu servicio
-  this.router.navigate(['/login']); // Redirige al login después del logout
-}
+  // Método para cerrar sesión
+  cerrarSesion(): void {
+    this.loginService.logout(); // Llama al método de logout de tu servicio
+    this.router.navigate(['/login']); // Redirige al login después del logout
+  }
 }

@@ -28,7 +28,7 @@ label {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
-}   
+}
 
 input[type="text"],
 input[type="password"] {
@@ -81,7 +81,8 @@ input[type="password"] {
 }
 
 .btn-efecto:hover {
-  background-color: #0056b3; /* un azul más oscuro */
+  background-color: #0056b3;
+  /* un azul más oscuro */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transform: scale(1.03);
 }

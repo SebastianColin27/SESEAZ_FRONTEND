@@ -1,7 +1,7 @@
 export class Personal {
-    
+
     id?: any;
-    _id?: string;  
+    _id?: string;
     nombre: string = '';
     cargo: string = '';
     fechaIngreso: string = '';

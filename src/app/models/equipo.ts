@@ -1,6 +1,6 @@
 export class Equipo {
     id?: any;
-    _id?: string;  
+    _id?: string;
     numeroSerie?: string;
     marca?: string;
     modelo?: string;
@@ -14,12 +14,12 @@ export class Equipo {
     estado?: string;
     fechaCompra?: string;
 
-     imagenGridFsId?: string; 
-    imagenUrl?: string; 
+    imagenGridFsId?: string;
+    imagenUrl?: string;
 }
 
 export class Puertos {
-    [key: string]: number | undefined; 
+    [key: string]: number | undefined;
     usb?: number;
     ethernet?: number;
     sd?: number;

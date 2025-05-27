@@ -6,7 +6,7 @@
 <div class="search-container m-3">
   <label for="searchNombre">Buscar por Nombre:</label>
   <input type="text" [formControl]="searchControl" placeholder="Buscar por licencia..." />
-  <button type="button" class="btn btn-secondary" (click)="cargarLicencias()">Mostrar Todos</button> 
+  <button type="button" class="btn btn-secondary" (click)="cargarLicencias()">Mostrar Todos</button>
 </div>
 
 
@@ -14,19 +14,19 @@
 
   <!-- Botón para agregar personal (solo visible para administradores) -->
   <div *ngIf="isAdmin" class="m-3 w-25">
-   <button class="btn btn-success m-3 w-100 bi bi-plus-circle" (click)="abrirModalAgregar()"> Agregar</button>
- </div>
+    <button class="btn btn-success m-3 w-100 bi bi-plus-circle" (click)="abrirModalAgregar()"> Agregar</button>
+  </div>
 
- <!-- Botones alineados a la izquierda -->
- <div>
-   <!-- Botón para alternar orden -->
-   <button class="btn btn-secondary bi bi-arrow-down-up m-3" (click)="alternarOrden()"></button>
-   <!-- Botón para ir al Dashboard -->
-   <button class="btn btn-primary m-3 bi bi-house-fill" (click)="irAlDashboard()"> Inicio</button>
-   <!-- Botón para cerrar sesión -->
-   <button class="btn btn-danger m-3 bi bi-door-closed-fill" (click)="cerrarSesion()"> Salir</button>
-   
- </div>
+  <!-- Botones alineados a la izquierda -->
+  <div>
+    <!-- Botón para alternar orden -->
+    <button class="btn btn-secondary bi bi-arrow-down-up m-3" (click)="alternarOrden()"></button>
+    <!-- Botón para ir al Dashboard -->
+    <button class="btn btn-primary m-3 bi bi-house-fill" (click)="irAlDashboard()"> Inicio</button>
+    <!-- Botón para cerrar sesión -->
+    <button class="btn btn-danger m-3 bi bi-door-closed-fill" (click)="cerrarSesion()"> Salir</button>
+
+  </div>
 
 </div>
 <!-- Mensajes de éxito -->
@@ -46,50 +46,52 @@
 </div>
 
 <div *ngIf="!loading">
-<table class="table table-striped m-3">
-  <thead>
-    <tr>
-      <th>Tipo de software</th>
-      <th>Nombre</th>
-      <th>No. Serie</th>
-     <!-- <th>Usuarios soportados</th>-->
-      <th>Tipo de subscripción</th>
-      <th>Fecha Expiración</th>
-  <!--<th>Username</th>-->
-    <!--  <th>Password</th>-->
-      <th>Acciones</th> 
-    </tr>
-  </thead>
-  <tbody class="table-group-divider">
-    <tr *ngFor="let licencia of licenciaList">
-      <td>{{ licencia.tipoSw}}</td>
-      <td>{{ licencia.nombreLicencia }}</td>
-      <td>{{ licencia.numeroSerie}}</td>
-     <!-- <td>{{licencia.numeroUsuarios}}</td>-->
-      <td>{{licencia.subcripcion}}</td>
-     
-      <td>
-        <!-- Si es permanente, muestra "PERMANENTE" -->
-        <ng-container *ngIf="licencia.esPermanente; else mostrarFecha">
-          PERMANENTE
-        </ng-container>
-      
-        <!-- Si no es permanente, muestra la fecha (si existe) -->
-        <ng-template #mostrarFecha>
-          {{ licencia.fechaVencimiento ? licencia.fechaVencimiento : 'PERMANENTE' }}
-        </ng-template>
-      </td>
+  <table class="table table-striped m-3">
+    <thead>
+      <tr>
+        <th>Tipo de software</th>
+        <th>Nombre</th>
+        <th>No. Serie</th>
+        <!-- <th>Usuarios soportados</th>-->
+        <th>Tipo de subscripción</th>
+        <th>Fecha Expiración</th>
+        <!--<th>Username</th>-->
+        <!--  <th>Password</th>-->
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody class="table-group-divider">
+      <tr *ngFor="let licencia of licenciaList">
+        <td>{{ licencia.tipoSw}}</td>
+        <td>{{ licencia.nombreLicencia }}</td>
+        <td>{{ licencia.numeroSerie}}</td>
+        <!-- <td>{{licencia.numeroUsuarios}}</td>-->
+        <td>{{licencia.subcripcion}}</td>
 
-    <!--  <td>{{licencia.usuario}}</td>-->
-    <!--    <td>{{licencia.contrasena}}</td>-->
-      <td>
-        <button *ngIf="isAdminOrModerador"  class="btn btn-info me-3" (click)="abrirModalEditar(licencia)"><i class="bi bi-pencil"></i></button>
-        <button *ngIf="isAdmin"  class="btn btn-danger me-3" (click)="eliminarLicencia(licencia.id!)"><i class="bi bi-trash"></i></button> 
-        <button class="btn btn-primary" (click)="abrirModalVer(licencia)"><i class="bi bi-eye"></i></button>
-      </td>
-    </tr>
-  </tbody>
-</table>
+        <td>
+          <!-- Si es permanente, muestra "PERMANENTE" -->
+          <ng-container *ngIf="licencia.esPermanente; else mostrarFecha">
+            PERMANENTE
+          </ng-container>
+
+          <!-- Si no es permanente, muestra la fecha (si existe) -->
+          <ng-template #mostrarFecha>
+            {{ licencia.fechaVencimiento ? licencia.fechaVencimiento : 'PERMANENTE' }}
+          </ng-template>
+        </td>
+
+        <!--  <td>{{licencia.usuario}}</td>-->
+        <!--    <td>{{licencia.contrasena}}</td>-->
+        <td>
+          <button *ngIf="isAdminOrModerador" class="btn btn-info me-3" (click)="abrirModalEditar(licencia)"><i
+              class="bi bi-pencil"></i></button>
+          <button *ngIf="isAdmin" class="btn btn-danger me-3" (click)="eliminarLicencia(licencia.id!)"><i
+              class="bi bi-trash"></i></button>
+          <button class="btn btn-primary" (click)="abrirModalVer(licencia)"><i class="bi bi-eye"></i></button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
 <!-- Modal para agregar o editar licencia -->
@@ -101,7 +103,7 @@
 
     <form (ngSubmit)="guardarLicencia()" *ngIf="selectedLicencia">
       <input type="hidden" [(ngModel)]="selectedLicencia.id" name="id">
-      
+
       <div>
         <label for="tiposw">Tipo de software:</label>
         <input type="text" id="tiposw" name="tiposw" [(ngModel)]="selectedLicencia.tipoSw" required>
@@ -120,60 +122,42 @@
       </div>
 
 
-<div>
-  <label>Tipo de suscripción:</label><br>
+      <div>
+        <label>Tipo de suscripción:</label><br>
 
-  <div>
-    <input
-      type="radio"
-      id="anual"
-      name="suscripcion"
-      value="ANUAL"
-      [(ngModel)]="selectedLicencia.subcripcion"
-      (ngModelChange)="onSubscriptionChange()"> <!-- Llamamos a onSubscriptionChange -->
-    <label for="anual">ANUAL</label>
-  </div>
+        <div>
+          <input type="radio" id="anual" name="suscripcion" value="ANUAL" [(ngModel)]="selectedLicencia.subcripcion"
+            (ngModelChange)="onSubscriptionChange()"> <!-- Llamamos a onSubscriptionChange -->
+          <label for="anual">ANUAL</label>
+        </div>
 
-  <div>
-    <input
-      type="radio"
-      id="mensual"
-      name="suscripcion"
-      value="MENSUAL"
-      [(ngModel)]="selectedLicencia.subcripcion"
-      (ngModelChange)="onSubscriptionChange()"> <!-- Llamamos a onSubscriptionChange -->
-    <label for="mensual">MENSUAL</label>
-  </div>
+        <div>
+          <input type="radio" id="mensual" name="suscripcion" value="MENSUAL" [(ngModel)]="selectedLicencia.subcripcion"
+            (ngModelChange)="onSubscriptionChange()"> <!-- Llamamos a onSubscriptionChange -->
+          <label for="mensual">MENSUAL</label>
+        </div>
 
-  <div>
-    <input
-      type="radio"
-      id="permanente"
-      name="suscripcion"
-      value="PERMANENTE"
-      [(ngModel)]="selectedLicencia.subcripcion"
-      (ngModelChange)="onSubscriptionChange()"> <!-- Llamamos a onSubscriptionChange -->
-    <label for="permanente">PERMANENTE</label>
-  </div>
-</div>
+        <div>
+          <input type="radio" id="permanente" name="suscripcion" value="PERMANENTE"
+            [(ngModel)]="selectedLicencia.subcripcion" (ngModelChange)="onSubscriptionChange()">
+          <!-- Llamamos a onSubscriptionChange -->
+          <label for="permanente">PERMANENTE</label>
+        </div>
+      </div>
 
-<!-- Fecha de expiración o texto "PERMANENTE" -->
-<div>
-  <label for="fechaExpiracion">Fecha Expiración:</label>
+      <!-- Fecha de expiración o texto "PERMANENTE" -->
+      <div>
+        <label for="fechaExpiracion">Fecha Expiración:</label>
 
-  <!-- Mostramos el input de fecha SOLO si la suscripción NO es PERMANENTE -->
-  <input
-    *ngIf="selectedLicencia.subcripcion !== 'PERMANENTE'"
-    type="date"
-    id="fechaExpiracion"
-    name="fechaExpiracion"
-    [(ngModel)]="selectedLicencia.fechaVencimiento"
-    required > <!-- Es requerido solo si se muestra este input -->
+        <!-- Mostramos el input de fecha SOLO si la suscripción NO es PERMANENTE -->
+        <input *ngIf="selectedLicencia.subcripcion !== 'PERMANENTE'" type="date" id="fechaExpiracion"
+          name="fechaExpiracion" [(ngModel)]="selectedLicencia.fechaVencimiento" required>
+        <!-- Es requerido solo si se muestra este input -->
 
-  <!-- Mostramos el texto "PERMANENTE" SOLO si la suscripción ES PERMANENTE -->
-  <span *ngIf="selectedLicencia.subcripcion === 'PERMANENTE'">PERMANENTE</span>
-</div>
-      
+        <!-- Mostramos el texto "PERMANENTE" SOLO si la suscripción ES PERMANENTE -->
+        <span *ngIf="selectedLicencia.subcripcion === 'PERMANENTE'">PERMANENTE</span>
+      </div>
+
       <div>
         <label for="usernamelic">Username:</label>
         <input type="text" id="usernamelic" name="usernamelic" [(ngModel)]="selectedLicencia.usuario" required>
@@ -208,7 +192,7 @@
       <ng-container *ngIf="selectedLicencia?.esPermanente; else mostrarFechaDetalles">
         PERMANENTE
       </ng-container>
-    
+
       <!-- Si no es permanente, muestra la fecha (o N/A) -->
       <ng-template #mostrarFechaDetalles>
         {{ selectedLicencia?.fechaVencimiento ? selectedLicencia?.fechaVencimiento : 'N/A' }}

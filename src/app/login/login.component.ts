@@ -16,7 +16,7 @@ import { LoadingComponent } from '../controlEquipos/loading/loading.component';
   styleUrl: './login.component.css'
 })
 export class LoginComponent {
-    loading = false;  
+  loading = false;
   loginError: string = "";
   isSubmitting = false; // Para evitar doble submit
 
@@ -41,7 +41,7 @@ export class LoginComponent {
   }
 
   login() {
-     this.loading = true;
+    this.loading = true;
     // Marca todos los campos como tocados para mostrar errores si es necesario
     this.loginForm.markAllAsTouched();
 
@@ -62,7 +62,7 @@ export class LoginComponent {
           } else {
             console.error('[LoginComponent] ¡ERROR CRÍTICO! El token no se encontró en sessionStorage inmediatamente después de que el servicio lo procesó.');
             this.loginError = "Error inesperado al iniciar sesión. Intente de nuevo.";
-           
+
             this.isSubmitting = false; // Permite reintentar
           }
         },
@@ -103,10 +103,10 @@ export class LoginComponent {
       console.warn('[LoginComponent] Formulario inválido o ya se está enviando.');
       if (!this.loginForm.valid) {
         // Mensaje más específico si el formulario no es válido
-        if(this.username.errors?.['required'] || this.password.errors?.['required']){
-             this.loginError = "Por favor, ingrese su usuario y contraseña.";
+        if (this.username.errors?.['required'] || this.password.errors?.['required']) {
+          this.loginError = "Por favor, ingrese su usuario y contraseña.";
         } else {
-             this.loginError = "Por favor, complete el formulario correctamente.";
+          this.loginError = "Por favor, complete el formulario correctamente.";
         }
       }
     }

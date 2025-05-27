@@ -1,4 +1,3 @@
-
 <h2 class="text-center mt-3 mb-3  bi bi-people"> Personal</h2>
 
 <app-loading [loading]="loading"></app-loading>
@@ -7,14 +6,14 @@
 <div class="search-container m-3">
   <label for="searchNombre">Buscar por Nombre:</label>
   <input type="text" [(ngModel)]="searchNombre" (input)="buscarPorNombre()" placeholder="Buscar por nombre">
-  <button type="button" class="btn btn-secondary" (click)="cargarPersonal()">Mostrar Todos</button> 
+  <button type="button" class="btn btn-secondary" (click)="cargarPersonal()">Mostrar Todos</button>
 </div>
 
 
 <div class="d-flex justify-content-between align-items-start">
 
-   <!-- Botón para agregar personal (solo visible para administradores) -->
-   <div *ngIf="isAdmin" class="m-3 w-25">
+  <!-- Botón para agregar personal (solo visible para administradores) -->
+  <div *ngIf="isAdmin" class="m-3 w-25">
     <button class="btn btn-success m-3 bi bi-plus-circle w-100" (click)="abrirModalAgregar()"> Agregar</button>
   </div>
 
@@ -26,7 +25,7 @@
     <button class="btn btn-primary m-3 bi bi-house-fill" (click)="irAlDashboard()"> Inicio</button>
     <!-- Botón para cerrar sesión -->
     <button class="btn btn-danger m-3 bi bi-door-closed-fill" (click)="cerrarSesion()"> Salir</button>
-    
+
   </div>
 
 </div>
@@ -50,34 +49,36 @@
 </div>
 
 
- <!-- Tabla de personal -->
+<!-- Tabla de personal -->
 <!-- Spinner de carga -->
 <div *ngIf="!loading">
-<table class="table table-striped m-3 " >
-  <thead>
-    <tr >
-      <th>Nombre</th>
-      <th>Cargo</th>
-      <th>Fecha Ingreso</th>
-      <th>Fecha Egreso</th>
-      <th>Acciones</th> 
-    </tr>
-  </thead>
-  <tbody class="table-group-divider">
-    <tr *ngFor="let personal of personalList">
-      <td>{{ personal.nombre }}</td>
-      <td>{{ personal.cargo }}</td>
-      <td>{{ personal.fechaIngreso }}</td>
-      <td>{{ personal.fechaEgreso }}</td>
-      <td>
-        <button *ngIf="isAdminOrModerador"  class="btn btn-info me-3" (click)="abrirModalEditar(personal)"><i class="bi bi-pencil"></i></button>
-        <button *ngIf="isAdmin"  class="btn btn-danger me-3" (click)="eliminarPersonal(personal.id!)"><i class="bi bi-trash"></i></button> 
-        <button class="btn btn-primary" (click)="abrirModalVer(personal)"><i class="bi bi-eye"></i></button>
-        
-      </td>
-    </tr>
-  </tbody>
-</table>
+  <table class="table table-striped m-3 ">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Cargo</th>
+        <th>Fecha Ingreso</th>
+        <th>Fecha Egreso</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody class="table-group-divider">
+      <tr *ngFor="let personal of personalList">
+        <td>{{ personal.nombre }}</td>
+        <td>{{ personal.cargo }}</td>
+        <td>{{ personal.fechaIngreso }}</td>
+        <td>{{ personal.fechaEgreso }}</td>
+        <td>
+          <button *ngIf="isAdminOrModerador" class="btn btn-info me-3" (click)="abrirModalEditar(personal)"><i
+              class="bi bi-pencil"></i></button>
+          <button *ngIf="isAdmin" class="btn btn-danger me-3" (click)="eliminarPersonal(personal.id!)"><i
+              class="bi bi-trash"></i></button>
+          <button class="btn btn-primary" (click)="abrirModalVer(personal)"><i class="bi bi-eye"></i></button>
+
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
 <!-- Modal para agregar o editar personal -->
@@ -88,7 +89,7 @@
 
     <form (ngSubmit)="guardarPersonal()" *ngIf="selectedPersonal">
       <input type="hidden" [(ngModel)]="selectedPersonal.id" name="id">
-      
+
       <div>
         <label for="nombre">Nombre:</label>
         <input type="text" id="nombre" name="nombre" [(ngModel)]="selectedPersonal.nombre" required>
@@ -118,7 +119,7 @@
 <div *ngIf="isViewModalVisible" class="modal">
   <div class="modal-content">
     <span class="close" (click)="cerrarModalVer()">&times;</span>
-    <h3 class="text-center" >Detalles del Personal</h3>
+    <h3 class="text-center">Detalles del Personal</h3>
     <p><strong>Nombre:</strong> {{ selectedPersonal?.nombre }}</p>
     <p><strong>Cargo:</strong> {{ selectedPersonal?.cargo }}</p>
     <p><strong>Fecha Ingreso:</strong> {{ selectedPersonal?.fechaIngreso }}</p>

@@ -7,10 +7,10 @@ import { Asignacion } from '../models/asignacion';
   providedIn: 'root'
 })
 export class AsignacionService {
- private apiUrl = 'http://localhost:8080/api/asignaciones';
-  //private apiUrl = 'https://seseaz-backend.onrender.com/api/asignaciones';
+  //private apiUrl = 'http://localhost:8080/api/asignaciones';
+  private apiUrl = 'https://seseaz-backend.onrender.com/api/asignaciones';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   obtenerTodasLasAsignaciones(): Observable<Asignacion[]> {
     return this.http.get<Asignacion[]>(this.apiUrl);
@@ -31,15 +31,15 @@ export class AsignacionService {
   eliminarAsignacion(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
- 
-  
- buscarPorNumeroSerie(numeroSerie: string): Observable<Asignacion[]> {
-  return this.http.get<Asignacion[]>(`${this.apiUrl}/buscar?numeroSerie=${encodeURIComponent(numeroSerie)}`);
-}
-
-  
 
 
-  
+  buscarPorNumeroSerie(numeroSerie: string): Observable<Asignacion[]> {
+    return this.http.get<Asignacion[]>(`${this.apiUrl}/buscar?numeroSerie=${encodeURIComponent(numeroSerie)}`);
+  }
+
+
+
+
+
 
 }
