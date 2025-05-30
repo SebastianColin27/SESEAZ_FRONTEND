@@ -71,15 +71,15 @@
 
           <ng-container *ngIf="Array.isArray(mantenimiento.equipo) && mantenimiento.equipo.length > 0">
             <span *ngFor="let equipo of mantenimiento.equipo; let last = last">
-              {{ equipo.numeroSerie }} - {{ equipo.modelo }} - {{equipo.tipo}} - {{ equipo.color }}<span *ngIf="!last">,
+              {{ equipo.numeroSerie }} / {{ equipo.modelo }} / {{equipo.tipo}} / {{ equipo.color }} -> {{equipo.estado}} <span *ngIf="!last">,
               </span>
             </span>
           </ng-container>
 
           <!-- Si mantenimiento.equipo es un único objeto -->
           <ng-container *ngIf="!Array.isArray(mantenimiento.equipo) && mantenimiento.equipo">
-            {{ mantenimiento.equipo.numeroSerie }} - {{ mantenimiento.equipo.modelo }} - {{mantenimiento.equipo.tipo}} -
-            {{ mantenimiento.equipo.color }}
+            {{ mantenimiento.equipo.numeroSerie }} / {{ mantenimiento.equipo.modelo }} / {{mantenimiento.equipo.tipo}} /
+            {{ mantenimiento.equipo.color }} -> {{ mantenimiento.equipo.estado }}
           </ng-container>
         </td>
 
@@ -129,7 +129,8 @@
       <label for="equipos">Equipos:</label>
       <select class="custom-select" [(ngModel)]="selectedMantenimiento.equipo" name="equipos">
         <option *ngFor="let equipo of equiposList" [ngValue]="equipo">
-          {{ equipo.numeroSerie }} - {{ equipo.modelo }} - {{ equipo.color }}
+          {{ equipo.numeroSerie }} / {{ equipo.modelo }} / {{ equipo.color }} / {{ equipo.tipo }} ->
+          {{ equipo.estado }}
         </option>
       </select>
 

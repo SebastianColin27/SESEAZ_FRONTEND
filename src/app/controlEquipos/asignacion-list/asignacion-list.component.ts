@@ -15,6 +15,8 @@ import { LoginService } from '../../auth/login.service';
 import { PdfService } from '../../services/pdf.service';
 import { catchError, debounceTime, distinctUntilChanged, EMPTY, filter, map, of, Subscription, switchMap } from 'rxjs';
 import { LoadingComponent } from '../loading/loading.component';
+import * as XLSX from 'xlsx';
+import * as FileSaver from 'file-saver';
 
 @Component({
   selector: 'app-asignacion-list',
@@ -59,6 +61,8 @@ export class AsignacionComponent implements OnInit {
   mensajeError: string = '';
   isConfirmDeleteVisible: boolean = false;
   idParaEliminar: string | null = null;
+
+  modalExportarVisible: boolean = false;
 
   searchControl = new FormControl('');
   private searchSubscription?: Subscription;
@@ -412,5 +416,90 @@ export class AsignacionComponent implements OnInit {
     this.cd.detectChanges(); // Asegúrate de que Angular detecte el cambio
   }
 
+
+  // Método para exportar a Excel
+camposDisponibles: { campo: string; nombre: string }[] = [
+  { campo: 'equipo.numeroSerie', nombre: 'Número de serie' },
+  { campo: 'equipo.marca', nombre: 'Marca' },
+  { campo: 'equipo.modelo', nombre: 'Modelo' },
+  { campo: 'equipo.tipo', nombre: 'Tipo' },
+  { campo: 'equipo.estado', nombre: 'Estado' },
+  { campo: 'equipo.ram', nombre: 'RAM (GB)' },
+  { campo: 'equipo.hdd', nombre: 'Disco Duro (HDD)' },
+  { campo: 'equipo.sdd', nombre: 'Unidad Sólida (SDD)' },
+  { campo: 'equipo.fechaCompra', nombre: 'Fecha de compra' },
+  { campo: 'personal.nombre', nombre: 'Nombre del personal' },
+  { campo: 'asignacion.fechaAsignacion', nombre: 'Fecha de asignación' },
+  { campo: 'asignacion.fechaFinAsignacion', nombre: 'Fin de asignación' },
+  { campo: 'asignacion.ubicacionFisica', nombre: 'Ubicación física' },
+  { campo: 'asignacion.nombreEquipo', nombre: 'Nombre de equipo' },
+  { campo: 'asignacion.contrasena', nombre: 'Contraseña' },
+  { campo: 'asignacion.evidenciaAsignacion', nombre: 'Evidencia' },
+  { campo: 'asignacion.comentarios', nombre: 'Comentarios' }
+];
+
+camposSeleccionados: string[] = this.camposDisponibles.map(c => c.campo);
+
+
+exportarEquiposConAsignacionesDesdeRelaciones(estado: string): void {
+  this.asignacionService.obtenerTodasLasAsignaciones().subscribe((asignaciones: Asignacion[]) => {
+    const asignacionesFiltradas = asignaciones.filter(asignacion =>
+      asignacion.equipo?.estado === estado && asignacion.personal && asignacion.equipo
+    );
+
+    // Mapear datos con encabezados legibles
+    const data = asignacionesFiltradas.map(asignacion => {
+      const fila: any = {};
+      this.camposDisponibles.forEach(campoDef => {
+        if (this.camposSeleccionados.includes(campoDef.campo)) {
+          const [entidad, propiedad] = campoDef.campo.split('.');
+          let valor = '';
+          if (entidad === 'personal') {
+            valor = (asignacion.personal as any)[propiedad];
+          } else if (entidad === 'equipo') {
+            valor = (asignacion.equipo as any)[propiedad];
+          } else if (entidad === 'asignacion') {
+            valor = (asignacion as any)[propiedad];
+          }
+          fila[campoDef.nombre] = valor;
+        }
+      });
+      return fila;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = { Sheets: { 'EquiposAsignados': worksheet }, SheetNames: ['EquiposAsignados'] };
+    const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+
+    const fileName = `equipos_${estado.toLowerCase()}_con_asignacion_${new Date().toISOString().slice(0,10)}.xlsx`;
+    FileSaver.saveAs(blob, fileName);
+  });
+}
+
+  
+onToggleCampo(campo: string, checked: boolean): void {
+  if (checked) {
+    if (!this.camposSeleccionados.includes(campo)) {
+      this.camposSeleccionados.push(campo);
+    }
+  } else {
+    this.camposSeleccionados = this.camposSeleccionados.filter(c => c !== campo);
+  }
+}
+
+
+abrirModalExportar(): void {
+  this.modalExportarVisible = true;
+}
+
+cerrarModalExportar(): void {
+  this.modalExportarVisible = false;
+}
+
+onCheckboxChange(event: Event, campo: string): void {
+  const checked = (event.target as HTMLInputElement).checked;
+  this.onToggleCampo(campo, checked);
+}
 
 }

@@ -9,6 +9,8 @@ import { AuthService } from '../../auth/auth.service';
 import { LoginService } from '../../auth/login.service';
 import { debounceTime, distinctUntilChanged, switchMap, catchError, forkJoin, of, Subscription, map, Observable, throwError, filter } from 'rxjs';
 import { LoadingComponent } from '../loading/loading.component';
+import * as XLSX from 'xlsx';
+import * as FileSaver from 'file-saver';
 
 
   @Component({
@@ -44,6 +46,8 @@ import { LoadingComponent } from '../loading/loading.component';
     mensajeError: string = '';
     isConfirmDeleteVisible: boolean = false;
     idParaEliminar: string | null = null;
+
+     modalExportarVisible: boolean = false;
 
     searchControl = new FormControl('');
     private searchSubscription?: Subscription;
@@ -434,6 +438,83 @@ import { LoadingComponent } from '../loading/loading.component';
           this.imagenPreview = URL.createObjectURL(blob);
         });
     }
+
+
+  // Método para exportar a Excel
+camposDisponibles: { campo: string; nombre: string }[] = [
+  { campo: 'numeroSerie', nombre: 'Número de serie' },
+  { campo: 'marca', nombre: 'Marca' },
+  { campo: 'modelo', nombre: 'Modelo' },
+  { campo: 'procesador', nombre: 'Procesador' },
+  { campo: 'tipo', nombre: 'Tipo' },
+  { campo: 'color', nombre: 'Color' },
+  { campo: 'estado', nombre: 'Estado' },
+  { campo: 'ram', nombre: 'RAM (GB)' },
+  { campo: 'hdd', nombre: 'Disco Duro (HDD)' },
+  { campo: 'sdd', nombre: 'Unidad Sólida (SDD)' },
+  { campo: 'fechaCompra', nombre: 'Fecha de compra' }
+];
+
+camposSeleccionados: string[] = this.camposDisponibles.map(c => c.campo);
+
+
+
+exportarEquiposPorEstado(estado: string): void {
+  this.equipoService.obtenerTodosLosEquipos().subscribe((equipos: Equipo[]) => {
+    const equiposFiltrados = equipos.filter(equipo => equipo.estado === estado);
+
+    const data = equiposFiltrados.map(equipo => {
+      const fila: any = {};
+      this.camposDisponibles.forEach(campoDef => {
+        if (this.camposSeleccionados.includes(campoDef.campo)) {
+          let valor = (equipo as any)[campoDef.campo];
+          
+          // Formatear fecha si es fechaCompra
+          if (campoDef.campo === 'fechaCompra' && valor) {
+            valor = new Date(valor).toLocaleDateString(); // dd/mm/yyyy según navegador
+          }
+
+          fila[campoDef.nombre] = valor;
+        }
+      });
+      return fila;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = { Sheets: { 'Equipos' : worksheet }, SheetNames: ['Equipos'] };
+    const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+
+    const fileName = `equipos_${estado.toLowerCase()}_${new Date().toISOString().slice(0,10)}.xlsx`;
+    FileSaver.saveAs(blob, fileName);
+  });
+}
+
+  
+onToggleCampo(campo: string, checked: boolean): void {
+  if (checked) {
+    if (!this.camposSeleccionados.includes(campo)) {
+      this.camposSeleccionados.push(campo);
+    }
+  } else {
+    this.camposSeleccionados = this.camposSeleccionados.filter(c => c !== campo);
+  }
+}
+
+onCheckboxChange(event: Event, campo: string): void {
+  const checked = (event.target as HTMLInputElement).checked;
+  this.onToggleCampo(campo, checked);
+}
+
+
+
+abrirModalExportar(): void {
+  this.modalExportarVisible = true;
+}
+
+cerrarModalExportar(): void {
+  this.modalExportarVisible = false;
+}
 
 
 

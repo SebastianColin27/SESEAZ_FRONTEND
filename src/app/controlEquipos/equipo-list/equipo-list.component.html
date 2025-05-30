@@ -10,6 +10,11 @@
   <button type="button" class="btn btn-secondary" (click)="cargarEquipos()">Ver Todos</button>
 </div>
 
+<!-- BOTÓN PARA ABRIR EL MODAL EXCEL -->
+<button class="btn btn-outline-primary bi bi-file-earmark-excel-fill" (click)="abrirModalExportar()">
+  Exportar Equipos por Estado
+</button>
+
 <div class="d-flex justify-content-between align-items-start">
 
   <!-- Botón para agregar personal (solo visible para administradores) -->
@@ -252,6 +257,56 @@
     <div class="modal-buttons">
       <button class="btn btn-danger" (click)="confirmarEliminacion()">Eliminar</button>
       <button class="btn btn-secondary" (click)="cancelarEliminacion()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL -->
+<div class="modal" [class.show]="modalExportarVisible" [style.display]="modalExportarVisible ? 'block' : 'none'">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      
+      <div class="modal-header">
+        <h5 class="modal-title">Exportar equipos por estado</h5>
+        <button type="button" class="btn-close" (click)="cerrarModalExportar()"></button>
+      </div>
+
+      <div class="modal-body">
+        <h5>Selecciona los campos a exportar:</h5>
+        <div class="row">
+          <div class="col-md-6" *ngFor="let campo of camposDisponibles">
+            <label class="form-check-label">
+              <input type="checkbox"
+                     class="form-check-input"
+                     [value]="campo.campo"
+                     [checked]="camposSeleccionados.includes(campo.campo)"
+                     (change)="onCheckboxChange($event, campo.campo)" />
+              {{ campo.nombre }}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-success"
+                (click)="exportarEquiposPorEstado('EN USO')">
+          Exportar EN USO
+        </button>
+        <button class="btn btn-danger"
+                (click)="exportarEquiposPorEstado('BAJA')">
+          Exportar BAJA
+        </button>
+         <button class="btn btn-primary"
+                (click)="exportarEquiposPorEstado('DISPONIBLE')">
+          Exportar DISPONIBLE
+        </button>
+        <button class="btn btn-warning"
+                (click)="exportarEquiposPorEstado('EN REPARACIÓN')">
+          Exportar EN REPARACIÓN
+        </button>
+        <button class="btn btn-secondary" (click)="cerrarModalExportar()">Cancelar</button>
+      </div>
     </div>
   </div>
 </div>

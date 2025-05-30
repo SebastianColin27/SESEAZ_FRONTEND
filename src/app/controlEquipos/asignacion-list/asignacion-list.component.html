@@ -12,6 +12,16 @@
 <button class="btn btn-warning m-3 bi bi-file-earmark-arrow-down-fill" (click)="descargarPdf()"> Reporte
   General</button>
 
+
+<!-- BOTÓN PARA ABRIR EL MODAL EXCEL -->
+<button class="btn btn-outline-primary bi bi-file-earmark-excel-fill" (click)="abrirModalExportar()">
+  Exportar Equipos por Estado
+</button>
+
+
+
+
+
 <div class="d-flex justify-content-between align-items-start">
 
   <!-- Botón para agregar personal (solo visible para administradores) -->
@@ -120,7 +130,7 @@
       <label for="equipo">Equipo:</label>
       <select class="custom-select" [(ngModel)]="selectedAsignacion.equipo" name="equipo">
         <option *ngFor="let equipo of equipoList" [ngValue]="equipo">
-          {{ equipo.numeroSerie }} - {{ equipo.modelo }} - {{equipo.tipo}} - {{ equipo.color }}
+          {{ equipo.numeroSerie }} / {{ equipo.modelo }} / {{equipo.tipo}} / {{ equipo.color }} -> {{ equipo.estado }}
         </option>
       </select>
 
@@ -220,3 +230,46 @@
     </div>
   </div>
 </div>
+
+
+<!-- MODAL -->
+<div class="modal" [class.show]="modalExportarVisible" [style.display]="modalExportarVisible ? 'block' : 'none'">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      
+      <div class="modal-header">
+        <h5 class="modal-title">Exportar equipos por estado</h5>
+        <button type="button" class="btn-close" (click)="cerrarModalExportar()"></button>
+      </div>
+
+      <div class="modal-body">
+        <h5>Selecciona los campos a exportar:</h5>
+        <div class="row">
+          <div class="col-md-6" *ngFor="let campo of camposDisponibles">
+            <label class="form-check-label">
+              <input type="checkbox"
+                     class="form-check-input"
+                     [value]="campo.campo"
+                     [checked]="camposSeleccionados.includes(campo.campo)"
+                     (change)="onCheckboxChange($event, campo.campo)" />
+              {{ campo.nombre }}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-success"
+                (click)="exportarEquiposConAsignacionesDesdeRelaciones('EN USO')">
+          Exportar EN USO
+        </button>
+        <button class="btn btn-danger"
+                (click)="exportarEquiposConAsignacionesDesdeRelaciones('BAJA')">
+          Exportar BAJA
+        </button>   
+        <button class="btn btn-secondary" (click)="cerrarModalExportar()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
