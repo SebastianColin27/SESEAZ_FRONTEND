@@ -16,9 +16,9 @@ export interface RegisterRequest {
   providedIn: 'root'
 })
 export class AuthService {
- private apiUrl = 'http://localhost:8080/auth';
+ //private apiUrl = 'http://localhost:8080/auth';
 
- //  private apiUrl = 'https://seseaz-backend.onrender.com/auth'; 
+  private apiUrl = 'https://seseaz-backend.onrender.com/auth'; 
 
   constructor(private jwtHelper: JwtHelperService, private http: HttpClient) { }
 
