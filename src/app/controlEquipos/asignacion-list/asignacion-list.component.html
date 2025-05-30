@@ -14,10 +14,11 @@
 
 
 <!-- BOTÓN PARA ABRIR EL MODAL EXCEL -->
+ <div *ngIf="isAdmin">
 <button class="btn btn-outline-primary bi bi-file-earmark-excel-fill" (click)="abrirModalExportar()">
   Exportar Equipos por Estado
 </button>
-
+</div>
 
 
 
