@@ -407,6 +407,7 @@ export class AsignacionComponent implements OnInit {
   // Método para exportar a Excel
 camposDisponibles: { campo: string; nombre: string }[] = [
   { campo: 'equipo.numeroSerie', nombre: 'Número de serie' },
+  { campo: 'equipo.numeroInventario', nombre: 'Número de inventario' },
   { campo: 'equipo.marca', nombre: 'Marca' },
   { campo: 'equipo.modelo', nombre: 'Modelo' },
   { campo: 'equipo.tipo', nombre: 'Tipo' },
