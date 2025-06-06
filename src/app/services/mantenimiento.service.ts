@@ -7,9 +7,9 @@ import { Mantenimiento } from '../models/mantenimiento';
   providedIn: 'root'
 })
 export class MantenimientoService {
-  //private apiUrl = 'http://localhost:8080/api/mantenimientos';
+  private apiUrl = 'http://localhost:8080/api/mantenimientos';
 
-  private apiUrl = 'https://seseaz-backend.onrender.com/api/mantenimientos';
+ // private apiUrl = 'https://seseaz-backend.onrender.com/api/mantenimientos';
 
   constructor(private http: HttpClient) { }
 

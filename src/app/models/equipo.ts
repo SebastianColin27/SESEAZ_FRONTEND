@@ -2,6 +2,7 @@ export class Equipo {
     id?: any;
     _id?: string;
     numeroSerie?: string;
+    numeroInventario?: string;
     marca?: string;
     modelo?: string;
     color?: string;
@@ -16,6 +17,7 @@ export class Equipo {
 
     imagenGridFsId?: string;
     imagenUrl?: string;
+    imagenPreview?: string; 
 }
 
 export class Puertos {

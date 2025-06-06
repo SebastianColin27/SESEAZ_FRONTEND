@@ -27,22 +27,9 @@ import * as FileSaver from 'file-saver';
 })
 export class AsignacionComponent implements OnInit {
   loading = true;
-  getLicenciaNames(asignacion: Asignacion): string {
-    if (asignacion.licencias && asignacion.licencias.length > 0) {
-      return asignacion.licencias
-        .filter(l => l?.nombreLicencia)  // Filtra solo licencias con nombre
-        .map(l => l.nombreLicencia)
-        .join(', ');
-    }
-    return 'Sin asignar';
-  }
+ 
 
-  getPersonalName(asignacion: Asignacion): string {
-    if (asignacion.personal) {
-      return asignacion.personal.nombre || 'Sin asignar'; // Asegura que el nombre no sea nulo
-    }
-    return 'Sin asignar';
-  }
+
 
 
 
@@ -477,6 +464,40 @@ exportarEquiposConAsignacionesDesdeRelaciones(estado: string): void {
   });
 }
 
+exportarTodosLosEquiposConAsignaciones(): void {
+  this.asignacionService.obtenerTodasLasAsignaciones().subscribe((asignaciones: Asignacion[]) => {
+    const asignacionesFiltradas = asignaciones.filter(asignacion =>
+      asignacion.personal && asignacion.equipo
+    );
+
+    const data = asignacionesFiltradas.map(asignacion => {
+      const fila: any = {};
+      this.camposDisponibles.forEach(campoDef => {
+        if (this.camposSeleccionados.includes(campoDef.campo)) {
+          const [entidad, propiedad] = campoDef.campo.split('.');
+          let valor = '';
+          if (entidad === 'personal') {
+            valor = (asignacion.personal as any)[propiedad];
+          } else if (entidad === 'equipo') {
+            valor = (asignacion.equipo as any)[propiedad];
+          } else if (entidad === 'asignacion') {
+            valor = (asignacion as any)[propiedad];
+          }
+          fila[campoDef.nombre] = valor;
+        }
+      });
+      return fila;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = { Sheets: { 'EquiposAsignados': worksheet }, SheetNames: ['EquiposAsignados'] };
+    const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+
+    const fileName = `equipos_todos_con_asignacion_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    FileSaver.saveAs(blob, fileName);
+  });
+}
   
 onToggleCampo(campo: string, checked: boolean): void {
   if (checked) {

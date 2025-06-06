@@ -83,6 +83,7 @@ import * as FileSaver from 'file-saver';
       setTimeout(() => this.loading = false, 500); // Simula carga
       this.cargarEquipos();
 
+
       this.searchSubscription = this.searchControl.valueChanges
         .pipe(
           filter((value): value is string => value !== null),
@@ -168,6 +169,7 @@ import * as FileSaver from 'file-saver';
     abrirModalAgregar(): void {
       this.selectedEquipo = {
         numeroSerie: '',
+        numeroInventario: '',
         marca: '',
         modelo: '',
         tipo: '',
@@ -214,83 +216,98 @@ import * as FileSaver from 'file-saver';
 
 
 
-    guardarEquipo(): void {
-      if (this.selectedEquipo) {
-        const equipoData = { ...this.selectedEquipo }; // Copy data for sending
-        const imagenFile = this.selectedFile; // Get the selected file
-        this.selectedFile = null; // Clear selected file immediately
+guardarEquipo(): void {
+  if (this.selectedEquipo) {
+    const equipoData = { ...this.selectedEquipo };
+    const imagenFile = this.selectedFile;
 
-        // Remove frontend-only fields before sending to backend
-        delete equipoData.imagenUrl;
-        // Do NOT delete imagenGridFsId if updating, let backend handle it.
-        // Wait, the backend PUT method ignores imagenGridFsId from body, it fetches existing.
-        // So it's safe to delete it here too.
-        delete equipoData.imagenGridFsId;
+    delete equipoData.imagenUrl;
+    delete equipoData.imagenGridFsId;
 
+    // Validar duplicados solo en modo agregar
+    if (!this.isEditMode) {
+      this.equipoService.buscarEquipoPorSerie((equipoData.numeroSerie ?? '').trim()).pipe(
+        map((equipos) => equipos || []),
+        switchMap((equiposEncontrados) => {
+          if (equiposEncontrados.length > 0) {
+            this.mostrarNotificacion('Ya existe un equipo con ese número de serie.', 'error');
+            throw new Error('Número de serie duplicado');
+          }
 
-        // Clean up ports object if checkboxes were used (they are not in the current HTML though)
-        if (equipoData.puertos) {
-          Object.keys(equipoData.puertos).forEach(key => {
-            if (key.endsWith('Check')) {
-              delete (equipoData.puertos as any)[key];
-            }
-          });
+          // Si no hay duplicados, proceder con la creación
+          return this.equipoService.crearEquipo(equipoData);
+        }),
+        switchMap((equipoResponse: Equipo) => {
+          if (imagenFile && equipoResponse.id) {
+            return this.equipoService.subirImagen(equipoResponse.id, imagenFile).pipe(
+              map(() => equipoResponse),
+              catchError(uploadErr => {
+                console.error('Error al subir imagen:', uploadErr);
+                this.mostrarNotificacion('Equipo guardado, pero falló la subida de imagen.', 'error');
+                return of(equipoResponse);
+              })
+            );
+          } else {
+            return of(equipoResponse);
+          }
+        }),
+        catchError((err) => {
+          if (err.message !== 'Número de serie duplicado') {
+            this.mostrarNotificacion('Error al guardar equipo.', 'error');
+          }
+          this.cerrarModal();
+          return throwError(() => err);
+        })
+      ).subscribe({
+        next: () => {
+          this.cargarEquipos();
+          this.cerrarModal();
+          this.mostrarNotificacion('Equipo agregado con éxito', 'success');
+        },
+        error: (err) => {
+          console.error('Error en la suscripción de creación:', err);
         }
+      });
 
-
-        let saveOrUpdateObservable: Observable<Equipo>;
-        const equipoId = equipoData.id; // Capture ID before deleting from object
-
-        if (this.isEditMode && equipoId) {
-          // Update existing equipment
-          saveOrUpdateObservable = this.equipoService.actualizarEquipo(equipoId, equipoData);
-        } else {
-          // Create new equipment
-          saveOrUpdateObservable = this.equipoService.crearEquipo(equipoData);
-        }
-
-        saveOrUpdateObservable.pipe(
-          switchMap((equipoResponse: Equipo) => {
-            console.log('Equipo data saved/updated:', equipoResponse);
-            // Check if an image was selected AND the equipment was saved/updated successfully (has an ID)
-            if (imagenFile && equipoResponse.id) {
-              // If image selected, upload it using the ID from the response
-              return this.equipoService.subirImagen(equipoResponse.id, imagenFile).pipe(
-                map(() => equipoResponse), // Pass the equipo response through
-                catchError(uploadErr => {
-                  console.error('Error al subir imagen:', uploadErr);
-                  // Decide how to handle image upload failure after successful data save
-                  this.mostrarNotificacion('Equipo guardado, pero falló la subida de imagen.', 'error');
-                  return of(equipoResponse); // Continue the observable chain with the saved equipo data
-                })
-              );
-            } else {
-              // No image to upload, just pass the equipo response through
-              return of(equipoResponse);
-            }
-          }),
-          catchError(err => {
-            console.error('Error al guardar/actualizar equipo:', err);
-            this.mostrarNotificacion('Error al guardar/actualizar equipo.', 'error');
-            this.cerrarModal(); // Close modal on error
-            return throwError(() => err); // Re-throw the error to stop the sequence
-          })
-        )
-          .subscribe({
-            next: (finalEquipoResponse) => {
-              // This block executes after both data save/update AND optional image upload
-              console.log('Operación de equipo completa.');
-              this.cargarEquipos(); // Reload the list including new/updated image URLs
-              this.cerrarModal(); // Close the modal
-              this.mostrarNotificacion(this.isEditMode ? 'Equipo actualizado con éxito' : 'Equipo agregado con éxito', 'success');
-            },
-            error: (err) => {
-              // Error already handled and notified in catchError pipe
-              console.log('Subscription finished with error.');
-            }
-          });
-      }
+      return; // Salir para no continuar con lógica común
     }
+
+    // Si es modo edición
+    let saveOrUpdateObservable = this.equipoService.actualizarEquipo(equipoData.id!, equipoData);
+
+    saveOrUpdateObservable.pipe(
+      switchMap((equipoResponse: Equipo) => {
+        if (imagenFile && equipoResponse.id) {
+          return this.equipoService.subirImagen(equipoResponse.id, imagenFile).pipe(
+            map(() => equipoResponse),
+            catchError(uploadErr => {
+              console.error('Error al subir imagen:', uploadErr);
+              this.mostrarNotificacion('Equipo actualizado, pero falló la subida de imagen.', 'error');
+              return of(equipoResponse);
+            })
+          );
+        } else {
+          return of(equipoResponse);
+        }
+      }),
+      catchError(err => {
+        this.mostrarNotificacion('Error al actualizar equipo.', 'error');
+        this.cerrarModal();
+        return throwError(() => err);
+      })
+    ).subscribe({
+      next: () => {
+        this.cargarEquipos();
+        this.cerrarModal();
+        this.mostrarNotificacion('Equipo actualizado con éxito', 'success');
+      },
+      error: (err) => {
+        console.error('Error en la suscripción de actualización:', err);
+      }
+    });
+  }
+}
+
 
 
     cancelarEdicion(): void {
@@ -357,24 +374,18 @@ import * as FileSaver from 'file-saver';
 
 
 
-
-
-
-
-
-
     isViewModalVisible = false;
 
     abrirModalVer(equipo: Equipo): void {
-      // Create a copy for viewing
+      
       this.selectedEquipo = { ...equipo };
       this.imagenPreview = null;
-      // Ensure ports are initialized if missing
+      
       if (!this.selectedEquipo!.puertos) {
         this.selectedEquipo!.puertos = { usb: 0, ethernet: 0, sd: 0, vga: 0, hdmi: 0, tipoC: 0, jack_35: 0 };
       }
-      // imagenUrl is already populated by the service
-      console.log("Equipo para ver:", this.selectedEquipo); // Debug URL
+  
+      console.log("Equipo para ver:", this.selectedEquipo); 
       this.isViewModalVisible = true;
     }
     cerrarModalVer(): void {
@@ -443,6 +454,7 @@ import * as FileSaver from 'file-saver';
   // Método para exportar a Excel
 camposDisponibles: { campo: string; nombre: string }[] = [
   { campo: 'numeroSerie', nombre: 'Número de serie' },
+  { campo: 'numeroInventario', nombre: 'Número de inventario' },
   { campo: 'marca', nombre: 'Marca' },
   { campo: 'modelo', nombre: 'Modelo' },
   { campo: 'procesador', nombre: 'Procesador' },
@@ -471,7 +483,7 @@ exportarEquiposPorEstado(estado: string): void {
           
           // Formatear fecha si es fechaCompra
           if (campoDef.campo === 'fechaCompra' && valor) {
-            valor = new Date(valor).toLocaleDateString(); // dd/mm/yyyy según navegador
+            valor = new Date(valor).toLocaleDateString(); 
           }
 
           fila[campoDef.nombre] = valor;
@@ -489,6 +501,35 @@ exportarEquiposPorEstado(estado: string): void {
     FileSaver.saveAs(blob, fileName);
   });
 }
+exportarTodosLosEquipos(): void {
+  this.equipoService.obtenerTodosLosEquipos().subscribe((equipos: Equipo[]) => {
+    const data = equipos.map(equipo => {
+      const fila: any = {};
+      this.camposDisponibles.forEach(campoDef => {
+        if (this.camposSeleccionados.includes(campoDef.campo)) {
+          let valor = (equipo as any)[campoDef.campo];
+
+          // Formatear fecha si es fechaCompra
+          if (campoDef.campo === 'fechaCompra' && valor) {
+            valor = new Date(valor).toLocaleDateString(); 
+          }
+
+          fila[campoDef.nombre] = valor;
+        }
+      });
+      return fila;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = { Sheets: { 'Equipos': worksheet }, SheetNames: ['Equipos'] };
+    const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+
+    const fileName = `equipos_todos_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    FileSaver.saveAs(blob, fileName);
+  });
+}
+
 
   
 onToggleCampo(campo: string, checked: boolean): void {

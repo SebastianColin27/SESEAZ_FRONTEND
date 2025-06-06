@@ -86,7 +86,7 @@
           {{ asignacion.equipo?.tipo}}-
           {{ asignacion.equipo?.color }}
         </td>
-        <td>{{ getPersonalName(asignacion) }}</td>
+        <td>{{ asignacion.personal?.nombre }}</td>
         <!--   <td>{{ getLicenciaNames(asignacion) }}</td>-->
         <!--  <td>{{ asignacion.ubicacionFisica }}</td>-->
         <td>{{ asignacion.nombreEquipo }}</td>
@@ -144,11 +144,10 @@
       </select>
 
       <!-- Select múltiple para Licencias -->
-      <!-- HTML -->
       <label for="licencias">Licencias:</label>
       <div class="custom-multiselect">
         <select class="custom-select" [(ngModel)]="selectedAsignacion.licencias" name="licencias" multiple>
-          <option *ngFor="let licencia of licenciaList" [ngValue]="licencia">{{ licencia.nombreLicencia }}</option>
+          <option *ngFor="let licencia of licenciaList" [ngValue]="licencia">{{ licencia.nombreLicencia }} / {{licencia.numeroSerie}}</option>
         </select>
         <div class="selected-items">
           <span class="selected-tag" *ngFor="let item of selectedAsignacion.licencias">
@@ -205,8 +204,17 @@
     <h3 class="text-center">Detalles de las asignaciones</h3>
     <p><strong>Equipo:</strong> {{ selectedAsignacion?.equipo?.numeroSerie && selectedAsignacion?.equipo?.modelo }}</p>
     <p><strong>No. de serie del equipo:</strong> {{ selectedAsignacion?.equipo?.numeroSerie }}</p>
-    <p><strong>Personal:</strong> {{ selectedAsignacion ? getPersonalName(selectedAsignacion) : '' }}</p>
-    <p><strong>Licencias:</strong> {{ selectedAsignacion ? getLicenciaNames(selectedAsignacion) : '' }}</p>
+    <p><strong>Personal:</strong> {{ selectedAsignacion ?.personal?.nombre }}</p>
+    <p><strong>Licencias:</strong>
+      <span *ngIf="(selectedAsignacion?.licencias ?? []).length > 0">
+        <span *ngFor="let licencia of (selectedAsignacion?.licencias ?? []); let last = last">
+          {{ licencia.nombreLicencia }} ( {{ licencia.numeroSerie }} )<span *ngIf="!last">, </span>
+        </span>
+      </span>
+      <span *ngIf="!selectedAsignacion?.licencias || selectedAsignacion?.licencias?.length === 0">
+        Sin licencias
+      </span>
+    </p>
     <p><strong>Ubicación Física:</strong> {{ selectedAsignacion?.ubicacionFisica }}</p>
     <p><strong>Nombre Equipo:</strong> {{ selectedAsignacion?.nombreEquipo }}</p>
     <p><strong>Contraseña:</strong> {{ selectedAsignacion?.contrasena }}</p>
@@ -267,7 +275,19 @@
         <button class="btn btn-danger"
                 (click)="exportarEquiposConAsignacionesDesdeRelaciones('BAJA')">
           Exportar BAJA
-        </button>   
+        </button> 
+          <button class="btn btn-primary"
+                (click)="exportarEquiposConAsignacionesDesdeRelaciones('DISPONIBLE')">
+          Exportar DISPONIBLE
+        </button>
+        <button class="btn btn-warning"
+                (click)="exportarEquiposConAsignacionesDesdeRelaciones('EN REPARACIÓN')">
+          Exportar EN REPARACIÓN
+        </button>
+        <button class="btn btn-info" (click)="exportarTodosLosEquiposConAsignaciones()">
+  Exportar Todos 
+</button>
+  
         <button class="btn btn-secondary" (click)="cerrarModalExportar()">Cancelar</button>
       </div>
     </div>
