@@ -9,7 +9,7 @@ export interface RegisterRequest {
   firstName: string;
   lastName: string;
   password: string;
-  role: 'ADMIN' | 'MODERADOR' | 'LECTOR'; // o cualquier valor que tengas en tu enum
+  role: 'ADMIN' | 'MODERADOR' | 'LECTOR';
 }
 
 @Injectable({

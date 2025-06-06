@@ -4,6 +4,7 @@ import { BehaviorSubject, catchError, map, Observable, tap, throwError } from 'r
 import { LoginRequest } from './loginRequest';
 import { environment } from '../../environments/environment';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -17,12 +18,18 @@ export class LoginService {
 
   http: HttpClient = inject(HttpClient);
   private jwtHelper: JwtHelperService = inject(JwtHelperService)
-
+private router: Router = inject(Router);
 
   constructor() {
     const token = sessionStorage.getItem("token");
     if (token) {
-      this.decodeAndStoreUserData(token); // Decodifica el token al iniciar
+      // Verificar si el token está expirado al inicializar
+      if (this.isTokenExpired(token)) {
+        this.logout();
+      } else {
+        this.decodeAndStoreUserData(token);
+        this.startTokenExpirationCheck(); // Iniciar verificación periódica
+      }
     }
   }
 
@@ -30,16 +37,15 @@ export class LoginService {
     return this.http.post<any>(environment.urlHost + "auth/login", credentials).pipe(
       tap((userData) => {
         sessionStorage.setItem("token", userData.token);
-        this.decodeAndStoreUserData(userData.token)
+        this.decodeAndStoreUserData(userData.token);
+        this.startTokenExpirationCheck(); // Iniciar verificación periódica
       }),
       map((userData) => userData.token),
       catchError(this.handleError)
     );
   }
 
-
   private decodeAndStoreUserData(token: string): void {
-
     try {
       const decodedToken = this.jwtHelper.decodeToken(token);
       console.log(decodedToken);
@@ -47,27 +53,45 @@ export class LoginService {
       this.currentUserData.next(decodedToken);
       this.currentUserLoginOn.next(true);
 
-      // Obtén el rol del usuario del token decodificado
       const roles = decodedToken['roles'];
-      console.log("roles", roles)
+      console.log("roles", roles);
       if (roles) {
         this.currentUserRole.next(roles);
       } else {
-        this.currentUserRole.next(''); // O un valor por defecto si no hay rol
-        console.log("no tiene  rol")
+        this.currentUserRole.next('');
+        console.log("no tiene rol");
       }
-
 
     } catch (error) {
       console.error('Error decoding token:', error);
       this.currentUserRole.next('');
       this.currentUserData.next(null);
       this.currentUserLoginOn.next(false);
-
     }
   }
 
+  private isTokenExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const now = Date.now() / 1000;
+      return payload.exp < now;
+    } catch (error) {
+      console.error('Error verificando expiración del token:', error);
+      return true;
+    }
+  }
 
+  private startTokenExpirationCheck(): void {
+    // Verificar cada 30 segundos si el token está expirado
+    setInterval(() => {
+      const token = sessionStorage.getItem("token");
+      if (token && this.isTokenExpired(token)) {
+        this.logout();
+        this.router.navigate(['/login']);
+        console.log('Sesión expirada. Redirigiendo al login...');
+      }
+    }, 30000); // 30 segundos
+  }
 
   logout(): void {
     sessionStorage.removeItem("token");
@@ -77,9 +101,7 @@ export class LoginService {
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
-
     console.error('An error occurred:', error.message);
-
     return throwError(() => new Error('Something went wrong; please try again later.'));
   }
 
