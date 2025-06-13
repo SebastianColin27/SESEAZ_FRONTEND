@@ -15,6 +15,8 @@ import { catchError, debounceTime, distinctUntilChanged, EMPTY, filter, of, Subs
 import { Personal } from '../../models/personal';
 import { PersonalService } from '../../services/personal.service';
 import { LoadingComponent } from '../loading/loading.component';
+import * as XLSX from 'xlsx';
+import * as FileSaver from 'file-saver';
 
 @Component({
   selector: 'app-mantenimiento-list',
@@ -45,6 +47,10 @@ export class MantenimientoListComponent implements OnInit {
 
   searchControl = new FormControl();
   searchSubscription!: Subscription;
+
+  fechaInicio: Date | null = null;
+fechaFin: Date | null = null;
+
 
 
 
@@ -374,6 +380,35 @@ export class MantenimientoListComponent implements OnInit {
       this.mostrarNotificacion('Este mantenimiento no tiene un equipo asociado para generar reporte.', 'error');
     }
   }
+
+  exportarMantenimientosAExcel(): void {
+  let dataFiltrada = this.mantenimientosList;
+
+  // Filtrado por fechas si están definidas
+  if (this.fechaInicio && this.fechaFin) {
+    const inicio = new Date(this.fechaInicio).getTime();
+    const fin = new Date(this.fechaFin).getTime();
+
+    dataFiltrada = dataFiltrada.filter(m => {
+      const fechaMantenimiento = new Date(m.fecha).getTime();
+      return fechaMantenimiento >= inicio && fechaMantenimiento <= fin;
+    });
+  }
+
+  const dataParaExcel = dataFiltrada.map(m => ({
+    Fecha: m.fecha,
+    Actividad: m.actividadRealizada,
+    Equipo: `${m.equipo?.numeroSerie || ''} (${m.equipo?.modelo || ''})`,
+    Responsable: `${m.personal?.nombre || ''} ${m.personal?.cargo || ''}`,
+  }));
+
+  const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataParaExcel);
+  const workbook: XLSX.WorkBook = { Sheets: { 'Mantenimientos': worksheet }, SheetNames: ['Mantenimientos'] };
+  const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+
+  const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+  FileSaver.saveAs(blob, 'MantenimientosFiltrados.xlsx');
+}
 
 
 }
