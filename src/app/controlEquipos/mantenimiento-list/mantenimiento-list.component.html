@@ -12,10 +12,10 @@
   <!-- Botón para descargar PDF de asignaciones -->
   <button class="btn btn-warning  m-3 bi bi-file-earmark-arrow-down-fill" (click)="descargarPdfMantenimiento()"> Reporte
     General</button>
-<div class="filtros">
+<div class="custom-multiselect">
   <label>Desde: <input type="date" [(ngModel)]="fechaInicio"></label>
   <label>Hasta: <input type="date" [(ngModel)]="fechaFin"></label>
-  <button (click)="exportarMantenimientosAExcel()">Exportar Excel</button>
+  <button class="btn btn-outline-primary bi bi-file-earmark-excel-fill"  (click)="exportarMantenimientosAExcel()">Exportar Excel</button>
 </div>
 
   <div class="d-flex justify-content-between align-items-start">

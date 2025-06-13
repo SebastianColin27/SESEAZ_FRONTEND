@@ -398,8 +398,8 @@ fechaFin: Date | null = null;
   const dataParaExcel = dataFiltrada.map(m => ({
     Fecha: m.fecha,
     Actividad: m.actividadRealizada,
-    Equipo: `${m.equipo?.numeroSerie || ''} (${m.equipo?.modelo || ''})`,
-    Responsable: `${m.personal?.nombre || ''} ${m.personal?.cargo || ''}`,
+    Equipo: `${m.equipo?.numeroSerie || ''} / ${m.equipo?.modelo || ''} / ${m.equipo?.marca || ''} / ${m.equipo?.tipo|| ''} / ${m.equipo?.color || ''}`,
+    Responsable: `${m.personal?.nombre || ''} `,
   }));
 
   const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataParaExcel);
