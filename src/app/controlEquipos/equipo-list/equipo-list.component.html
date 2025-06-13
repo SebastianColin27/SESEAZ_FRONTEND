@@ -55,19 +55,23 @@
 <!-- Filtros -->
 <div class="filtros">
   <label>Tipo:
-    <select [(ngModel)]="filtroTipo" (change)="filtrarEquipos()">
+    <select class="custom-select" [(ngModel)]="filtroTipo" (change)="filtrarEquipos()">
       <option value="">Todos</option>
+      <option value="LAPTOP">LAPTOP</option>
+      <option value="PC ESCRITORIO">PC</option>
       <option value="IMPRESORA">Impresora</option>
-      <option value="TABLET">Tablet</option>
-      <option value="PC">PC</option>
+      <option value="TABLETA">Tableta</option>
+      
     </select>
   </label>
 
   <label>Estado:
-    <select [(ngModel)]="filtroEstado" (change)="filtrarEquipos()">
+    <select class="custom-select" [(ngModel)]="filtroEstado" (change)="filtrarEquipos()">
       <option value="">Todos</option>
       <option value="EN USO">En uso</option>
       <option value="BAJA">Baja</option>
+      <option value="EN REPARACIÓN">Baja</option>
+      <option value="DISPONIBLE">Baja</option>
     </select>
   </label>
 </div>
