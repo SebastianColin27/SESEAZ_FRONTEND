@@ -52,6 +52,27 @@
   </div>
 </div>
 
+<!-- Filtros -->
+<div class="filtros">
+  <label>Tipo:
+    <select [(ngModel)]="filtroTipo" (change)="filtrarEquipos()">
+      <option value="">Todos</option>
+      <option value="IMPRESORA">Impresora</option>
+      <option value="TABLET">Tablet</option>
+      <option value="PC">PC</option>
+    </select>
+  </label>
+
+  <label>Estado:
+    <select [(ngModel)]="filtroEstado" (change)="filtrarEquipos()">
+      <option value="">Todos</option>
+      <option value="EN USO">En uso</option>
+      <option value="BAJA">Baja</option>
+    </select>
+  </label>
+</div>
+
+
 <!-- Spinner de carga -->
 <div *ngIf="!loading">
   <table class="table table-striped m-3 ">
@@ -72,7 +93,7 @@
       </tr>
     </thead>
     <tbody class="table-group-divider">
-      <tr *ngFor="let equipo of equipoList">
+      <tr *ngFor="let equipo of equiposFiltrados">
         <td>{{ equipo.numeroSerie }}</td>
         <td>{{ equipo.tipo }}</td>
         <td>{{ equipo.marca }}</td>
@@ -102,6 +123,7 @@
       </tr>
     </tbody>
   </table>
+  <p>Total mostrados: {{ equiposFiltrados.length }}</p>
 </div>
 <!------------------------------------------ Modal-------------------------------- -->
 <div *ngIf="isModalVisible" class="modal">
@@ -129,6 +151,7 @@
           <option value="LAPTOP">LAPTOP</option>
           <option value="PC ESCRITORIO">PC DE ESCRITORIO</option>
           <option value="TABLETA">TABLETA</option>
+          <option value="IMPRESORA">IMPRESORA</option>
         </select>
       </div>
 

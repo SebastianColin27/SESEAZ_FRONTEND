@@ -198,8 +198,8 @@
         {{ selectedLicencia?.fechaVencimiento ? selectedLicencia?.fechaVencimiento : 'N/A' }}
       </ng-template>
     </p>
-    <p><strong>Username:</strong> {{ selectedLicencia?.usuario }}</p>
-    <p><strong>Password:</strong> {{ selectedLicencia?.contrasena }}</p>
+    <p *ngIf="isAdminOrModerador"><strong>Username:</strong> {{ selectedLicencia?.usuario }}</p>
+    <p *ngIf="isAdminOrModerador"><strong>Password:</strong> {{ selectedLicencia?.contrasena }}</p>
   </div>
 </div>
 

@@ -68,11 +68,11 @@
         <th>Personal</th>
         <!--   <th>Licencias</th>-->
         <!--   <th>Ubicación Física</th>-->
-        <th>Equipo</th>
+        <!-- <th>Equipo</th> -->
         <!--    <th>contraseña</th>-->
         <!--    <th>Evidencia de asignación</th>-->
-        <!--   <th>Fecha de asignación</th>-->
-        <!--    <th>Fecha de finalizacion</th>-->
+        <th>Fecha de asignación</th>
+        <th>Fecha de finalizacion</th>
         <!--    <th>Comentarios</th>-->
         <th>Acciones</th>
         <th>Reportes</th>
@@ -89,11 +89,11 @@
         <td>{{ asignacion.personal?.nombre }}</td>
         <!--   <td>{{ getLicenciaNames(asignacion) }}</td>-->
         <!--  <td>{{ asignacion.ubicacionFisica }}</td>-->
-        <td>{{ asignacion.nombreEquipo }}</td>
+        <!-- <td>{{ asignacion.nombreEquipo }}</td> -->
         <!--     <td>{{ asignacion.contrasena }}</td>-->
         <!--    <td>{{ asignacion.evidenciaAsignacion }}</td>-->
-        <!--   <td>{{ asignacion.fechaAsignacion }}</td>-->
-        <!--    <td>{{ asignacion.fechaFinAsignacion }}</td>-->
+          <td>{{ asignacion.fechaAsignacion }}</td>
+           <td>{{ asignacion.fechaFinAsignacion }}</td>
         <!--  <td>{{ asignacion.comentarios }}</td>-->
         <td>
           <button *ngIf="isAdminOrModerador" class="btn btn-info me-3" (click)="abrirModalEditar(asignacion)"><i
@@ -217,7 +217,7 @@
     </p>
     <p><strong>Ubicación Física:</strong> {{ selectedAsignacion?.ubicacionFisica }}</p>
     <p><strong>Nombre Equipo:</strong> {{ selectedAsignacion?.nombreEquipo }}</p>
-    <p><strong>Contraseña:</strong> {{ selectedAsignacion?.contrasena }}</p>
+    <p *ngIf="isAdminOrModerador"><strong>Contraseña:</strong> {{ selectedAsignacion?.contrasena }}</p>
     <p><strong>Evidencia de asignación:</strong> {{ selectedAsignacion?.evidenciaAsignacion }}</p>
     <p><strong>Fecha de asignación:</strong> {{ selectedAsignacion?.fechaAsignacion }}</p>
     <p><strong>Fecha de finalización:</strong> {{ selectedAsignacion?.fechaFinAsignacion }}</p>

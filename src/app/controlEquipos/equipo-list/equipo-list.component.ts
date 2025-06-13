@@ -29,6 +29,7 @@ import * as FileSaver from 'file-saver';
     }
 
     equipoList: Equipo[] = [];
+    equiposFiltrados: Equipo[] = [];
     selectedEquipo: Equipo | null = null;
     isModalVisible = false;
     isEditMode = false;
@@ -51,7 +52,8 @@ import * as FileSaver from 'file-saver';
 
     searchControl = new FormControl('');
     private searchSubscription?: Subscription;
-
+filtroTipo: string = '';
+filtroEstado: string = '';
 
     constructor(private equipoService: EquipoService, private http: HttpClient,
       private loginService: LoginService, public authService: AuthService,
@@ -159,13 +161,20 @@ import * as FileSaver from 'file-saver';
             return item;
           });
           console.log('Lista de equipos cargada:', this.equipoList);
+           this.filtrarEquipos();
         },
         (error) => {
           console.error('Error cargando equipos:', error);
         }
       );
     }
-
+filtrarEquipos(): void {
+    this.equiposFiltrados = this.equipoList.filter(equipo => {
+      const coincideTipo = this.filtroTipo ? equipo.tipo === this.filtroTipo : true;
+      const coincideEstado = this.filtroEstado ? equipo.estado === this.filtroEstado : true;
+      return coincideTipo && coincideEstado;
+    });
+  }
     abrirModalAgregar(): void {
       this.selectedEquipo = {
         numeroSerie: '',
