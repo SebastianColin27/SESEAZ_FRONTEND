@@ -398,7 +398,7 @@ fechaFin: Date | null = null;
   const dataParaExcel = dataFiltrada.map(m => ({
     Fecha: m.fecha,
     Actividad: m.actividadRealizada,
-    Equipo: `${m.equipo?.numeroSerie || ''} / ${m.equipo?.modelo || ''} / ${m.equipo?.marca || ''} / ${m.equipo?.tipo|| ''} / ${m.equipo?.color || ''}`,
+    Equipo: `${m.equipo?.numeroSerie || ''} / ${m.equipo?.modelo || ''} / ${m.equipo?.marca || ''} / ${m.equipo?.tipo|| ''} / ${m.equipo?.color || ''} -> ${m.equipo?.estado || ''}`,
     Responsable: `${m.personal?.nombre || ''} `,
   }));
 
