@@ -1,296 +1,295 @@
-<h2 class="text-center mt-3 mb-3 bi bi-arrow-left-right"> Asignaciones</h2>
+<div class="ps-3 pe-3">
+  <h2 class="text-center mt-3 mb-3 bi bi-arrow-left-right"> Asignaciones</h2>
 
-<app-loading [loading]="loading"></app-loading>
-
-
-<div class="search-container m-3">
-  <label for="searchEquipo">Buscar por Equipo:</label>
-  <input type="text" [formControl]="searchControl" placeholder="Buscar por número de serie..." />
-  <button type="button" class="btn btn-secondary" (click)="cargarAsignaciones()">Mostrar Todos</button>
-</div>
-<!-- Botón para descargar PDF de asignaciones -->
-<button class="btn btn-warning m-3 bi bi-file-earmark-arrow-down-fill" (click)="descargarPdf()"> Reporte
-  General</button>
+  <app-loading [loading]="loading"></app-loading>
 
 
-<!-- BOTÓN PARA ABRIR EL MODAL EXCEL -->
- <div *ngIf="isAdmin">
-<button class="btn btn-outline-primary bi bi-file-earmark-excel-fill" (click)="abrirModalExportar()">
-  Exportar Equipos por Estado
-</button>
-</div>
+  <div class="search-container m-3">
+    <label for="searchEquipo">Buscar por Equipo:</label>
+    <input type="text" [formControl]="searchControl" placeholder="Buscar por número de serie..." />
+    <button type="button" class="btn btn-secondary" (click)="cargarAsignaciones()">Mostrar Todos</button>
+  </div>
+  <!-- Botón para descargar PDF de asignaciones -->
+  <button class="btn btn-warning m-3 bi bi-file-earmark-arrow-down-fill" (click)="descargarPdf()"> Reporte
+    General</button>
 
 
-
-
-<div class="d-flex justify-content-between align-items-start">
-
-  <!-- Botón para agregar personal (solo visible para administradores) -->
-  <div *ngIf="isAdmin" class="m-3 w-25">
-    <button class="btn btn-success m-3 w-100 bi bi-plus-circle " (click)="abrirModalAgregar()"> Agregar</button>
+  <!-- BOTÓN PARA ABRIR EL MODAL EXCEL -->
+  <div *ngIf="isAdmin">
+    <button class="btn btn-outline-primary bi bi-file-earmark-excel-fill" (click)="abrirModalExportar()">
+      Exportar Equipos por Estado
+    </button>
   </div>
 
-  <!-- Botones alineados a la izquierda -->
-  <div>
-    <!-- Botón para alternar orden -->
-    <button class="btn btn-secondary bi bi-arrow-down-up m-3" (click)="alternarOrden()"></button>
-
-    <!-- Botón para ir al Dashboard -->
-    <button class="btn btn-primary m-3 bi bi-house-fill" (click)="irAlDashboard()"> Inicio</button>
-    <!-- Botón para cerrar sesión -->
-    <button class="btn btn-danger m-3 bi bi-door-closed-fill" (click)="cerrarSesion()">Salir</button>
-
-  </div>
-
-</div>
-<!-- Mensajes de éxito -->
-<!-- Contenedor de notificaciones -->
-<div class="notifications-container">
-  <!-- Notificación de éxito -->
-  <div *ngIf="mensajeExito" class="notification success">
-    <span class="notification-icon"></span>
-    {{ mensajeExito }}
-  </div>
-
-  <!-- Notificación de error -->
-  <div *ngIf="mensajeError" class="notification error">
-    <span class="notification-icon"></span>
-    {{ mensajeError }}
-  </div>
-</div>
-
-<!-- Spinner de carga -->
-<div *ngIf="!loading">
-  <table class="table table-striped m-3">
-    <thead>
-      <tr>
-        <th>Equipo</th>
-        <th>Personal</th>
-        <!--   <th>Licencias</th>-->
-        <!--   <th>Ubicación Física</th>-->
-        <!-- <th>Equipo</th> -->
-        <!--    <th>contraseña</th>-->
-        <!--    <th>Evidencia de asignación</th>-->
-        <th>Fecha de asignación</th>
-        <th>Fecha de finalizacion</th>
-        <!--    <th>Comentarios</th>-->
-        <th>Acciones</th>
-        <th>Reportes</th>
-      </tr>
-    </thead>
-    <tbody class="table-group-divider">
-      <tr *ngFor="let asignacion of asignacionList">
-        <td>
-          {{ asignacion.equipo?.numeroSerie }} -
-          {{ asignacion.equipo?.modelo }} -
-          {{ asignacion.equipo?.tipo}}-
-          {{ asignacion.equipo?.color }}
-        </td>
-        <td>{{ asignacion.personal?.nombre }}</td>
-        <!--   <td>{{ getLicenciaNames(asignacion) }}</td>-->
-        <!--  <td>{{ asignacion.ubicacionFisica }}</td>-->
-        <!-- <td>{{ asignacion.nombreEquipo }}</td> -->
-        <!--     <td>{{ asignacion.contrasena }}</td>-->
-        <!--    <td>{{ asignacion.evidenciaAsignacion }}</td>-->
-          <td>{{ asignacion.fechaAsignacion }}</td>
-           <td>{{ asignacion.fechaFinAsignacion }}</td>
-        <!--  <td>{{ asignacion.comentarios }}</td>-->
-        <td>
-          <button *ngIf="isAdminOrModerador" class="btn btn-info me-3" (click)="abrirModalEditar(asignacion)"><i
-              class="bi bi-pencil"></i></button>
-          <button *ngIf="isAdmin" class="btn btn-danger me-3"
-            (click)="asignacion.id && eliminarAsignacion(asignacion.id)"><i class="bi bi-trash"></i></button>
-          <button class="btn btn-primary me-3" (click)="abrirModalVer(asignacion)"><i class="bi bi-eye"></i></button>
-        </td>
-
-        <td>
-          <button class="btn btn-warning me-3 bi bi-pc-display-horizontal"
-            (click)="descargarReporteAsignacionesPorEquipo(asignacion)" [disabled]="!asignacion.equipo?.id">
-            <!-- Deshabilita si no hay equipo o ID -->
-          </button>
-
-          <button class="btn btn-dark me-3 bi bi-file-earmark-person-fill"
-            (click)="descargarReporteAsignacionesPorPersonal(asignacion)" [disabled]="!asignacion.personal?.id">
-            <!-- Deshabilita si no hay personal o ID -->
-          </button>
-
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-<!-- Modal para agregar o editar asignación -->
-<div *ngIf="isModalVisible" class="modal">
-  <div class="modal-content">
-    <span class="close" (click)="cerrarModal()">&times;</span>
-    <h3>{{ isEditMode ? 'Editar Asignación' : 'Agregar Asignación' }}</h3>
-
-    <form (ngSubmit)="guardarAsignacion()" *ngIf="selectedAsignacion">
-      <!-- Select para Equipo -->
-      <label for="equipo">Equipo:</label>
-      <select class="custom-select" [(ngModel)]="selectedAsignacion.equipo" name="equipo">
-        <option *ngFor="let equipo of equipoList" [ngValue]="equipo">
-          {{ equipo.numeroSerie }} / {{ equipo.modelo }} / {{equipo.tipo}} / {{ equipo.color }} -> {{ equipo.estado }}
-        </option>
-      </select>
-
-      <!-- Select simple para Personal -->
-      <label for="personal">Personal:</label>
-      <select class="custom-select" [(ngModel)]="selectedAsignacion.personal" name="personal">
-        <option *ngFor="let personal of personalList" [ngValue]="personal">
-          {{ personal.nombre }}
-        </option>
-      </select>
-
-      <!-- Select múltiple para Licencias -->
-      <label for="licencias">Licencias:</label>
-      <div class="custom-multiselect">
-        <select class="custom-select" [(ngModel)]="selectedAsignacion.licencias" name="licencias" multiple>
-          <option *ngFor="let licencia of licenciaList" [ngValue]="licencia">{{ licencia.nombreLicencia }} / {{licencia.numeroSerie}}</option>
-        </select>
-        <div class="selected-items">
-          <span class="selected-tag" *ngFor="let item of selectedAsignacion.licencias">
-            {{ item.nombreLicencia }}
-            <span class="remove-tag" (click)="removeItem(item)">×</span>
-          </span>
-          <span class="placeholder" *ngIf="!selectedAsignacion.licencias || selectedAsignacion.licencias.length === 0">
-            Seleccione las licencias...
-          </span>
-        </div>
-      </div>
-
-      <!-- Otros campos del formulario -->
-      <label for="ubicacionFisica">Ubicación Física:</label>
-      <input type="text" id="ubicacionFisica" name="ubicacionFisica" [(ngModel)]="selectedAsignacion.ubicacionFisica"
-        required>
-
-      <label for="nombreEquipo">Nombre Equipo:</label>
-      <input type="text" id="nombreEquipo" name="nombreEquipo" [(ngModel)]="selectedAsignacion.nombreEquipo" required>
-
-      <label for="contrasenaEquipo">Contraseña Equipo:</label>
-      <input type="text" id="contrasenaEquipo" name="contrasenaEquipo" [(ngModel)]="selectedAsignacion.contrasena"
-        required>
-
-      <label for="evidenciaAsignacion">Evidencia Asignación</label>
-      <input type="text" id="evidenciaAsignacion" name="evidenciaAsignacion"
-        [(ngModel)]="selectedAsignacion.evidenciaAsignacion" required>
-
-      <label for="fechaAsignacion">Fecha Asignación:</label>
-      <input type="date" class="custom-date-input" id="fechaAsignacion" name="fechaAsignacion"
-        [(ngModel)]="selectedAsignacion.fechaAsignacion" required>
-
-      <label for="fechaFinAsignacion">Fecha Fin Asignación:</label>
-      <input type="date" id="fechaFinAsignacion" name="fechaFinAsignacion"
-        [(ngModel)]="selectedAsignacion.fechaFinAsignacion" required>
-
-      <label for="comentarios">Comentarios:</label>
-      <textarea id="comentarios" name="comentarios" [(ngModel)]="selectedAsignacion.comentarios"></textarea>
-
-      <!-- Botones del formulario -->
-      <div class="buttons">
-        <button class="btn btn-success me-3" type="submit">Guardar</button>
-        <button class="btn btn-danger" type="button" (click)="cerrarModal()">Cancelar</button>
-      </div>
-    </form>
-  </div>
-</div>
 
 
-<!-- Modal para visualizar detalles -->
-<div *ngIf="isViewModalVisible" class="modal">
-  <div class="modal-content">
-    <span class="close" (click)="cerrarModalVer()">&times;</span>
-    <h3 class="text-center">Detalles de las asignaciones</h3>
-    <p><strong>Equipo:</strong> {{ selectedAsignacion?.equipo?.numeroSerie && selectedAsignacion?.equipo?.modelo }}</p>
-    <p><strong>No. de serie del equipo:</strong> {{ selectedAsignacion?.equipo?.numeroSerie }}</p>
-    <p><strong>Personal:</strong> {{ selectedAsignacion ?.personal?.nombre }}</p>
-    <p><strong>Licencias:</strong>
-      <span *ngIf="(selectedAsignacion?.licencias ?? []).length > 0">
-        <span *ngFor="let licencia of (selectedAsignacion?.licencias ?? []); let last = last">
-          {{ licencia.nombreLicencia }} ( {{ licencia.numeroSerie }} )<span *ngIf="!last">, </span>
-        </span>
-      </span>
-      <span *ngIf="!selectedAsignacion?.licencias || selectedAsignacion?.licencias?.length === 0">
-        Sin licencias
-      </span>
-    </p>
-    <p><strong>Ubicación Física:</strong> {{ selectedAsignacion?.ubicacionFisica }}</p>
-    <p><strong>Nombre Equipo:</strong> {{ selectedAsignacion?.nombreEquipo }}</p>
-    <p *ngIf="isAdminOrModerador"><strong>Contraseña:</strong> {{ selectedAsignacion?.contrasena }}</p>
-    <p><strong>Evidencia de asignación:</strong> {{ selectedAsignacion?.evidenciaAsignacion }}</p>
-    <p><strong>Fecha de asignación:</strong> {{ selectedAsignacion?.fechaAsignacion }}</p>
-    <p><strong>Fecha de finalización:</strong> {{ selectedAsignacion?.fechaFinAsignacion }}</p>
-    <p><strong>Comentarios:</strong> {{ selectedAsignacion?.comentarios }}</p>
+
+  <div class="d-flex justify-content-between align-items-start">
+
+    <!-- Botón para agregar personal (solo visible para administradores) -->
+    <div *ngIf="isAdmin" class="m-3 w-25">
+      <button class="btn btn-success m-3 w-100 bi bi-plus-circle " (click)="abrirModalAgregar()"> Agregar</button>
+    </div>
+
+    <!-- Botones alineados a la izquierda -->
+    <div>
+      <!-- Botón para alternar orden -->
+      <button class="btn btn-secondary bi bi-arrow-down-up m-3" (click)="alternarOrden()"></button>
+
+      <!-- Botón para ir al Dashboard -->
+      <button class="btn btn-primary m-3 bi bi-house-fill" (click)="irAlDashboard()"> Inicio</button>
+      <!-- Botón para cerrar sesión -->
+      <button class="btn btn-danger m-3 bi bi-door-closed-fill" (click)="cerrarSesion()">Salir</button>
+
+    </div>
 
   </div>
-</div>
+  <!-- Mensajes de éxito -->
+  <!-- Contenedor de notificaciones -->
+  <div class="notifications-container">
+    <!-- Notificación de éxito -->
+    <div *ngIf="mensajeExito" class="notification success">
+      <span class="notification-icon"></span>
+      {{ mensajeExito }}
+    </div>
 
-
-<!-- Modal de confirmación para eliminar -->
-<div *ngIf="isConfirmDeleteVisible" class="modal-overlay">
-  <div class="modal-container">
-    <span class="close-btn" (click)="cancelarEliminacion()">&times;</span>
-    <h3 class="modal-title">Confirmar Eliminación</h3>
-    <p>¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.</p>
-    <div class="modal-buttons">
-      <button class="btn btn-danger" (click)="confirmarEliminacion()">Eliminar</button>
-      <button class="btn btn-secondary" (click)="cancelarEliminacion()">Cancelar</button>
+    <!-- Notificación de error -->
+    <div *ngIf="mensajeError" class="notification error">
+      <span class="notification-icon"></span>
+      {{ mensajeError }}
     </div>
   </div>
-</div>
 
+  <!-- Spinner de carga -->
+  <div *ngIf="!loading">
+    <table class="table table-striped m-3">
+      <thead>
+        <tr>
+          <th>Equipo</th>
+          <th>Personal</th>
+          <!--   <th>Licencias</th>-->
+          <!--   <th>Ubicación Física</th>-->
+          <!-- <th>Equipo</th> -->
+          <!--    <th>contraseña</th>-->
+          <!--    <th>Evidencia de asignación</th>-->
+          <th>Fecha de asignación</th>
+          <th>Fecha de finalizacion</th>
+          <!--    <th>Comentarios</th>-->
+          <th>Acciones</th>
+          <th>Reportes</th>
+        </tr>
+      </thead>
+      <tbody class="table-group-divider">
+        <tr *ngFor="let asignacion of asignacionList">
+          <td>
+            {{ asignacion.equipo?.numeroSerie }} -
+            {{ asignacion.equipo?.modelo }} -
+            {{ asignacion.equipo?.tipo}}-
+            {{ asignacion.equipo?.color }}
+          </td>
+          <td>{{ asignacion.personal?.nombre }}</td>
+          <!--   <td>{{ getLicenciaNames(asignacion) }}</td>-->
+          <!--  <td>{{ asignacion.ubicacionFisica }}</td>-->
+          <!-- <td>{{ asignacion.nombreEquipo }}</td> -->
+          <!--     <td>{{ asignacion.contrasena }}</td>-->
+          <!--    <td>{{ asignacion.evidenciaAsignacion }}</td>-->
+          <td>{{ asignacion.fechaAsignacion }}</td>
+          <td>{{ asignacion.fechaFinAsignacion }}</td>
+          <!--  <td>{{ asignacion.comentarios }}</td>-->
+          <td>
+            <button *ngIf="isAdminOrModerador" class="btn btn-info me-3" (click)="abrirModalEditar(asignacion)"><i
+                class="bi bi-pencil"></i></button>
+            <button *ngIf="isAdmin" class="btn btn-danger me-3"
+              (click)="asignacion.id && eliminarAsignacion(asignacion.id)"><i class="bi bi-trash"></i></button>
+            <button class="btn btn-primary me-3" (click)="abrirModalVer(asignacion)"><i class="bi bi-eye"></i></button>
+          </td>
 
-<!-- MODAL -->
-<div class="modal" [class.show]="modalExportarVisible" [style.display]="modalExportarVisible ? 'block' : 'none'">
-  <div class="modal-dialog modal-lg">
+          <td>
+            <button class="btn btn-warning me-3 bi bi-pc-display-horizontal"
+              (click)="descargarReporteAsignacionesPorEquipo(asignacion)" [disabled]="!asignacion.equipo?.id">
+              <!-- Deshabilita si no hay equipo o ID -->
+            </button>
+
+            <button class="btn btn-dark me-3 bi bi-file-earmark-person-fill"
+              (click)="descargarReporteAsignacionesPorPersonal(asignacion)" [disabled]="!asignacion.personal?.id">
+              <!-- Deshabilita si no hay personal o ID -->
+            </button>
+
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal para agregar o editar asignación -->
+  <div *ngIf="isModalVisible" class="modal">
     <div class="modal-content">
-      
-      <div class="modal-header">
-        <h5 class="modal-title">Exportar equipos por estado</h5>
-        <button type="button" class="btn-close" (click)="cerrarModalExportar()"></button>
-      </div>
+      <span class="close" (click)="cerrarModal()">&times;</span>
+      <h3>{{ isEditMode ? 'Editar Asignación' : 'Agregar Asignación' }}</h3>
 
-      <div class="modal-body">
-        <h5>Selecciona los campos a exportar:</h5>
-        <div class="row">
-          <div class="col-md-6" *ngFor="let campo of camposDisponibles">
-            <label class="form-check-label">
-              <input type="checkbox"
-                     class="form-check-input"
-                     [value]="campo.campo"
-                     [checked]="camposSeleccionados.includes(campo.campo)"
-                     (change)="onCheckboxChange($event, campo.campo)" />
-              {{ campo.nombre }}
-            </label>
+      <form (ngSubmit)="guardarAsignacion()" *ngIf="selectedAsignacion">
+        <!-- Select para Equipo -->
+        <label for="equipo">Equipo:</label>
+        <select class="custom-select" [(ngModel)]="selectedAsignacion.equipo" name="equipo">
+          <option *ngFor="let equipo of equipoList" [ngValue]="equipo">
+            {{ equipo.numeroSerie }} / {{ equipo.modelo }} / {{equipo.tipo}} / {{ equipo.color }} -> {{ equipo.estado }}
+          </option>
+        </select>
+
+        <!-- Select simple para Personal -->
+        <label for="personal">Personal:</label>
+        <select class="custom-select" [(ngModel)]="selectedAsignacion.personal" name="personal">
+          <option *ngFor="let personal of personalList" [ngValue]="personal">
+            {{ personal.nombre }}
+          </option>
+        </select>
+
+        <!-- Select múltiple para Licencias -->
+        <label for="licencias">Licencias:</label>
+        <div class="custom-multiselect">
+          <select class="custom-select" [(ngModel)]="selectedAsignacion.licencias" name="licencias" multiple>
+            <option *ngFor="let licencia of licenciaList" [ngValue]="licencia">{{ licencia.nombreLicencia }} /
+              {{licencia.numeroSerie}}</option>
+          </select>
+          <div class="selected-items">
+            <span class="selected-tag" *ngFor="let item of selectedAsignacion.licencias">
+              {{ item.nombreLicencia }}
+              <span class="remove-tag" (click)="removeItem(item)">×</span>
+            </span>
+            <span class="placeholder"
+              *ngIf="!selectedAsignacion.licencias || selectedAsignacion.licencias.length === 0">
+              Seleccione las licencias...
+            </span>
           </div>
         </div>
-      </div>
 
-      <div class="modal-footer">
-        <button class="btn btn-success"
-                (click)="exportarEquiposConAsignacionesDesdeRelaciones('EN USO')">
-          Exportar EN USO
-        </button>
-        <button class="btn btn-danger"
-                (click)="exportarEquiposConAsignacionesDesdeRelaciones('BAJA')">
-          Exportar BAJA
-        </button> 
-          <button class="btn btn-primary"
-                (click)="exportarEquiposConAsignacionesDesdeRelaciones('DISPONIBLE')">
-          Exportar DISPONIBLE
-        </button>
-        <button class="btn btn-warning"
-                (click)="exportarEquiposConAsignacionesDesdeRelaciones('EN REPARACIÓN')">
-          Exportar EN REPARACIÓN
-        </button>
-        <button class="btn btn-info" (click)="exportarTodosLosEquiposConAsignaciones()">
-  Exportar Todos 
-</button>
-  
-        <button class="btn btn-secondary" (click)="cerrarModalExportar()">Cancelar</button>
+        <!-- Otros campos del formulario -->
+        <label for="ubicacionFisica">Ubicación Física:</label>
+        <input type="text" id="ubicacionFisica" name="ubicacionFisica" [(ngModel)]="selectedAsignacion.ubicacionFisica"
+          required>
+
+        <label for="nombreEquipo">Nombre Equipo:</label>
+        <input type="text" id="nombreEquipo" name="nombreEquipo" [(ngModel)]="selectedAsignacion.nombreEquipo" required>
+
+        <label for="contrasenaEquipo">Contraseña Equipo:</label>
+        <input type="text" id="contrasenaEquipo" name="contrasenaEquipo" [(ngModel)]="selectedAsignacion.contrasena"
+          required>
+
+        <label for="evidenciaAsignacion">Evidencia Asignación</label>
+        <input type="text" id="evidenciaAsignacion" name="evidenciaAsignacion"
+          [(ngModel)]="selectedAsignacion.evidenciaAsignacion" required>
+
+        <label for="fechaAsignacion">Fecha Asignación:</label>
+        <input type="date" class="custom-date-input" id="fechaAsignacion" name="fechaAsignacion"
+          [(ngModel)]="selectedAsignacion.fechaAsignacion" required>
+
+        <label for="fechaFinAsignacion">Fecha Fin Asignación:</label>
+        <input type="date" id="fechaFinAsignacion" name="fechaFinAsignacion"
+          [(ngModel)]="selectedAsignacion.fechaFinAsignacion" required>
+
+        <label for="comentarios">Comentarios:</label>
+        <textarea id="comentarios" name="comentarios" [(ngModel)]="selectedAsignacion.comentarios"></textarea>
+
+        <!-- Botones del formulario -->
+        <div class="buttons">
+          <button class="btn btn-success me-3" type="submit">Guardar</button>
+          <button class="btn btn-danger" type="button" (click)="cerrarModal()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- Modal para visualizar detalles -->
+  <div *ngIf="isViewModalVisible" class="modal">
+    <div class="modal-content">
+      <span class="close" (click)="cerrarModalVer()">&times;</span>
+      <h3 class="text-center">Detalles de las asignaciones</h3>
+      <p><strong>Equipo:</strong> {{ selectedAsignacion?.equipo?.numeroSerie && selectedAsignacion?.equipo?.modelo }}
+      </p>
+      <p><strong>No. de serie del equipo:</strong> {{ selectedAsignacion?.equipo?.numeroSerie }}</p>
+      <p><strong>Personal:</strong> {{ selectedAsignacion ?.personal?.nombre }}</p>
+      <p><strong>Licencias:</strong>
+        <span *ngIf="(selectedAsignacion?.licencias ?? []).length > 0">
+          <span *ngFor="let licencia of (selectedAsignacion?.licencias ?? []); let last = last">
+            {{ licencia.nombreLicencia }} ( {{ licencia.numeroSerie }} )<span *ngIf="!last">, </span>
+          </span>
+        </span>
+        <span *ngIf="!selectedAsignacion?.licencias || selectedAsignacion?.licencias?.length === 0">
+          Sin licencias
+        </span>
+      </p>
+      <p><strong>Ubicación Física:</strong> {{ selectedAsignacion?.ubicacionFisica }}</p>
+      <p><strong>Nombre Equipo:</strong> {{ selectedAsignacion?.nombreEquipo }}</p>
+      <p *ngIf="isAdminOrModerador"><strong>Contraseña:</strong> {{ selectedAsignacion?.contrasena }}</p>
+      <p><strong>Evidencia de asignación:</strong> {{ selectedAsignacion?.evidenciaAsignacion }}</p>
+      <p><strong>Fecha de asignación:</strong> {{ selectedAsignacion?.fechaAsignacion }}</p>
+      <p><strong>Fecha de finalización:</strong> {{ selectedAsignacion?.fechaFinAsignacion }}</p>
+      <p><strong>Comentarios:</strong> {{ selectedAsignacion?.comentarios }}</p>
+
+    </div>
+  </div>
+
+
+  <!-- Modal de confirmación para eliminar -->
+  <div *ngIf="isConfirmDeleteVisible" class="modal-overlay">
+    <div class="modal-container">
+      <span class="close-btn" (click)="cancelarEliminacion()">&times;</span>
+      <h3 class="modal-title">Confirmar Eliminación</h3>
+      <p>¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.</p>
+      <div class="modal-buttons">
+        <button class="btn btn-danger" (click)="confirmarEliminacion()">Eliminar</button>
+        <button class="btn btn-secondary" (click)="cancelarEliminacion()">Cancelar</button>
       </div>
     </div>
   </div>
-</div>
 
+
+  <!-- MODAL -->
+  <div class="modal" [class.show]="modalExportarVisible" [style.display]="modalExportarVisible ? 'block' : 'none'">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Exportar equipos por estado</h5>
+          <button type="button" class="btn-close" (click)="cerrarModalExportar()"></button>
+        </div>
+
+        <div class="modal-body">
+          <h5>Selecciona los campos a exportar:</h5>
+          <div class="row">
+            <div class="col-md-6" *ngFor="let campo of camposDisponibles">
+              <label class="form-check-label">
+                <input type="checkbox" class="form-check-input" [value]="campo.campo"
+                  [checked]="camposSeleccionados.includes(campo.campo)"
+                  (change)="onCheckboxChange($event, campo.campo)" />
+                {{ campo.nombre }}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-success" (click)="exportarEquiposConAsignacionesDesdeRelaciones('EN USO')">
+            Exportar EN USO
+          </button>
+          <button class="btn btn-danger" (click)="exportarEquiposConAsignacionesDesdeRelaciones('BAJA')">
+            Exportar BAJA
+          </button>
+          <button class="btn btn-primary" (click)="exportarEquiposConAsignacionesDesdeRelaciones('DISPONIBLE')">
+            Exportar DISPONIBLE
+          </button>
+          <button class="btn btn-warning" (click)="exportarEquiposConAsignacionesDesdeRelaciones('EN REPARACIÓN')">
+            Exportar EN REPARACIÓN
+          </button>
+          <button class="btn btn-info" (click)="exportarTodosLosEquiposConAsignaciones()">
+            Exportar Todos
+          </button>
+
+          <button class="btn btn-secondary" (click)="cerrarModalExportar()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

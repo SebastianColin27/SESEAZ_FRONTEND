@@ -1,193 +1,198 @@
-<h2 class="text-center mt-3 mb-3 bi bi-tools"> Mantenimientos</h2>
+<div class="ps-3 pe-3">
+  <h2 class="text-center mt-3 mb-3 bi bi-tools"> Mantenimientos</h2>
 
-<!-- Spinner de carga -->
-<app-loading [loading]="loading"></app-loading>
+  <!-- Spinner de carga -->
+  <app-loading [loading]="loading"></app-loading>
 
-<div class="search-container m-3">
-  <label for="searchEquipo">Buscar por Equipo:</label>
-  <input type="text" [formControl]="searchControl" placeholder="Buscar por número de serie del equipo" />
-  <button type="button" class="btn btn-secondary" (click)="cargarMantenimientos()">Mostrar Todos</button>
-</div>
-<!-- Botón para descargar PDF de asignaciones -->
-<button class="btn btn-warning  m-3 bi bi-file-earmark-arrow-down-fill" (click)="descargarPdfMantenimiento()"> Reporte
-  General</button>
+  <div class="search-container m-3">
+    <label for="searchEquipo">Buscar por Equipo:</label>
+    <input type="text" [formControl]="searchControl" placeholder="Buscar por número de serie del equipo" />
+    <button type="button" class="btn btn-secondary" (click)="cargarMantenimientos()">Mostrar Todos</button>
+  </div>
+  <!-- Botón para descargar PDF de asignaciones -->
+  <button class="btn btn-warning  m-3 bi bi-file-earmark-arrow-down-fill" (click)="descargarPdfMantenimiento()"> Reporte
+    General</button>
 
 
-<div class="d-flex justify-content-between align-items-start">
+  <div class="d-flex justify-content-between align-items-start">
 
-  <!-- Botón para agregar personal (solo visible para administradores) -->
-  <div *ngIf="isAdmin" class="m-3 w-25">
-    <button class="btn btn-success m-3 w-100 bi bi-plus-circle" (click)="abrirModalAgregar()"> Agregar</button>
+    <!-- Botón para agregar personal (solo visible para administradores) -->
+    <div *ngIf="isAdmin" class="m-3 w-25">
+      <button class="btn btn-success m-3 w-100 bi bi-plus-circle" (click)="abrirModalAgregar()"> Agregar</button>
+    </div>
+
+    <!-- Botones alineados a la izquierda -->
+    <div>
+      <!-- Botón para alternar orden -->
+      <button class="btn btn-secondary bi bi-arrow-down-up m-3" (click)="alternarOrden()"></button>
+
+      <!-- Botón para ir al Dashboard -->
+      <button class="btn btn-primary m-3 bi bi-house-fill" (click)="irAlDashboard()"> Inicio</button>
+      <!-- Botón para cerrar sesión -->
+      <button class="btn btn-danger m-3 bi bi-door-closed-fill" (click)="cerrarSesion()"> Salir</button>
+
+    </div>
+
+  </div>
+  <!-- Mensajes de éxito -->
+  <!-- Contenedor de notificaciones -->
+  <div class="notifications-container">
+    <!-- Notificación de éxito -->
+    <div *ngIf="mensajeExito" class="notification success">
+      <span class="notification-icon"></span>
+      {{ mensajeExito }}
+    </div>
+
+    <!-- Notificación de error -->
+    <div *ngIf="mensajeError" class="notification error">
+      <span class="notification-icon"></span>
+      {{ mensajeError }}
+    </div>
   </div>
 
-  <!-- Botones alineados a la izquierda -->
-  <div>
-    <!-- Botón para alternar orden -->
-    <button class="btn btn-secondary bi bi-arrow-down-up m-3" (click)="alternarOrden()"></button>
+  <!-- Spinner de carga -->
+  <div *ngIf="!loading">
+    <table class="table table-striped m-3">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Actividad Realizada</th>
+          <th>Equipo</th>
+          <th>Acciones</th>
+          <th>Reportes</th>
 
-    <!-- Botón para ir al Dashboard -->
-    <button class="btn btn-primary m-3 bi bi-house-fill" (click)="irAlDashboard()"> Inicio</button>
-    <!-- Botón para cerrar sesión -->
-    <button class="btn btn-danger m-3 bi bi-door-closed-fill" (click)="cerrarSesion()"> Salir</button>
+        </tr>
+      </thead>
+      <tbody class="table-group-divider">
+        <tr *ngFor="let mantenimiento of mantenimientosList">
+          <td>{{ mantenimiento.fecha }}</td>
+          <td>{{ mantenimiento.actividadRealizada }}</td>
 
-  </div>
+          <td>
 
-</div>
-<!-- Mensajes de éxito -->
-<!-- Contenedor de notificaciones -->
-<div class="notifications-container">
-  <!-- Notificación de éxito -->
-  <div *ngIf="mensajeExito" class="notification success">
-    <span class="notification-icon"></span>
-    {{ mensajeExito }}
-  </div>
-
-  <!-- Notificación de error -->
-  <div *ngIf="mensajeError" class="notification error">
-    <span class="notification-icon"></span>
-    {{ mensajeError }}
-  </div>
-</div>
-
-<!-- Spinner de carga -->
-<div *ngIf="!loading">
-  <table class="table table-striped m-3">
-    <thead>
-      <tr>
-        <th>Fecha</th>
-        <th>Actividad Realizada</th>
-        <th>Equipo</th>
-        <th>Acciones</th>
-        <th>Reportes</th>
-
-      </tr>
-    </thead>
-    <tbody class="table-group-divider">
-      <tr *ngFor="let mantenimiento of mantenimientosList">
-        <td>{{ mantenimiento.fecha }}</td>
-        <td>{{ mantenimiento.actividadRealizada }}</td>
-
-        <td>
-
-          <ng-container *ngIf="Array.isArray(mantenimiento.equipo) && mantenimiento.equipo.length > 0">
-            <span *ngFor="let equipo of mantenimiento.equipo; let last = last">
-              {{ equipo.numeroSerie }} / {{ equipo.modelo }} / {{equipo.tipo}} / {{ equipo.color }} -> {{equipo.estado}} <span *ngIf="!last">,
+            <ng-container *ngIf="Array.isArray(mantenimiento.equipo) && mantenimiento.equipo.length > 0">
+              <span *ngFor="let equipo of mantenimiento.equipo; let last = last">
+                {{ equipo.numeroSerie }} / {{ equipo.modelo }} / {{equipo.tipo}} / {{ equipo.color }} ->
+                {{equipo.estado}} <span *ngIf="!last">,
+                </span>
               </span>
-            </span>
-          </ng-container>
+            </ng-container>
 
-          <!-- Si mantenimiento.equipo es un único objeto -->
-          <ng-container *ngIf="!Array.isArray(mantenimiento.equipo) && mantenimiento.equipo">
-            {{ mantenimiento.equipo.numeroSerie }} / {{ mantenimiento.equipo.modelo }} / {{mantenimiento.equipo.tipo}} /
-            {{ mantenimiento.equipo.color }} -> {{ mantenimiento.equipo.estado }}
-          </ng-container>
-        </td>
+            <!-- Si mantenimiento.equipo es un único objeto -->
+            <ng-container *ngIf="!Array.isArray(mantenimiento.equipo) && mantenimiento.equipo">
+              {{ mantenimiento.equipo.numeroSerie }} / {{ mantenimiento.equipo.modelo }} / {{mantenimiento.equipo.tipo}}
+              /
+              {{ mantenimiento.equipo.color }} -> {{ mantenimiento.equipo.estado }}
+            </ng-container>
+          </td>
 
-        <td>
-          <button *ngIf="isAdminOrModerador" class="btn btn-info me-3" (click)="abrirModalEditar(mantenimiento)"><i
-              class="bi bi-pencil"></i></button>
-          <button *ngIf="isAdmin" class="btn btn-danger me-3"
-            (click)="mantenimiento.id && eliminarMantenimiento(mantenimiento.id)"><i class="bi bi-trash"></i></button>
-          <button class="btn btn-primary me-3" (click)="abrirModalVer(mantenimiento)"><i class="bi bi-eye"></i></button>
+          <td>
+            <button *ngIf="isAdminOrModerador" class="btn btn-info me-3" (click)="abrirModalEditar(mantenimiento)"><i
+                class="bi bi-pencil"></i></button>
+            <button *ngIf="isAdmin" class="btn btn-danger me-3"
+              (click)="mantenimiento.id && eliminarMantenimiento(mantenimiento.id)"><i class="bi bi-trash"></i></button>
+            <button class="btn btn-primary me-3" (click)="abrirModalVer(mantenimiento)"><i
+                class="bi bi-eye"></i></button>
 
-        </td>
-        <td>
-          <button class="btn btn-warning me-3 bi bi-pc-display-horizontal"
-            (click)="descargarReporteMantenimientosPorEquipo(mantenimiento)" [disabled]="!mantenimiento.equipo?.id">
-            <!-- Deshabilita si no hay equipo o ID -->
+          </td>
+          <td>
+            <button class="btn btn-warning me-3 bi bi-pc-display-horizontal"
+              (click)="descargarReporteMantenimientosPorEquipo(mantenimiento)" [disabled]="!mantenimiento.equipo?.id">
+              <!-- Deshabilita si no hay equipo o ID -->
 
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-<!-- Modal para agregar o editar mantenimiento -->
+  <!-- Modal para agregar o editar mantenimiento -->
 
-<div *ngIf="isModalVisible" class="modal">
-  <div class="modal-content">
-    <span class="close" (click)="cerrarModal()">&times;</span>
-    <h3>{{ isEditMode ? 'Editar Mantenimiento' : 'Agregar Mantenimiento' }}</h3>
+  <div *ngIf="isModalVisible" class="modal">
+    <div class="modal-content">
+      <span class="close" (click)="cerrarModal()">&times;</span>
+      <h3>{{ isEditMode ? 'Editar Mantenimiento' : 'Agregar Mantenimiento' }}</h3>
 
-    <form (ngSubmit)="guardarMantenimiento()" *ngIf="selectedMantenimiento">
+      <form (ngSubmit)="guardarMantenimiento()" *ngIf="selectedMantenimiento">
 
-      <label for="fecha">Fecha de Mantenimiento:</label>
-      <input type="date" class="custom-date-input" id="fecha" name="fecha" [(ngModel)]="selectedMantenimiento.fecha"
-        required>
-
-
-      <label for="actividadRealizada">Actividad Realizada:</label>
-      <textarea id="actividadRealizada" name="actividadRealizada" [(ngModel)]="selectedMantenimiento.actividadRealizada"
-        required></textarea>
+        <label for="fecha">Fecha de Mantenimiento:</label>
+        <input type="date" class="custom-date-input" id="fecha" name="fecha" [(ngModel)]="selectedMantenimiento.fecha"
+          required>
 
 
-      <label for="evidencia">Evidencia:</label>
-      <input type="text" id="evidencia" name="evidencia" [(ngModel)]="selectedMantenimiento.evidencia" required>
+        <label for="actividadRealizada">Actividad Realizada:</label>
+        <textarea id="actividadRealizada" name="actividadRealizada"
+          [(ngModel)]="selectedMantenimiento.actividadRealizada" required></textarea>
 
 
-      <label for="equipos">Equipos:</label>
-      <select class="custom-select" [(ngModel)]="selectedMantenimiento.equipo" name="equipos">
-        <option *ngFor="let equipo of equiposList" [ngValue]="equipo">
-          {{ equipo.numeroSerie }} / {{ equipo.modelo }} / {{ equipo.color }} / {{ equipo.tipo }} ->
-          {{ equipo.estado }}
-        </option>
-      </select>
-
-      <label for="personal">Asignado a:</label>
-      <select class="custom-select" [(ngModel)]="selectedMantenimiento.personal" name="personal">
-        <option [ngValue]="null"> Sin asignar</option>
-        <option *ngFor="let personal of personalList" [ngValue]="personal">
-          {{ personal.nombre }}
-        </option>
-      </select>
+        <label for="evidencia">Evidencia:</label>
+        <input type="text" id="evidencia" name="evidencia" [(ngModel)]="selectedMantenimiento.evidencia" required>
 
 
-      <div class="buttons">
-        <button class="btn btn-success me-3" type="submit">Guardar</button>
-        <button class="btn btn-danger" type="button" (click)="cerrarModal()">Cancelar</button>
+        <label for="equipos">Equipos:</label>
+        <select class="custom-select" [(ngModel)]="selectedMantenimiento.equipo" name="equipos">
+          <option *ngFor="let equipo of equiposList" [ngValue]="equipo">
+            {{ equipo.numeroSerie }} / {{ equipo.modelo }} / {{ equipo.color }} / {{ equipo.tipo }} ->
+            {{ equipo.estado }}
+          </option>
+        </select>
+
+        <label for="personal">Asignado a:</label>
+        <select class="custom-select" [(ngModel)]="selectedMantenimiento.personal" name="personal">
+          <option [ngValue]="null"> Sin asignar</option>
+          <option *ngFor="let personal of personalList" [ngValue]="personal">
+            {{ personal.nombre }}
+          </option>
+        </select>
+
+
+        <div class="buttons">
+          <button class="btn btn-success me-3" type="submit">Guardar</button>
+          <button class="btn btn-danger" type="button" (click)="cerrarModal()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+
+  <!-- Modal para visualizar detalles  -->
+  <div *ngIf="isViewModalVisible" class="modal">
+    <div class="modal-content">
+      <span class="close" (click)="cerrarModalVer()">&times;</span>
+      <h3 class="text-center">Detalles del Mantenimiento</h3>
+      <p><strong>Fecha</strong> {{ selectedMantenimiento?.fecha }}</p>
+      <p><strong>actividad Realizada</strong> {{ selectedMantenimiento?.actividadRealizada}}</p>
+      <p><strong>Evidencia:</strong> {{ selectedMantenimiento?.evidencia }}</p>
+      <p *ngIf="selectedMantenimiento?.equipo">
+        <strong>Equipo:</strong>
+        {{ selectedMantenimiento?.equipo?.numeroSerie }} -
+        {{ selectedMantenimiento?.equipo?.modelo }} -
+        {{ selectedMantenimiento?.equipo?.tipo }}-
+        {{ selectedMantenimiento?.equipo?.color }}
+      </p>
+
+      <p *ngIf="selectedMantenimiento?.personal">
+        <strong>Asignado a:</strong>
+        {{ selectedMantenimiento?.personal?.nombre }}
+      </p>
+
+
+    </div>
+  </div>
+
+
+  <!-- Modal de confirmación para eliminar -->
+  <div *ngIf="isConfirmDeleteVisible" class="modal-overlay">
+    <div class="modal-container">
+      <span class="close-btn" (click)="cancelarEliminacion()">&times;</span>
+      <h3 class="modal-title">Confirmar Eliminación</h3>
+      <p>¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.</p>
+      <div class="modal-buttons">
+        <button class="btn btn-danger" (click)="confirmarEliminacion()">Eliminar</button>
+        <button class="btn btn-secondary" (click)="cancelarEliminacion()">Cancelar</button>
       </div>
-    </form>
-  </div>
-</div>
-
-
-
-<!-- Modal para visualizar detalles  -->
-<div *ngIf="isViewModalVisible" class="modal">
-  <div class="modal-content">
-    <span class="close" (click)="cerrarModalVer()">&times;</span>
-    <h3 class="text-center">Detalles del Mantenimiento</h3>
-    <p><strong>Fecha</strong> {{ selectedMantenimiento?.fecha }}</p>
-    <p><strong>actividad Realizada</strong> {{ selectedMantenimiento?.actividadRealizada}}</p>
-    <p><strong>Evidencia:</strong> {{ selectedMantenimiento?.evidencia }}</p>
-    <p *ngIf="selectedMantenimiento?.equipo">
-      <strong>Equipo:</strong>
-      {{ selectedMantenimiento?.equipo?.numeroSerie }} -
-      {{ selectedMantenimiento?.equipo?.modelo }} -
-      {{ selectedMantenimiento?.equipo?.tipo }}-
-      {{ selectedMantenimiento?.equipo?.color }}
-    </p>
-
-    <p *ngIf="selectedMantenimiento?.personal">
-      <strong>Asignado a:</strong>
-      {{ selectedMantenimiento?.personal?.nombre }}
-    </p>
-
-
-  </div>
-</div>
-
-
-<!-- Modal de confirmación para eliminar -->
-<div *ngIf="isConfirmDeleteVisible" class="modal-overlay">
-  <div class="modal-container">
-    <span class="close-btn" (click)="cancelarEliminacion()">&times;</span>
-    <h3 class="modal-title">Confirmar Eliminación</h3>
-    <p>¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.</p>
-    <div class="modal-buttons">
-      <button class="btn btn-danger" (click)="confirmarEliminacion()">Eliminar</button>
-      <button class="btn btn-secondary" (click)="cancelarEliminacion()">Cancelar</button>
     </div>
   </div>
 </div>

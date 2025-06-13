@@ -1,142 +1,144 @@
-<h2 class="text-center mt-3 mb-3  bi bi-people"> Personal</h2>
+<div class="ps-3 pe-3">
+  <h2 class="text-center mt-3 mb-3  bi bi-people"> Personal</h2>
 
-<app-loading [loading]="loading"></app-loading>
-<!-- Spinner de carga -->
+  <app-loading [loading]="loading"></app-loading>
+  <!-- Spinner de carga -->
 
-<div class="search-container m-3">
-  <label for="searchNombre">Buscar por Nombre:</label>
-  <input type="text" [(ngModel)]="searchNombre" (input)="buscarPorNombre()" placeholder="Buscar por nombre">
-  <button type="button" class="btn btn-secondary" (click)="cargarPersonal()">Mostrar Todos</button>
-</div>
-
-
-<div class="d-flex justify-content-between align-items-start">
-
-  <!-- Botón para agregar personal (solo visible para administradores) -->
-  <div *ngIf="isAdmin" class="m-3 w-25">
-    <button class="btn btn-success m-3 bi bi-plus-circle w-100" (click)="abrirModalAgregar()"> Agregar</button>
+  <div class="search-container m-3">
+    <label for="searchNombre">Buscar por Nombre:</label>
+    <input type="text" [(ngModel)]="searchNombre" (input)="buscarPorNombre()" placeholder="Buscar por nombre">
+    <button type="button" class="btn btn-secondary" (click)="cargarPersonal()">Mostrar Todos</button>
   </div>
 
-  <!-- Botones alineados a la izquierda -->
-  <div>
-    <!-- Botón para alternar orden -->
-    <button class="btn btn-secondary bi bi-arrow-down-up m-3" (click)="alternarOrden()"></button>
-    <!-- Botón para ir al Dashboard -->
-    <button class="btn btn-primary m-3 bi bi-house-fill" (click)="irAlDashboard()"> Inicio</button>
-    <!-- Botón para cerrar sesión -->
-    <button class="btn btn-danger m-3 bi bi-door-closed-fill" (click)="cerrarSesion()"> Salir</button>
+
+  <div class="d-flex justify-content-between align-items-start">
+
+    <!-- Botón para agregar personal (solo visible para administradores) -->
+    <div *ngIf="isAdmin" class="m-3 w-25">
+      <button class="btn btn-success m-3 bi bi-plus-circle w-100" (click)="abrirModalAgregar()"> Agregar</button>
+    </div>
+
+    <!-- Botones alineados a la izquierda -->
+    <div>
+      <!-- Botón para alternar orden -->
+      <button class="btn btn-secondary bi bi-arrow-down-up m-3" (click)="alternarOrden()"></button>
+      <!-- Botón para ir al Dashboard -->
+      <button class="btn btn-primary m-3 bi bi-house-fill" (click)="irAlDashboard()"> Inicio</button>
+      <!-- Botón para cerrar sesión -->
+      <button class="btn btn-danger m-3 bi bi-door-closed-fill" (click)="cerrarSesion()"> Salir</button>
+
+    </div>
 
   </div>
 
-</div>
 
 
+  <!-- Mensajes de éxito -->
+  <!-- Contenedor de notificaciones -->
+  <div class="notifications-container">
+    <!-- Notificación de éxito -->
+    <div *ngIf="mensajeExito" class="notification success">
+      <span class="notification-icon"></span>
+      {{ mensajeExito }}
+    </div>
 
-<!-- Mensajes de éxito -->
-<!-- Contenedor de notificaciones -->
-<div class="notifications-container">
-  <!-- Notificación de éxito -->
-  <div *ngIf="mensajeExito" class="notification success">
-    <span class="notification-icon"></span>
-    {{ mensajeExito }}
+    <!-- Notificación de error -->
+    <div *ngIf="mensajeError" class="notification error">
+      <span class="notification-icon"></span>
+      {{ mensajeError }}
+    </div>
   </div>
 
-  <!-- Notificación de error -->
-  <div *ngIf="mensajeError" class="notification error">
-    <span class="notification-icon"></span>
-    {{ mensajeError }}
+
+  <!-- Tabla de personal -->
+  <!-- Spinner de carga -->
+  <div *ngIf="!loading">
+    <table class="table table-striped m-3 ">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Cargo</th>
+          <th>Fecha Ingreso</th>
+          <th>Fecha Egreso</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="table-group-divider">
+        <tr *ngFor="let personal of personalList">
+          <td>{{ personal.nombre }}</td>
+          <td>{{ personal.cargo }}</td>
+          <td>{{ personal.fechaIngreso }}</td>
+          <td>{{ personal.fechaEgreso }}</td>
+          <td>
+            <button *ngIf="isAdminOrModerador" class="btn btn-info me-3" (click)="abrirModalEditar(personal)"><i
+                class="bi bi-pencil"></i></button>
+            <button *ngIf="isAdmin" class="btn btn-danger me-3" (click)="eliminarPersonal(personal.id!)"><i
+                class="bi bi-trash"></i></button>
+            <button class="btn btn-primary" (click)="abrirModalVer(personal)"><i class="bi bi-eye"></i></button>
+
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
-</div>
+
+  <!-- Modal para agregar o editar personal -->
+  <div *ngIf="isModalVisible" class="modal">
+    <div class="modal-content">
+      <span class="close" (click)="cerrarModal()">×</span>
+      <h3>{{ isEditMode ? 'Editar Personal' : 'Agregar Personal' }}</h3>
+
+      <form (ngSubmit)="guardarPersonal()" *ngIf="selectedPersonal">
+        <input type="hidden" [(ngModel)]="selectedPersonal.id" name="id">
+
+        <div>
+          <label for="nombre">Nombre:</label>
+          <input type="text" id="nombre" name="nombre" [(ngModel)]="selectedPersonal.nombre" required>
+        </div>
+        <div>
+          <label for="cargo">Cargo:</label>
+          <input type="text" id="cargo" name="cargo" [(ngModel)]="selectedPersonal.cargo" required>
+        </div>
+        <div>
+          <label for="fechaIngreso">Fecha Ingreso:</label>
+          <input type="date" id="fechaIngreso" name="fechaIngreso" [(ngModel)]="selectedPersonal.fechaIngreso" required>
+        </div>
+        <div>
+          <label for="fechaEgreso">Fecha Egreso:</label>
+          <input type="date" id="fechaEgreso" name="fechaEgreso" [(ngModel)]="selectedPersonal.fechaEgreso">
+        </div>
+
+        <div class="buttons">
+          <button class="btn btn-success me-3" type="submit">Guardar</button>
+          <button class="btn btn-danger" type="button" (click)="cancelarEdicion()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal para visualizar detalles del personal (MOVIDO FUERA DEL OTRO MODAL) -->
+  <div *ngIf="isViewModalVisible" class="modal">
+    <div class="modal-content">
+      <span class="close" (click)="cerrarModalVer()">&times;</span>
+      <h3 class="text-center">Detalles del Personal</h3>
+      <p><strong>Nombre:</strong> {{ selectedPersonal?.nombre }}</p>
+      <p><strong>Cargo:</strong> {{ selectedPersonal?.cargo }}</p>
+      <p><strong>Fecha Ingreso:</strong> {{ selectedPersonal?.fechaIngreso }}</p>
+      <p><strong>Fecha Egreso:</strong> {{ selectedPersonal?.fechaEgreso }}</p>
+    </div>
+  </div>
 
 
-<!-- Tabla de personal -->
-<!-- Spinner de carga -->
-<div *ngIf="!loading">
-  <table class="table table-striped m-3 ">
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Cargo</th>
-        <th>Fecha Ingreso</th>
-        <th>Fecha Egreso</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody class="table-group-divider">
-      <tr *ngFor="let personal of personalList">
-        <td>{{ personal.nombre }}</td>
-        <td>{{ personal.cargo }}</td>
-        <td>{{ personal.fechaIngreso }}</td>
-        <td>{{ personal.fechaEgreso }}</td>
-        <td>
-          <button *ngIf="isAdminOrModerador" class="btn btn-info me-3" (click)="abrirModalEditar(personal)"><i
-              class="bi bi-pencil"></i></button>
-          <button *ngIf="isAdmin" class="btn btn-danger me-3" (click)="eliminarPersonal(personal.id!)"><i
-              class="bi bi-trash"></i></button>
-          <button class="btn btn-primary" (click)="abrirModalVer(personal)"><i class="bi bi-eye"></i></button>
-
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-<!-- Modal para agregar o editar personal -->
-<div *ngIf="isModalVisible" class="modal">
-  <div class="modal-content">
-    <span class="close" (click)="cerrarModal()">×</span>
-    <h3>{{ isEditMode ? 'Editar Personal' : 'Agregar Personal' }}</h3>
-
-    <form (ngSubmit)="guardarPersonal()" *ngIf="selectedPersonal">
-      <input type="hidden" [(ngModel)]="selectedPersonal.id" name="id">
-
-      <div>
-        <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" name="nombre" [(ngModel)]="selectedPersonal.nombre" required>
+  <!-- Modal de confirmación para eliminar -->
+  <div *ngIf="isConfirmDeleteVisible" class="modal-overlay">
+    <div class="modal-container">
+      <span class="close-btn" (click)="cancelarEliminacion()">&times;</span>
+      <h3 class="modal-title">Confirmar Eliminación</h3>
+      <p>¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.</p>
+      <div class="modal-buttons">
+        <button class="btn btn-danger" (click)="confirmarEliminacion()">Eliminar</button>
+        <button class="btn btn-secondary" (click)="cancelarEliminacion()">Cancelar</button>
       </div>
-      <div>
-        <label for="cargo">Cargo:</label>
-        <input type="text" id="cargo" name="cargo" [(ngModel)]="selectedPersonal.cargo" required>
-      </div>
-      <div>
-        <label for="fechaIngreso">Fecha Ingreso:</label>
-        <input type="date" id="fechaIngreso" name="fechaIngreso" [(ngModel)]="selectedPersonal.fechaIngreso" required>
-      </div>
-      <div>
-        <label for="fechaEgreso">Fecha Egreso:</label>
-        <input type="date" id="fechaEgreso" name="fechaEgreso" [(ngModel)]="selectedPersonal.fechaEgreso">
-      </div>
-
-      <div class="buttons">
-        <button class="btn btn-success me-3" type="submit">Guardar</button>
-        <button class="btn btn-danger" type="button" (click)="cancelarEdicion()">Cancelar</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Modal para visualizar detalles del personal (MOVIDO FUERA DEL OTRO MODAL) -->
-<div *ngIf="isViewModalVisible" class="modal">
-  <div class="modal-content">
-    <span class="close" (click)="cerrarModalVer()">&times;</span>
-    <h3 class="text-center">Detalles del Personal</h3>
-    <p><strong>Nombre:</strong> {{ selectedPersonal?.nombre }}</p>
-    <p><strong>Cargo:</strong> {{ selectedPersonal?.cargo }}</p>
-    <p><strong>Fecha Ingreso:</strong> {{ selectedPersonal?.fechaIngreso }}</p>
-    <p><strong>Fecha Egreso:</strong> {{ selectedPersonal?.fechaEgreso }}</p>
-  </div>
-</div>
-
-
-<!-- Modal de confirmación para eliminar -->
-<div *ngIf="isConfirmDeleteVisible" class="modal-overlay">
-  <div class="modal-container">
-    <span class="close-btn" (click)="cancelarEliminacion()">&times;</span>
-    <h3 class="modal-title">Confirmar Eliminación</h3>
-    <p>¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.</p>
-    <div class="modal-buttons">
-      <button class="btn btn-danger" (click)="confirmarEliminacion()">Eliminar</button>
-      <button class="btn btn-secondary" (click)="cancelarEliminacion()">Cancelar</button>
     </div>
   </div>
 </div>
