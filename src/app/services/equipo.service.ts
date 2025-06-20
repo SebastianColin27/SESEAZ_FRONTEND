@@ -10,8 +10,9 @@ import { Personal } from '../models/personal';
   providedIn: 'root'
 })
 export class EquipoService {
-  //private apiUrl = 'http://localhost:8080/api/equipos';
+  // private apiUrl = 'http://localhost:8080/api/equipos';
   private apiUrl = 'https://seseaz-backend.onrender.com/api/equipos';
+  //private apiUrl = 'http://192.168.100.32:8080/api/equipos';
 
   constructor(private http: HttpClient, private authService: AuthService) { }
 

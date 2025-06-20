@@ -52,13 +52,13 @@ export class LoginComponent {
 
       this.loginService.login(this.loginForm.value as LoginRequest).subscribe({
         next: (tokenDevueltoPorServicio) => {
-          console.log('[LoginComponent] Callback NEXT ejecutado. Valor emitido por servicio (debería ser el token):', tokenDevueltoPorServicio);
+         // console.log('[LoginComponent] Callback NEXT ejecutado. Valor emitido por servicio (debería ser el token):', tokenDevueltoPorServicio);
 
           const tokenEnStorage = sessionStorage.getItem('token');
-          console.log('[LoginComponent] Verificando sessionStorage DENTRO de NEXT:', tokenEnStorage ? 'ENCONTRADO' : 'NO ENCONTRADO');
+         // console.log('[LoginComponent] Verificando sessionStorage DENTRO de NEXT:', tokenEnStorage ? 'ENCONTRADO' : 'NO ENCONTRADO');
 
           if (tokenEnStorage) {
-            console.log('[LoginComponent] Token encontrado en sessionStorage:', tokenEnStorage);
+          //  console.log('[LoginComponent] Token encontrado en sessionStorage:', tokenEnStorage);
           } else {
             console.error('[LoginComponent] ¡ERROR CRÍTICO! El token no se encontró en sessionStorage inmediatamente después de que el servicio lo procesó.');
             this.loginError = "Error inesperado al iniciar sesión. Intente de nuevo.";

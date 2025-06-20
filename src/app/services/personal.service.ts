@@ -7,8 +7,9 @@ import { Personal } from '../models/personal';
   providedIn: 'root'
 })
 export class PersonalService {
- // private apiUrl = 'http://localhost:8080/api/personal';
+//  private apiUrl = 'http://localhost:8080/api/personal';
  private apiUrl = 'https://seseaz-backend.onrender.com/api/personal';
+//private apiUrl = 'http://192.168.100.32:8080/api/personal';
 
 
   constructor(private http: HttpClient) { }

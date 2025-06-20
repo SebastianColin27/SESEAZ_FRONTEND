@@ -34,6 +34,7 @@ export class MantenimientoListComponent implements OnInit {
   personalList: Personal[] = [];
 
   mantenimientosList: Mantenimiento[] = [];
+  asignacionesList: Asignacion[] = [];
 
   selectedMantenimiento: Mantenimiento | null = null;
   isModalVisible = false;
@@ -86,6 +87,8 @@ fechaFin: Date | null = null;
     this.cargarMantenimientos();
 
     this.cargarEquipos();
+
+    this.cargarAsignaciones();
 
     this.cargarPersonal();
 
@@ -186,38 +189,41 @@ fechaFin: Date | null = null;
   }
 
   guardarMantenimiento(): void {
-    if (this.selectedMantenimiento) {
-      // Elimina la propiedad asignacion si existe
-      const mantenimientoParaGuardar = { ...this.selectedMantenimiento };
+  if (this.selectedMantenimiento) {
+    const mantenimientoParaGuardar: any = {
+      ...this.selectedMantenimiento,
+      equipo: this.selectedMantenimiento.equipo?.id ? { id: this.selectedMantenimiento.equipo.id } : null,
+      personal: this.selectedMantenimiento.personal?.id ? { id: this.selectedMantenimiento.personal.id } : null
+    };
 
-
-      if (this.isEditMode && this.selectedMantenimiento.id) {
-        this.mantenimientoService.updateMantenimiento(this.selectedMantenimiento.id, mantenimientoParaGuardar).subscribe(
-          () => {
-            this.cargarMantenimientos();
-            this.cerrarModal();
-            this.mostrarNotificacion('Mantenimiento actualizado con éxito', 'success');
-          },
-          (error) => {
-            console.error('Error al actualizar mantenimiento:', error);
-            this.mostrarNotificacion('Error al actualizar mantenimiento', 'error');
-          }
-        );
-      } else {
-        this.mantenimientoService.createMantenimiento(mantenimientoParaGuardar).subscribe(
-          () => {
-            this.cargarMantenimientos();
-            this.cerrarModal();
-            this.mostrarNotificacion('Mantenimineto agregado con éxito', 'success');
-          },
-          (error) => {
-            console.error('Error al crear mantenimiento:', error);
-            this.mostrarNotificacion('Error al crear mantenimiento', 'error');
-          }
-        );
-      }
+    if (this.isEditMode && this.selectedMantenimiento.id) {
+      this.mantenimientoService.updateMantenimiento(this.selectedMantenimiento.id, mantenimientoParaGuardar).subscribe(
+        () => {
+          this.cargarMantenimientos();
+          this.cerrarModal();
+          this.mostrarNotificacion('Mantenimiento actualizado con éxito', 'success');
+        },
+        (error) => {
+          console.error('Error al actualizar mantenimiento:', error);
+          this.mostrarNotificacion('Error al actualizar mantenimiento', 'error');
+        }
+      );
+    } else {
+      this.mantenimientoService.createMantenimiento(mantenimientoParaGuardar).subscribe(
+        () => {
+          this.cargarMantenimientos();
+          this.cerrarModal();
+          this.mostrarNotificacion('Mantenimiento agregado con éxito', 'success');
+        },
+        (error) => {
+          console.error('Error al crear mantenimiento:', error);
+          this.mostrarNotificacion('Error al crear mantenimiento', 'error');
+        }
+      );
     }
   }
+}
+
 
 
   // Método para abrir el modal de confirmación
@@ -399,7 +405,9 @@ fechaFin: Date | null = null;
     Fecha: m.fecha,
     Actividad: m.actividadRealizada,
     Equipo: `${m.equipo?.numeroSerie || ''} / ${m.equipo?.modelo || ''} / ${m.equipo?.marca || ''} / ${m.equipo?.tipo|| ''} / ${m.equipo?.color || ''} -> ${m.equipo?.estado || ''}`,
-    Responsable: `${m.personal?.nombre || ''} `,
+    Responsable: this.getPersonaAsignada(m.equipo?.id, m.fecha)
+
+
   }));
 
   const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataParaExcel);
@@ -409,6 +417,63 @@ fechaFin: Date | null = null;
   const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
   FileSaver.saveAs(blob, 'MantenimientosFiltrados.xlsx');
 }
+
+cargarAsignaciones(): void {
+  this.asignacionService.obtenerTodasLasAsignaciones().subscribe(
+    (data) => {
+      this.asignacionesList = data;
+    },
+    (error) => {
+      console.error('Error al cargar asignaciones:', error);
+    }
+  );
+}
+
+getPersonaAsignada(equipoId: string | undefined, fechaMantenimientoStr?: string): string {
+  if (!equipoId) return 'Sin asignar';
+
+  const fechaMantenimiento = fechaMantenimientoStr ? new Date(fechaMantenimientoStr) : new Date();
+
+  // Filtra las asignaciones del equipo
+  const asignacionesDelEquipo = this.asignacionesList.filter(a =>
+    a.equipo?.id === equipoId
+  );
+
+  if (asignacionesDelEquipo.length === 0) return 'Sin asignar';
+
+  // Encuentra las asignaciones activas en la fecha del mantenimiento
+  const asignacionesValidas = asignacionesDelEquipo.filter(a => {
+    const inicio = new Date(a.fechaAsignacion);
+    const fin = a.fechaFinAsignacion ? new Date(a.fechaFinAsignacion) : null;
+
+    return (
+      fechaMantenimiento >= inicio &&
+      (!fin || fechaMantenimiento <= fin)
+    );
+  });
+
+  // Si hay asignaciones válidas, tomar la más reciente (mayor fechaAsignacion)
+  if (asignacionesValidas.length > 0) {
+    const asignacionMasReciente = asignacionesValidas.sort((a, b) =>
+      new Date(b.fechaAsignacion).getTime() - new Date(a.fechaAsignacion).getTime()
+    )[0];
+
+    return asignacionMasReciente.personal?.nombre || 'Sin asignar';
+  }
+
+  // Si no hay asignaciones activas, tomar la última sin fechaFin
+  const sinFechaFin = asignacionesDelEquipo.filter(a => !a.fechaFinAsignacion);
+  if (sinFechaFin.length > 0) {
+    const asignacionMasReciente = sinFechaFin.sort((a, b) =>
+      new Date(b.fechaAsignacion).getTime() - new Date(a.fechaAsignacion).getTime()
+    )[0];
+
+    return asignacionMasReciente.personal?.nombre || 'Sin asignar';
+  }
+
+  return 'Sin asignar';
+}
+
 
 
 }

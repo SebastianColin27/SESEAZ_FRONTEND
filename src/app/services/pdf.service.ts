@@ -7,10 +7,9 @@ import { Observable } from 'rxjs';
 })
 export class PdfService {
   
- //private apiUrlBase = 'http://localhost:8080/api/pdf';
-
- 
-  private apiUrlBase = 'https://seseaz-backend.onrender.com/api/pdf';
+//  private apiUrlBase = 'http://localhost:8080/api/pdf';
+ private apiUrlBase = 'https://seseaz-backend.onrender.com/api/pdf';
+//private apiUrlBase = 'http://192.168.100.32:8080/api/pdf';
 
   constructor(private http: HttpClient) { }
 

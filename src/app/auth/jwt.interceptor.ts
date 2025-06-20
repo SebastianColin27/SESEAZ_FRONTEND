@@ -60,13 +60,6 @@ export class JwtInterceptor implements HttpInterceptor {
     // Limpiar datos de sesión
     sessionStorage.removeItem('token');
     
-    // Aquí puedes llamar al método logout del LoginService si es necesario
-    // this.loginService.logout();
-    
-    // Redirigir al login
-    // Aquí puedes llamar al método logout del LoginService si es necesario
-    // this.loginService.logout();
-    // Redirigir al login
     this['router'].navigate(['/login']);
   }
 }

@@ -64,6 +64,7 @@
           <th>Fecha</th>
           <th>Actividad Realizada</th>
           <th>Equipo</th>
+          <th>Asignado a</th>
           <th>Acciones</th>
           <th>Reportes</th>
 
@@ -91,6 +92,9 @@
               {{ mantenimiento.equipo.color }} -> {{ mantenimiento.equipo.estado }}
             </ng-container>
           </td>
+
+          <td>{{ getPersonaAsignada(mantenimiento.equipo?.id, mantenimiento.fecha) }}</td>
+
 
           <td>
             <button *ngIf="isAdminOrModerador" class="btn btn-info me-3" (click)="abrirModalEditar(mantenimiento)"><i
@@ -137,20 +141,22 @@
 
 
         <label for="equipos">Equipos:</label>
-        <select class="custom-select" [(ngModel)]="selectedMantenimiento.equipo" name="equipos">
+        <select class="custom-select" [(ngModel)]="selectedMantenimiento.equipo"  name="equipos">
           <option *ngFor="let equipo of equiposList" [ngValue]="equipo">
             {{ equipo.numeroSerie }} / {{ equipo.modelo }} / {{ equipo.color }} / {{ equipo.tipo }} ->
             {{ equipo.estado }}
           </option>
         </select>
 
-        <label for="personal">Asignado a:</label>
+        <!-- <label for="personal">Asignado a:</label>
         <select class="custom-select" [(ngModel)]="selectedMantenimiento.personal" name="personal">
           <option [ngValue]="null"> Sin asignar</option>
           <option *ngFor="let personal of personalList" [ngValue]="personal">
             {{ personal.nombre }}
           </option>
-        </select>
+        </select> -->
+        
+
 
 
         <div class="buttons">
