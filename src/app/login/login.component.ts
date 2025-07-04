@@ -77,19 +77,30 @@ mensajeError: string = '';
           }
         },
         error: (errorData) => {
-          console.error('[LoginComponent] Callback ERROR ejecutado:', errorData);
-          if (errorData instanceof Error) {
-            this.loginError = errorData.message;
-          } else if (typeof errorData === 'string') {
-            this.loginError = errorData;
-          } else {
-           
-            this.loginError = 'Error de autenticación. Verifique su usuario y contraseña.';
-            this.mostrarNotificacion(this.loginError, 'error');
-          }
-          this.loading = false;
-          this.isSubmitting = false; 
-        },
+  console.error('[LoginComponent] Callback ERROR ejecutado:', errorData);
+
+  if (errorData?.status === 0) {
+    this.loginError = 'No se pudo conectar con el servidor. Intenta más tarde.';
+  } else if (errorData instanceof Error) {
+    this.loginError = errorData.message;
+  } else if (typeof errorData === 'string') {
+    this.loginError = errorData;
+  } else if (errorData?.error?.message) {
+    this.loginError = errorData.error.message;
+  } else {
+    this.loginError = 'Error inesperado. Intente nuevamente.';
+  }
+
+  this.mostrarNotificacion(this.loginError, 'error');
+  this.loading = false;
+  this.isSubmitting = false;
+
+  if (!this.loginError) {
+  this.loginError = 'Error desconocido al iniciar sesión.';
+}
+this.mostrarNotificacion(this.loginError, 'error');
+
+},
         complete: () => {
           console.info("[LoginComponent] Callback COMPLETE ejecutado.");
 
