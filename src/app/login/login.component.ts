@@ -76,31 +76,27 @@ mensajeError: string = '';
             this.isSubmitting = false; 
           }
         },
-        error: (errorData) => {
+       error: (errorData) => {
   console.error('[LoginComponent] Callback ERROR ejecutado:', errorData);
 
-  if (errorData?.status === 0) {
+  if (errorData.status === 0) {
+    // No se puede contactar el servidor (por ejemplo, backend dormido en Render)
     this.loginError = 'No se pudo conectar con el servidor. Intenta más tarde.';
-  } else if (errorData instanceof Error) {
-    this.loginError = errorData.message;
-  } else if (typeof errorData === 'string') {
-    this.loginError = errorData;
-  } else if (errorData?.error?.message) {
+  } else if (errorData.status === 401 || errorData.status === 403) {
+    this.loginError = 'Usuario o contraseña incorrectos.';
+  } else if (errorData.status === 502) {
+    this.loginError = 'Servidor fuera de servicio temporalmente.';
+  } else if (errorData.error?.message) {
     this.loginError = errorData.error.message;
   } else {
-    this.loginError = 'Error inesperado. Intente nuevamente.';
+    this.loginError = 'Error inesperado. Intenta nuevamente.';
   }
 
   this.mostrarNotificacion(this.loginError, 'error');
   this.loading = false;
   this.isSubmitting = false;
-
-  if (!this.loginError) {
-  this.loginError = 'Error desconocido al iniciar sesión.';
 }
-this.mostrarNotificacion(this.loginError, 'error');
-
-},
+,
         complete: () => {
           console.info("[LoginComponent] Callback COMPLETE ejecutado.");
 
