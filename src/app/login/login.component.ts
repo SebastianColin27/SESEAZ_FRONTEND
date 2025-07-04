@@ -19,8 +19,7 @@ export class LoginComponent {
   loading = false;
   loginError: string = "";
   isSubmitting = false; 
-mensajeExito: string = '';
-mensajeError: string = '';
+
   formBuilder: FormBuilder = inject(FormBuilder);
   router: Router = inject(Router);
   loginService: LoginService = inject(LoginService);
@@ -40,16 +39,7 @@ mensajeError: string = '';
     return this.loginForm.controls.password;
   }
 
-  // Método para mostrar notificaciones
-  mostrarNotificacion(mensaje: string, tipo: 'success' | 'error') {
-    if (tipo === 'success') {
-      this.mensajeExito = mensaje;
-      setTimeout(() => this.mensajeExito = '', 3000);
-    } else if (tipo === 'error') {
-      this.mensajeError = mensaje;
-      setTimeout(() => this.mensajeError = '', 3000);
-    }
-  }
+  
 
   login() {
     this.loading = true;
@@ -72,7 +62,7 @@ mensajeError: string = '';
           } else {
             console.error('[LoginComponent] ¡ERROR CRÍTICO! El token no se encontró en sessionStorage inmediatamente después de que el servicio lo procesó.');
             this.loginError = "Error inesperado al iniciar sesión. Intente de nuevo.";
-            this.mostrarNotificacion(this.loginError, 'error');
+          
             this.isSubmitting = false; 
           }
         },
@@ -85,7 +75,7 @@ mensajeError: string = '';
           } else {
            
             this.loginError = 'Error de autenticación. Verifique su usuario y contraseña.';
-            this.mostrarNotificacion(this.loginError, 'error');
+            
           }
           this.loading = false;
           this.isSubmitting = false; 
@@ -103,7 +93,7 @@ mensajeError: string = '';
             console.error('[LoginComponent] El token no está presente en COMPLETE. No se navegará.');
             if (!this.loginError) {
               this.loginError = "No se pudo completar el inicio de sesión.";
-              this.mostrarNotificacion(this.loginError, 'error');
+             
             }
             this.loading = false;
             this.isSubmitting = false; 
@@ -117,10 +107,10 @@ mensajeError: string = '';
         
         if (this.username.errors?.['required'] || this.password.errors?.['required']) {
           this.loginError = "Por favor, ingrese su usuario y contraseña.";
-          this.mostrarNotificacion(this.loginError, 'error');
+      
         } else {
           this.loginError = "Por favor, complete el formulario correctamente.";
-          this.mostrarNotificacion(this.loginError, 'error');
+         
         }
       }
     }
