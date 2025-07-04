@@ -1,14 +1,22 @@
 <app-loading [loading]="loading"></app-loading>
 
 <!-- Mensajes de éxito -->
-<!-- Contenedor de notificaciones -->
-<div class="notifications-container">
-  <!-- Notificación de éxito -->
-  <div *ngIf="mensajeExito" class="notification success">
-    <span class="notification-icon"></span>
-    {{ mensajeExito }}
+  <!-- Contenedor de notificaciones -->
+  <div class="notifications-container">
+    <!-- Notificación de éxito -->
+    <div *ngIf="mensajeExito" class="notification success">
+      <span class="notification-icon"></span>
+      {{ mensajeExito }}
+    </div>
+
+    <!-- Notificación de error -->
+    <div *ngIf="mensajeError" class="notification error">
+      <span class="notification-icon"></span>
+      {{ mensajeError }}
+    </div>
   </div>
-</div>
+
+
 
 <div *ngIf="!loading">
   <div class="container">
