@@ -53,11 +53,8 @@
           <th>Tipo de software</th>
           <th>Nombre</th>
           <th>No. Serie</th>
-          <!-- <th>Usuarios soportados</th>-->
           <th>Tipo de subscripción</th>
           <th>Fecha Expiración</th>
-          <!--<th>Username</th>-->
-          <!--  <th>Password</th>-->
           <th>Acciones</th>
         </tr>
       </thead>
@@ -66,7 +63,6 @@
           <td>{{ licencia.tipoSw}}</td>
           <td>{{ licencia.nombreLicencia }}</td>
           <td>{{ licencia.numeroSerie}}</td>
-          <!-- <td>{{licencia.numeroUsuarios}}</td>-->
           <td>{{licencia.subcripcion}}</td>
 
           <td>
@@ -80,9 +76,6 @@
               {{ licencia.fechaVencimiento ? licencia.fechaVencimiento : 'PERMANENTE' }}
             </ng-template>
           </td>
-
-          <!--  <td>{{licencia.usuario}}</td>-->
-          <!--    <td>{{licencia.contrasena}}</td>-->
           <td>
             <button *ngIf="isAdminOrModerador" class="btn btn-info me-3" (click)="abrirModalEditar(licencia)"><i
                 class="bi bi-pencil"></i></button>
@@ -128,21 +121,19 @@
 
           <div>
             <input type="radio" id="anual" name="suscripcion" value="ANUAL" [(ngModel)]="selectedLicencia.subcripcion"
-              (ngModelChange)="onSubscriptionChange()"> <!-- Llamamos a onSubscriptionChange -->
+              (ngModelChange)="onSubscriptionChange()"> 
             <label for="anual">ANUAL</label>
           </div>
 
           <div>
             <input type="radio" id="mensual" name="suscripcion" value="MENSUAL"
               [(ngModel)]="selectedLicencia.subcripcion" (ngModelChange)="onSubscriptionChange()">
-            <!-- Llamamos a onSubscriptionChange -->
             <label for="mensual">MENSUAL</label>
           </div>
 
           <div>
             <input type="radio" id="permanente" name="suscripcion" value="PERMANENTE"
               [(ngModel)]="selectedLicencia.subcripcion" (ngModelChange)="onSubscriptionChange()">
-            <!-- Llamamos a onSubscriptionChange -->
             <label for="permanente">PERMANENTE</label>
           </div>
         </div>
@@ -154,7 +145,6 @@
           <!-- Mostramos el input de fecha SOLO si la suscripción NO es PERMANENTE -->
           <input *ngIf="selectedLicencia.subcripcion !== 'PERMANENTE'" type="date" id="fechaExpiracion"
             name="fechaExpiracion" [(ngModel)]="selectedLicencia.fechaVencimiento" required>
-          <!-- Es requerido solo si se muestra este input -->
 
           <!-- Mostramos el texto "PERMANENTE" SOLO si la suscripción ES PERMANENTE -->
           <span *ngIf="selectedLicencia.subcripcion === 'PERMANENTE'">PERMANENTE</span>

@@ -38,7 +38,6 @@ import * as FileSaver from 'file-saver';
     equipoEncontrado?: Equipo;
     imagenPreview: string | null = null;
     ordenDescendente: boolean = true;
-
     selectedFile: File | null = null;
 
     private searchSub!: Subscription;
@@ -94,7 +93,7 @@ filtroEstado: string = '';
           switchMap((value: string) => {
             const trimmedValue = value.trim();
             if (!trimmedValue) {
-              this.cargarEquipos(); // Carga todos si la búsqueda está vacía
+              this.cargarEquipos(); 
               return of(null);
             }
 
@@ -130,25 +129,23 @@ filtroEstado: string = '';
       const files = event.target.files;
       if (files && files.length > 0) {
         const file = files[0];
-        // Basic file type validation (optional)
         if (!file.type.startsWith('image/')) {
           this.mostrarNotificacion('Solo se permiten archivos de imagen.', 'error');
           this.selectedFile = null;
-          this.imagenPreview = this.selectedEquipo?.imagenUrl || null; // Reset preview or show existing
-          event.target.value = null; // Clear the file input
+          this.imagenPreview = this.selectedEquipo?.imagenUrl || null; 
+          event.target.value = null; 
           return;
         }
 
         this.selectedFile = file;
-        // Create a preview URL for the selected file using FileReader
         const reader = new FileReader();
         reader.onload = (e: any) => {
           this.imagenPreview = e.target.result;
         };
-        reader.readAsDataURL(file); // Read file as Data URL for preview
+        reader.readAsDataURL(file); 
       } else {
         this.selectedFile = null;
-        this.imagenPreview = this.selectedEquipo?.imagenUrl || null; // Reset preview or show existing
+        this.imagenPreview = this.selectedEquipo?.imagenUrl || null; 
       }
     }
     cargarEquipos(): void {
@@ -202,14 +199,12 @@ filtrarEquipos(): void {
     }
 
     abrirModalEditar(equipo: Equipo): void {
-      // Create a deep copy if ports or other nested objects can be modified
       this.selectedEquipo = JSON.parse(JSON.stringify(equipo));
-      // Ensure ports are initialized if missing in data
       if (!this.selectedEquipo!.puertos) {
         this.selectedEquipo!.puertos = { usb: 0, ethernet: 0, sd: 0, vga: 0, hdmi: 0, tipoC: 0, jack_35: 0 };
       }
-      this.imagenPreview = equipo.imagenUrl || null; // Show existing image preview
-      this.selectedFile = null; // Clear any previously selected file
+      this.imagenPreview = equipo.imagenUrl || null; 
+      this.selectedFile = null; 
 
       console.log('Equipo para edición:', this.selectedEquipo);
       this.isEditMode = true;
@@ -278,7 +273,7 @@ guardarEquipo(): void {
         }
       });
 
-      return; // Salir para no continuar con lógica común
+      return; 
     }
 
     // Si es modo edición
@@ -340,14 +335,14 @@ guardarEquipo(): void {
           () => {
             this.cargarEquipos();
             this.mostrarNotificacion('Equipo eliminado con éxito', 'success');
-            this.isConfirmDeleteVisible = false; // Oculta el modal
-            this.idParaEliminar = null; // Limpia el ID
+            this.isConfirmDeleteVisible = false; 
+            this.idParaEliminar = null; 
           },
           (error) => {
             console.error('Error al eliminar equipo:', error);
             this.mostrarNotificacion('Error al eliminar equipo', 'error');
-            this.isConfirmDeleteVisible = false; // Oculta el modal
-            this.idParaEliminar = null; // Limpia el ID
+            this.isConfirmDeleteVisible = false; 
+            this.idParaEliminar = null; 
           }
         );
       }
@@ -355,13 +350,13 @@ guardarEquipo(): void {
 
     // Método para cancelar la eliminación
     cancelarEliminacion(): void {
-      this.isConfirmDeleteVisible = false; // Oculta el modal
-      this.idParaEliminar = null; // Limpia el ID
+      this.isConfirmDeleteVisible = false; 
+      this.idParaEliminar = null; 
     }
 
     // Método para eliminar personal (actualizado para usar el modal de confirmación)
     eliminarEquipo(id: any): void {
-      this.abrirModalConfirmacionEliminar(id); // Abre el modal de confirmación
+      this.abrirModalConfirmacionEliminar(id); 
     }
 
 
@@ -371,13 +366,13 @@ guardarEquipo(): void {
 
       return Object.keys(equipo.puertos)
         .filter(key => {
-          // Check if the key exists in Puertos interface and its value is > 0
-          const puertosTyped = equipo.puertos as Puertos; // Cast for type safety
+         
+          const puertosTyped = equipo.puertos as Puertos; 
           return puertosTyped.hasOwnProperty(key) && (puertosTyped as any)[key] > 0;
         })
         .map(key => ({
-          nombre: key.replace(/([A-Z])/g, ' $1').trim().toUpperCase(), // Convert camelCase to readable Name (e.g., tipoC -> TIPO C)
-          cantidad: (equipo.puertos as any)[key] // Access value
+          nombre: key.replace(/([A-Z])/g, ' $1').trim().toUpperCase(), 
+          cantidad: (equipo.puertos as any)[key]
         }));
     }
 
@@ -407,38 +402,38 @@ guardarEquipo(): void {
     mostrarNotificacion(mensaje: string, tipo: 'success' | 'error') {
       if (tipo === 'success') {
         this.mensajeExito = mensaje;
-        setTimeout(() => this.mensajeExito = '', 3000); // Oculta el mensaje después de 3 segundos
+        setTimeout(() => this.mensajeExito = '', 3000); 
       } else if (tipo === 'error') {
         this.mensajeError = mensaje;
-        setTimeout(() => this.mensajeError = '', 3000); // Oculta el mensaje después de 3 segundos
+        setTimeout(() => this.mensajeError = '', 3000); 
       }
     }
 
 
     // Método para redirigir al Dashboard
     irAlDashboard(): void {
-      this.router.navigate(['/dashboard']); // Cambia la ruta según tu configuración de rutas
+      this.router.navigate(['/dashboard']); 
     }
 
     // Método para cerrar sesión
     cerrarSesion(): void {
-      this.loginService.logout(); // Llama al método de logout de tu servicio
-      this.router.navigate(['/login']); // Redirige al login después del logout
+      this.loginService.logout(); 
+      this.router.navigate(['/login']); 
     }
 
 
     // Método para alternar el orden de la tabla
     alternarOrden(): void {
       this.ordenDescendente = !this.ordenDescendente;
-      this.equipoList.reverse(); // invierte el orden actual del array
+      this.equipoList.reverse(); 
     }
 
     subirImagen(idEquipo: string, imagen: File): void {
       const formData = new FormData();
       formData.append('imagen', imagen);
 
-      // Aquí se llama a `this.http.post` directamente, PERO esta función nunca es llamada en tu guardarEquipo().
-      this.http.post(`http://localhost:8080/equipos/${idEquipo}/imagen`, formData).subscribe({ // <--- ESTE ES EL CÓDIGO QUE DEBERÍAS USAR EN EL SERVICIO
+     
+      this.http.post(`http://localhost:8080/equipos/${idEquipo}/imagen`, formData).subscribe({ 
         next: () => {
           console.log('Imagen subida correctamente');
           this.mostrarNotificacion('Imagen subida correctamente', 'success');

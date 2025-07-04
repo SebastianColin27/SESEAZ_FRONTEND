@@ -32,23 +32,18 @@ export class MantenimientoListComponent implements OnInit {
 
   equiposList: Equipo[] = [];
   personalList: Personal[] = [];
-
   mantenimientosList: Mantenimiento[] = [];
   asignacionesList: Asignacion[] = [];
-
   selectedMantenimiento: Mantenimiento | null = null;
   isModalVisible = false;
   isEditMode = false;
   ordenDescendente: boolean = true;
-
   mensajeExito: string = '';
   mensajeError: string = '';
   isConfirmDeleteVisible: boolean = false;
   idParaEliminar: string | null = null;
-
   searchControl = new FormControl();
   searchSubscription!: Subscription;
-
   fechaInicio: Date | null = null;
 fechaFin: Date | null = null;
 
@@ -100,16 +95,15 @@ fechaFin: Date | null = null;
         switchMap((value) => {
           const trimmedValue = value?.trim();
           if (!trimmedValue) {
-            // Recarga todas las asignaciones y retorna un observable vacío
-            this.cargarMantenimientos(); // O this.cargarEquipos() según corresponda
-            return EMPTY; // No hace nada más en el flujo
+            this.cargarMantenimientos(); 
+            return EMPTY; 
           }
 
           return this.mantenimientoService.buscarPorNumeroSerie(trimmedValue).pipe(
             catchError(err => {
               console.error('Error al buscar asignaciones:', err);
               this.mensajeError = 'Ocurrió un error al buscar asignaciones.';
-              return of([]); // Retorna un arreglo vacío en caso de error
+              return of([]); 
             })
           );
         })
@@ -233,7 +227,7 @@ fechaFin: Date | null = null;
     } else {
       this.idParaEliminar = id.toString();
     }
-    this.isConfirmDeleteVisible = true; // Muestra el modal
+    this.isConfirmDeleteVisible = true; 
   }
 
   // Método para confirmar la eliminación
@@ -243,14 +237,14 @@ fechaFin: Date | null = null;
         () => {
           this.cargarMantenimientos();
           this.mostrarNotificacion('Mantenimiento eliminado con éxito', 'success');
-          this.isConfirmDeleteVisible = false; // Oculta el modal
-          this.idParaEliminar = null; // Limpia el ID
+          this.isConfirmDeleteVisible = false; 
+          this.idParaEliminar = null; 
         },
         (error) => {
           console.error('Error al eliminar mantenimiento:', error);
           this.mostrarNotificacion('Error al eliminar mantenimiento', 'error');
-          this.isConfirmDeleteVisible = false; // Oculta el modal
-          this.idParaEliminar = null; // Limpia el ID
+          this.isConfirmDeleteVisible = false; 
+          this.idParaEliminar = null; 
         }
       );
     }
@@ -258,13 +252,13 @@ fechaFin: Date | null = null;
 
   // Método para cancelar la eliminación
   cancelarEliminacion(): void {
-    this.isConfirmDeleteVisible = false; // Oculta el modal
-    this.idParaEliminar = null; // Limpia el ID
+    this.isConfirmDeleteVisible = false; 
+    this.idParaEliminar = null; 
   }
 
   // Método para eliminar (actualizado para usar el modal de confirmación)
   eliminarMantenimiento(id: any): void {
-    this.abrirModalConfirmacionEliminar(id); // Abre el modal de confirmación
+    this.abrirModalConfirmacionEliminar(id); 
   }
 
 
@@ -304,34 +298,34 @@ fechaFin: Date | null = null;
   mostrarNotificacion(mensaje: string, tipo: 'success' | 'error') {
     if (tipo === 'success') {
       this.mensajeExito = mensaje;
-      setTimeout(() => this.mensajeExito = '', 3000); // Oculta el mensaje después de 3 segundos
+      setTimeout(() => this.mensajeExito = '', 3000); 
     } else if (tipo === 'error') {
       this.mensajeError = mensaje;
-      setTimeout(() => this.mensajeError = '', 3000); // Oculta el mensaje después de 3 segundos
+      setTimeout(() => this.mensajeError = '', 3000); 
     }
   }
 
   // Método para redirigir al Dashboard
   irAlDashboard(): void {
-    this.router.navigate(['/dashboard']); // Cambia la ruta según tu configuración de rutas
+    this.router.navigate(['/dashboard']); 
   }
 
   // Método para cerrar sesión
   cerrarSesion(): void {
-    this.loginService.logout(); // Llama al método de logout de tu servicio
-    this.router.navigate(['/login']); // Redirige al login después del logout
+    this.loginService.logout(); 
+    this.router.navigate(['/login']); 
   }
 
   // Método para alternar el orden de la tabla
   alternarOrden(): void {
     this.ordenDescendente = !this.ordenDescendente;
-    this.mantenimientosList.reverse(); // invierte el orden actual del array
+    this.mantenimientosList.reverse(); 
   }
 
 
   // Método para descargar el reporte general de Mantenimientos
-  descargarPdfMantenimiento(): void { // Asumiendo que este es el método para el reporte GENERAL de mantenimientos
-    this.pdfService.downloadMantenimientosPdfGeneral().subscribe( // Asegúrate de usar el método correcto del PdfService
+  descargarPdfMantenimiento(): void { 
+    this.pdfService.downloadMantenimientosPdfGeneral().subscribe( 
       blob => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -339,12 +333,11 @@ fechaFin: Date | null = null;
         a.download = 'reporte_mantenimientos_general.pdf'; // Nombre de archivo más descriptivo para general
         a.click();
         window.URL.revokeObjectURL(url);
-        // **Añade la notificación de éxito aquí:**
+
         this.mostrarNotificacion('Reporte general de mantenimientos generado con éxito.', 'success');
       },
       error => {
         console.error('Error al descargar el reporte general de mantenimientos:', error);
-        // La notificación de error ya está probablemente en el catchError, si no, añádela:
         this.mostrarNotificacion('Error al generar el reporte general de mantenimientos.', 'error');
       }
     );
@@ -353,10 +346,8 @@ fechaFin: Date | null = null;
 
   // Método para descargar el reporte de Mantenimientos por Equipo
   descargarReporteMantenimientosPorEquipo(mantenimiento: Mantenimiento): void {
-    // Verifica que el equipo y su ID existan en el mantenimiento
     if (mantenimiento.equipo && mantenimiento.equipo.id) {
-      // Llama al servicio PDF para descargar el reporte por ID de equipo
-      // Asegúrate de que el ID del equipo sea un string válido
+
       const equipoIdString = typeof mantenimiento.equipo.id === 'string' ? mantenimiento.equipo.id : mantenimiento.equipo.id.$oid; // Ajusta según cómo esté representado el ObjectId
 
       if (equipoIdString) {

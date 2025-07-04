@@ -107,7 +107,7 @@
   border: 1px solid #f5c6cb;
 }
 
-/* Íconos (requiere Font Awesome) */
+/* Íconos  */
 .fas {
   font-size: 1.1rem;
 }
@@ -115,13 +115,13 @@
 /* --- Notifications Styling ) --- */
 .notifications-container {
   position: fixed;
-  /* Or absolute if within a container */
+
   top: 10px;
-  /* Adjust position */
+
   right: 10px;
-  /* Adjust position */
+
   z-index: 1100;
-  /* Above modals */
+
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -139,18 +139,17 @@
 
 .notification.success {
   background-color: #28a745;
-  /* Green */
+
 }
 
 .notification.error {
   background-color: #dc3545;
-  /* Red */
+
 }
 
 .notification-icon {
   font-size: 1.2em;
   margin-right: 10px;
   display: inline-flex;
-  /* Use flex for centering icon */
   align-items: center;
 }

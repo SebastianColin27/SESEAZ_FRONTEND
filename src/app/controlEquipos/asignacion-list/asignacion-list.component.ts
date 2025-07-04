@@ -28,11 +28,6 @@ import * as FileSaver from 'file-saver';
 export class AsignacionComponent implements OnInit {
   loading = true;
  
-
-
-
-
-
   asignacionList: Asignacion[] = [];
   equipoList: Equipo[] = [];
   personalList: Personal[] = [];
@@ -42,16 +37,13 @@ export class AsignacionComponent implements OnInit {
   isEditMode = false;
   searchEquipo: string = '';
   ordenDescendente: boolean = true;
-
-
   mensajeExito: string = '';
   mensajeError: string = '';
   isConfirmDeleteVisible: boolean = false;
   idParaEliminar: string | null = null;
-
   modalExportarVisible: boolean = false;
-
   searchControl = new FormControl('');
+
   private searchSubscription?: Subscription;
 
   constructor(
@@ -80,7 +72,7 @@ export class AsignacionComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    setTimeout(() => this.loading = false, 2000); // Simula carga
+    setTimeout(() => this.loading = false, 2000); 
     this.cargarAsignaciones();
     this.cargarEquipos();
     this.cargarPersonal();
@@ -94,16 +86,15 @@ export class AsignacionComponent implements OnInit {
         switchMap((value) => {
           const trimmedValue = value?.trim();
           if (!trimmedValue) {
-            // Recarga todas las asignaciones y retorna un observable vacío
-            this.cargarAsignaciones(); // O this.cargarEquipos() según corresponda
-            return EMPTY; // No hace nada más en el flujo
+            this.cargarAsignaciones(); 
+            return EMPTY; 
           }
 
           return this.asignacionService.buscarPorNumeroSerie(trimmedValue).pipe(
             catchError(err => {
               console.error('Error al buscar asignaciones:', err);
               this.mensajeError = 'Ocurrió un error al buscar asignaciones.';
-              return of([]); // Retorna un arreglo vacío en caso de error
+              return of([]); 
             })
           );
         })
@@ -169,8 +160,8 @@ export class AsignacionComponent implements OnInit {
   }
 
   abrirModalEditar(asignacion: Asignacion): void {
-    console.log('Asignación antes de abrir el modal:', asignacion); // Verifica qué valores tiene
-    this.selectedAsignacion = JSON.parse(JSON.stringify(asignacion)); // Copia sin referencias
+    console.log('Asignación antes de abrir el modal:', asignacion); 
+    this.selectedAsignacion = JSON.parse(JSON.stringify(asignacion)); 
     this.isEditMode = true;
     this.isModalVisible = true;
   }
@@ -224,7 +215,7 @@ export class AsignacionComponent implements OnInit {
     } else {
       this.idParaEliminar = id.toString();
     }
-    this.isConfirmDeleteVisible = true; // Muestra el modal
+    this.isConfirmDeleteVisible = true; 
   }
 
   // Método para confirmar la eliminación
@@ -234,14 +225,14 @@ export class AsignacionComponent implements OnInit {
         () => {
           this.cargarAsignaciones();
           this.mostrarNotificacion('Asignación eliminada con éxito', 'success');
-          this.isConfirmDeleteVisible = false; // Oculta el modal
-          this.idParaEliminar = null; // Limpia el ID
+          this.isConfirmDeleteVisible = false; 
+          this.idParaEliminar = null; 
         },
         (error) => {
           console.error('Error al eliminar personal:', error);
           this.mostrarNotificacion('Error al eliminar personal', 'error');
-          this.isConfirmDeleteVisible = false; // Oculta el modal
-          this.idParaEliminar = null; // Limpia el ID
+          this.isConfirmDeleteVisible = false; 
+          this.idParaEliminar = null; 
         }
       );
     }
@@ -249,13 +240,13 @@ export class AsignacionComponent implements OnInit {
 
   // Método para cancelar la eliminación
   cancelarEliminacion(): void {
-    this.isConfirmDeleteVisible = false; // Oculta el modal
-    this.idParaEliminar = null; // Limpia el ID
+    this.isConfirmDeleteVisible = false; 
+    this.idParaEliminar = null; 
   }
 
   // Método para eliminar personal (actualizado para usar el modal de confirmación)
   eliminarAsignacion(id: any): void {
-    this.abrirModalConfirmacionEliminar(id); // Abre el modal de confirmación
+    this.abrirModalConfirmacionEliminar(id); 
   }
 
   buscarPorEquipo(): void {
@@ -279,46 +270,44 @@ export class AsignacionComponent implements OnInit {
   mostrarNotificacion(mensaje: string, tipo: 'success' | 'error') {
     if (tipo === 'success') {
       this.mensajeExito = mensaje;
-      setTimeout(() => this.mensajeExito = '', 3000); // Oculta el mensaje después de 3 segundos
+      setTimeout(() => this.mensajeExito = '', 3000); 
     } else if (tipo === 'error') {
       this.mensajeError = mensaje;
-      setTimeout(() => this.mensajeError = '', 3000); // Oculta el mensaje después de 3 segundos
+      setTimeout(() => this.mensajeError = '', 3000); 
     }
   }
 
   // Método para redirigir al Dashboard
   irAlDashboard(): void {
-    this.router.navigate(['/dashboard']); // Cambia la ruta según tu configuración de rutas
+    this.router.navigate(['/dashboard']); 
   }
 
   // Método para cerrar sesión
   cerrarSesion(): void {
-    this.loginService.logout(); // Llama al método de logout de tu servicio
-    this.router.navigate(['/login']); // Redirige al login después del logout
+    this.loginService.logout(); 
+    this.router.navigate(['/login']); 
   }
 
   // Método para alternar el orden de la tabla
   alternarOrden(): void {
     this.ordenDescendente = !this.ordenDescendente;
-    this.asignacionList.reverse(); // invierte el orden actual del array
+    this.asignacionList.reverse(); 
   }
 
   // Método para descargar el reporte general de Asignaciones
-  descargarPdf(): void { // Asumiendo que este es el método para el reporte GENERAL de asignaciones
-    this.pdfService.downloadAsignacionesPdfGeneral().subscribe( // Asegúrate de usar el método correcto del PdfService
+  descargarPdf(): void { 
+    this.pdfService.downloadAsignacionesPdfGeneral().subscribe( 
       blob => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'reporte_asignaciones_general.pdf'; // Nombre de archivo más descriptivo para general
+        a.download = 'reporte_asignaciones_general.pdf'; // Nombre del archivo
         a.click();
         window.URL.revokeObjectURL(url);
-        // **Añade la notificación de éxito aquí:**
         this.mostrarNotificacion('Reporte general de asignaciones generado con éxito.', 'success');
       },
       error => {
         console.error('Error al descargar el reporte general de asignaciones:', error);
-        // La notificación de error ya está probablemente en el catchError, si no, añádela:
         this.mostrarNotificacion('Error al generar el reporte general de asignaciones.', 'error');
       }
     );
@@ -339,7 +328,7 @@ export class AsignacionComponent implements OnInit {
             a.href = url;
             a.download = `reporte_asignaciones_equipo_${equipoIdString}.pdf`; // Nombre del archivo
             a.click();
-            window.URL.revokeObjectURL(url); // Limpiar la URL del blob
+            window.URL.revokeObjectURL(url);
             this.mostrarNotificacion('Reporte de asignaciones generado con éxito.', 'success');
           },
           error => {
@@ -364,7 +353,7 @@ export class AsignacionComponent implements OnInit {
 
       const personalIdString = typeof asignacion.personal.id === 'string'
         ? asignacion.personal.id
-        : asignacion.personal.id.$oid; // Ajusta según cómo esté representado el ObjectId en tu modelo Personal en Angular
+        : asignacion.personal.id.$oid;
 
       if (personalIdString) {
         this.pdfService.downloadAsignacionesPdfPorPersonal(personalIdString).subscribe(
@@ -400,7 +389,7 @@ export class AsignacionComponent implements OnInit {
     if (index !== undefined && index > -1) {
       this.selectedAsignacion?.licencias.splice(index, 1);
     }
-    this.cd.detectChanges(); // Asegúrate de que Angular detecte el cambio
+    this.cd.detectChanges(); 
   }
 
 

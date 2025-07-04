@@ -15,7 +15,7 @@ export class JwtInterceptor implements HttpInterceptor {
   constructor(private authService: AuthService) { }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // const token = sessionStorage.getItem('token'); // Usas sessionStorage según tu LoginService
+    
     const token = this.authService.getToken();
 
  // Verificar si el token está expirado antes de hacer la petición

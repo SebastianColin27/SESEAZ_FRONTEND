@@ -23,39 +23,7 @@ export class EquipoService {
     })
   };
 
-  /*obtenerTodosLosEquipos(): Observable<Equipo[]> {
-    return this.http.get<Equipo[]>(this.apiUrl);
-  }
 
-  obtenerEquipoPorId(id: string): Observable<Equipo> {
-    return this.http.get<Equipo>(`${this.apiUrl}/${id}`);
-  }
-
-  crearEquipo(equipo: Equipo): Observable<Equipo> {
-    return this.http.post<Equipo>(this.apiUrl, equipo, this.httpOptions);
-  }
-
-  actualizarEquipo(id: string, equipo: Equipo): Observable<Equipo> {
-    return this.http.put<Equipo>(`${this.apiUrl}/${id}`, equipo, this.httpOptions);
-  }
-
-  eliminarEquipo(id: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/${id}`, this.httpOptions);
-  }
-
- 
-  buscarEquipoPorSerie(numeroSerie: string): Observable<Equipo> {
-    return this.http.get<Equipo>(`${this.apiUrl}/buscarSerie?serieEquipo=${numeroSerie}`);
-  }
-  
-  
-  buscarEquipoPorMarca(marcaEquipo: string): Observable<Equipo[]> {
-    return this.http.get<Equipo[]>(`${this.apiUrl}/buscarMarca?marcaEquipo=${marcaEquipo}`);
-  }
-  
-  buscarEquipoPorModelo(modeloEquipo: string): Observable<Equipo[]> {
-    return this.http.get<Equipo[]>(`${this.apiUrl}/buscarModelo?modeloEquipo=${modeloEquipo}`);
-  }*/
 
   private getIdString(id: any): string | null {
     if (!id) return null;
@@ -71,7 +39,7 @@ export class EquipoService {
     }
   }
 
-  // --- Image Handling ---
+  // --- Imagen---
 
   subirImagen(id: any, file: File): Observable<any> {
     const idString = this.getIdString(id);
@@ -87,37 +55,34 @@ export class EquipoService {
     );
   }
 
-  // Method to get the URL for displaying the image
   obtenerImagenUrl(id: any): string | null {
     const idString = this.getIdString(id);
     if (!idString) {
       return null;
     }
-    // Use the backend endpoint that serves the image data
+    
     return `${this.apiUrl}/${idString}/imagen`;
   }
 
-  // Helper to process backend Equipo objects and add imagenUrl
+  
   private processEquipo(equipo: Equipo): Equipo {
-    // Ensure the Angular model's 'id' property is set correctly (string version)
+ 
     if (equipo._id) {
       equipo.id = this.getIdString(equipo._id);
     } else if (equipo.id) {
       equipo.id = this.getIdString(equipo.id);
     }
 
-    // Add the frontend-friendly image URL
     if (equipo.imagenGridFsId && equipo.id) {
       equipo.imagenUrl = this.obtenerImagenUrl(equipo.id) ?? undefined;
     } else {
-      equipo.imagenUrl = undefined; // Ensure it's undefined if no image
+      equipo.imagenUrl = undefined; 
     }
 
-    // Ensure ports is initialized if null (though backend should send it)
     if (!equipo.puertos) {
       equipo.puertos = { usb: 0, ethernet: 0, hdmi: 0, tipoC: 0, jack_35: 0, vga: 0, sd: 0 };
     } else {
-      // Clean up potential checkbox helper fields if they exist from form
+
       Object.keys(equipo.puertos).forEach(key => {
         if (key.endsWith('Check')) {
           delete (equipo.puertos as any)[key];
@@ -129,8 +94,7 @@ export class EquipoService {
     return equipo;
   }
 
-
-  // --- Existing Methods (Modified to process image URL) ---
+  // --- Métodos CRUD ---
 
   obtenerTodosLosEquipos(): Observable<Equipo[]> {
     return this.http.get<Equipo[]>(this.apiUrl).pipe(

@@ -61,16 +61,16 @@ export class DashboardComponent {
 
 
   ngOnInit(): void {
-    setTimeout(() => this.loading = false, 500); // Simula carga
+    setTimeout(() => this.loading = false, 500); 
     this.checkIfAdmin();
   }
 
-  // Verifica si el usuario tiene el rol de admin
+  
   checkIfAdmin(): void {
     this.loginService.userRole$.subscribe((role) => {
       if (role.includes('ADMIN')) {
         this.isAdmin = true;
-        this.addRegisterModule(); // Agrega la opción de "Registrar Usuario" si es admin
+        this.addRegisterModule(); 
       } else {
         this.isAdmin = false;
       }
@@ -90,7 +90,7 @@ export class DashboardComponent {
 
   // Método para cerrar sesión
   cerrarSesion(): void {
-    this.loginService.logout(); // Llama al método de logout de tu servicio
-    this.router.navigate(['/login']); // Redirige al login después del logout
+    this.loginService.logout(); 
+    this.router.navigate(['/login']); 
   }
 }

@@ -25,14 +25,13 @@ export class LicenciaListComponent implements OnInit {
   isEditMode = false;
   searchNombre: string = '';
   ordenDescendente: boolean = true;
-
   mensajeExito: string = '';
   mensajeError: string = '';
   isConfirmDeleteVisible: boolean = false;
   idParaEliminar: string | null = null;
   ultimaFechaVencimiento: string | null = null;
-
   searchControl = new FormControl('');
+
   private searchSubscription?: Subscription;
 
   constructor(private licenciaService: LicenciaService,
@@ -57,7 +56,7 @@ export class LicenciaListComponent implements OnInit {
 
 
   ngOnInit(): void {
-    setTimeout(() => this.loading = false, 500); // Simula carga
+    setTimeout(() => this.loading = false, 500); 
     this.cargarLicencias();
 
     this.searchSubscription = this.searchControl.valueChanges
@@ -123,11 +122,7 @@ export class LicenciaListComponent implements OnInit {
 
   guardarLicencia(): void {
     if (this.selectedLicencia) {
-      // Si la licencia es permanente, eliminamos la fecha para evitar errores
-      /*if (this.selectedLicencia.esPermanente) {
-         this.selectedLicencia.fechaVencimiento = undefined;
-       }*/
-
+ 
       if (this.isEditMode && this.selectedLicencia.id) {
         this.licenciaService.actualizarLicencia(this.selectedLicencia.id, this.selectedLicencia).subscribe(
           (licenciaActualizada) => {
@@ -167,12 +162,6 @@ export class LicenciaListComponent implements OnInit {
     this.isConfirmDeleteVisible = true; // Muestra el modal
   }
 
-  /* toggleFechaExpiracion(): void {
-     if (this.isFechaDeshabilitada) {
-       this.selectedLicencia!.fechaVencimiento = 'Permanente';
-     }
-   }*/
-
 
   cancelarEdicion(): void {
     this.cerrarModal();
@@ -185,14 +174,14 @@ export class LicenciaListComponent implements OnInit {
         () => {
           this.cargarLicencias();
           this.mostrarNotificacion('Licencia eliminada con éxito', 'success');
-          this.isConfirmDeleteVisible = false; // Oculta el modal
-          this.idParaEliminar = null; // Limpia el ID
+          this.isConfirmDeleteVisible = false;
+          this.idParaEliminar = null;
         },
         (error) => {
           console.error('Error al eliminar licencial:', error);
           this.mostrarNotificacion('Error al eliminar licencia', 'error');
-          this.isConfirmDeleteVisible = false; // Oculta el modal
-          this.idParaEliminar = null; // Limpia el ID
+          this.isConfirmDeleteVisible = false;
+          this.idParaEliminar = null; 
         }
       );
     }
@@ -200,13 +189,13 @@ export class LicenciaListComponent implements OnInit {
 
   // Método para cancelar la eliminación
   cancelarEliminacion(): void {
-    this.isConfirmDeleteVisible = false; // Oculta el modal
-    this.idParaEliminar = null; // Limpia el ID
+    this.isConfirmDeleteVisible = false; 
+    this.idParaEliminar = null; 
   }
 
   // Método para eliminar personal (actualizado para usar el modal de confirmación)
   eliminarLicencia(id: any): void {
-    this.abrirModalConfirmacionEliminar(id); // Abre el modal de confirmación
+    this.abrirModalConfirmacionEliminar(id); 
   }
 
   buscarPorNombre(): void {
@@ -241,22 +230,22 @@ export class LicenciaListComponent implements OnInit {
   mostrarNotificacion(mensaje: string, tipo: 'success' | 'error') {
     if (tipo === 'success') {
       this.mensajeExito = mensaje;
-      setTimeout(() => this.mensajeExito = '', 3000); // Oculta el mensaje después de 3 segundos
+      setTimeout(() => this.mensajeExito = '', 3000); 
     } else if (tipo === 'error') {
       this.mensajeError = mensaje;
-      setTimeout(() => this.mensajeError = '', 3000); // Oculta el mensaje después de 3 segundos
+      setTimeout(() => this.mensajeError = '', 3000); 
     }
   }
 
   // Método para redirigir al Dashboard
   irAlDashboard(): void {
-    this.router.navigate(['/dashboard']); // Cambia la ruta según tu configuración de rutas
+    this.router.navigate(['/dashboard']); 
   }
 
   // Método para cerrar sesión
   cerrarSesion(): void {
-    this.loginService.logout(); // Llama al método de logout de tu servicio
-    this.router.navigate(['/login']); // Redirige al login después del logout
+    this.loginService.logout(); 
+    this.router.navigate(['/login']); 
   }
 
 
@@ -269,7 +258,7 @@ export class LicenciaListComponent implements OnInit {
   // Método llamado cuando cambia la selección de suscripción
   onSubscriptionChange(): void {
     if (this.selectedLicencia && this.selectedLicencia.subcripcion === 'PERMANENTE') {
-      // Si la suscripción es permanente, borramos el valor de la fecha de vencimiento en el modelo
+      
       this.selectedLicencia.fechaVencimiento = undefined; // O null
     }
     // Si la suscripción NO es permanente, no hacemos nada aquí.

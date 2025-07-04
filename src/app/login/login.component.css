@@ -10,7 +10,7 @@
 
 #Titulo1 {
   text-align: center;
-  color: #2d67d3;
+  color: #7F3554;
 }
 
 #Titulo2 {
@@ -40,15 +40,14 @@ input[type="password"] {
   margin-top: 10px;
 
   border-radius: 20px;
-  /* Esquinas muy redondeadas */
   padding: 12px 20px;
   border: 2px;
   outline: none;
-  /* Elimina el borde al enfocar */
+
 }
 
 .btn {
-  background-color: #2d67d3;
+  background-color: #7F3554;
   color: white;
   border-radius: 100px;
   padding: 10px 20px;
@@ -59,7 +58,7 @@ input[type="password"] {
 }
 
 .btn:hover {
-  background-color: #2d67d3;
+  background-color: #7F3554;
 }
 
 .error-message {
@@ -81,8 +80,7 @@ input[type="password"] {
 }
 
 .btn-efecto:hover {
-  background-color: #0056b3;
-  /* un azul más oscuro */
+  background-color: #692C45;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transform: scale(1.03);
 }

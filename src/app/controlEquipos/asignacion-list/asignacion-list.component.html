@@ -67,14 +67,8 @@
         <tr>
           <th>Equipo</th>
           <th>Personal</th>
-          <!--   <th>Licencias</th>-->
-          <!--   <th>Ubicación Física</th>-->
-          <!-- <th>Equipo</th> -->
-          <!--    <th>contraseña</th>-->
-          <!--    <th>Evidencia de asignación</th>-->
           <th>Fecha de asignación</th>
           <th>Fecha de finalizacion</th>
-          <!--    <th>Comentarios</th>-->
           <th>Acciones</th>
           <th>Reportes</th>
         </tr>
@@ -88,14 +82,8 @@
             {{ asignacion.equipo?.color }}
           </td>
           <td>{{ asignacion.personal?.nombre }}</td>
-          <!--   <td>{{ getLicenciaNames(asignacion) }}</td>-->
-          <!--  <td>{{ asignacion.ubicacionFisica }}</td>-->
-          <!-- <td>{{ asignacion.nombreEquipo }}</td> -->
-          <!--     <td>{{ asignacion.contrasena }}</td>-->
-          <!--    <td>{{ asignacion.evidenciaAsignacion }}</td>-->
           <td>{{ asignacion.fechaAsignacion }}</td>
           <td>{{ asignacion.fechaFinAsignacion }}</td>
-          <!--  <td>{{ asignacion.comentarios }}</td>-->
           <td>
             <button *ngIf="isAdminOrModerador" class="btn btn-info me-3" (click)="abrirModalEditar(asignacion)"><i
                 class="bi bi-pencil"></i></button>

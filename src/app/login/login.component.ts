@@ -18,20 +18,20 @@ import { LoadingComponent } from '../controlEquipos/loading/loading.component';
 export class LoginComponent {
   loading = false;
   loginError: string = "";
-  isSubmitting = false; // Para evitar doble submit
-
-  // Inyección moderna
+  isSubmitting = false; 
+mensajeExito: string = '';
+mensajeError: string = '';
   formBuilder: FormBuilder = inject(FormBuilder);
   router: Router = inject(Router);
   loginService: LoginService = inject(LoginService);
 
   loginForm = this.formBuilder.group({
-    // Solo requiere que no esté vacío
+  
     username: ['', [Validators.required]],
     password: ['', [Validators.required]]
   });
 
-  // Getters para fácil acceso en la plantilla
+
   public get username() {
     return this.loginForm.controls.username;
   }
@@ -40,30 +40,40 @@ export class LoginComponent {
     return this.loginForm.controls.password;
   }
 
+  // Método para mostrar notificaciones
+  mostrarNotificacion(mensaje: string, tipo: 'success' | 'error') {
+    if (tipo === 'success') {
+      this.mensajeExito = mensaje;
+      setTimeout(() => this.mensajeExito = '', 3000);
+    } else if (tipo === 'error') {
+      this.mensajeError = mensaje;
+      setTimeout(() => this.mensajeError = '', 3000);
+    }
+  }
+
   login() {
     this.loading = true;
-    // Marca todos los campos como tocados para mostrar errores si es necesario
+
     this.loginForm.markAllAsTouched();
 
     if (this.loginForm.valid && !this.isSubmitting) {
-      this.isSubmitting = true; // Previene doble click
-      this.loginError = ""; // Limpia errores previos
+      this.isSubmitting = true; 
+      this.loginError = ""; 
       console.log('[LoginComponent] Formulario válido. Iniciando llamada a loginService...');
 
       this.loginService.login(this.loginForm.value as LoginRequest).subscribe({
         next: (tokenDevueltoPorServicio) => {
-         // console.log('[LoginComponent] Callback NEXT ejecutado. Valor emitido por servicio (debería ser el token):', tokenDevueltoPorServicio);
-
+         
           const tokenEnStorage = sessionStorage.getItem('token');
-         // console.log('[LoginComponent] Verificando sessionStorage DENTRO de NEXT:', tokenEnStorage ? 'ENCONTRADO' : 'NO ENCONTRADO');
+         
 
           if (tokenEnStorage) {
-          //  console.log('[LoginComponent] Token encontrado en sessionStorage:', tokenEnStorage);
+          
           } else {
             console.error('[LoginComponent] ¡ERROR CRÍTICO! El token no se encontró en sessionStorage inmediatamente después de que el servicio lo procesó.');
             this.loginError = "Error inesperado al iniciar sesión. Intente de nuevo.";
-
-            this.isSubmitting = false; // Permite reintentar
+            this.mostrarNotificacion(this.loginError, 'error');
+            this.isSubmitting = false; 
           }
         },
         error: (errorData) => {
@@ -73,11 +83,12 @@ export class LoginComponent {
           } else if (typeof errorData === 'string') {
             this.loginError = errorData;
           } else {
-            // Mensaje más específico si es posible detectar un 401/403 vs otros errores
+           
             this.loginError = 'Error de autenticación. Verifique su usuario y contraseña.';
+            this.mostrarNotificacion(this.loginError, 'error');
           }
           this.loading = false;
-          this.isSubmitting = false; // Permite reintentar
+          this.isSubmitting = false; 
         },
         complete: () => {
           console.info("[LoginComponent] Callback COMPLETE ejecutado.");
@@ -87,14 +98,15 @@ export class LoginComponent {
 
           if (tokenAntesDeNavegar) {
             console.log('[LoginComponent] Token confirmado. Navegando a /dashboard...');
-            this.router.navigateByUrl('/dashboard'); // Ajusta la ruta si es necesario
+            this.router.navigateByUrl('/dashboard'); 
           } else {
             console.error('[LoginComponent] El token no está presente en COMPLETE. No se navegará.');
             if (!this.loginError) {
               this.loginError = "No se pudo completar el inicio de sesión.";
+              this.mostrarNotificacion(this.loginError, 'error');
             }
             this.loading = false;
-            this.isSubmitting = false; // Permite reintentar
+            this.isSubmitting = false; 
           }
         }
       });
@@ -102,11 +114,13 @@ export class LoginComponent {
     } else if (!this.isSubmitting) {
       console.warn('[LoginComponent] Formulario inválido o ya se está enviando.');
       if (!this.loginForm.valid) {
-        // Mensaje más específico si el formulario no es válido
+        
         if (this.username.errors?.['required'] || this.password.errors?.['required']) {
           this.loginError = "Por favor, ingrese su usuario y contraseña.";
+          this.mostrarNotificacion(this.loginError, 'error');
         } else {
           this.loginError = "Por favor, complete el formulario correctamente.";
+          this.mostrarNotificacion(this.loginError, 'error');
         }
       }
     }

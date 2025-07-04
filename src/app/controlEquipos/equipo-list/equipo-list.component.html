@@ -88,11 +88,6 @@
           <th>Marca</th>
           <th>Modelo</th>
           <th>Color</th>
-          <!--    <th>Procesador</th>-->
-          <!--   <th>RAM</th>-->
-          <!--     <th>Almacenamiento</th>-->
-          <!--     <th>Puertos</th>-->
-          <!--   <th>Fecha de Compra</th>-->
           <th>Estado</th>
           <th>Acciones</th>
         </tr>
@@ -104,19 +99,6 @@
           <td>{{ equipo.marca }}</td>
           <td>{{ equipo.modelo }}</td>
           <td>{{ equipo.color }}</td>
-          <!-- <td>{{ equipo.procesador }}</td>-->
-          <!--   <td>{{ equipo.ram }} GB</td>-->
-          <!--    <td>{{ equipo.almacenamiento }} GB</td>-->
-          <!--   <td>
-        <select class="form-select">
-          <option disabled value="" disabled selected>Puertos</option>
-          <option disabled *ngFor="let puerto of getPuertosList(equipo)" [value]="puerto.nombre">
-            {{ puerto.nombre }}: {{ puerto.cantidad }}
-          </option>
-        </select>
-      </td>-->
-
-          <!--   <td>{{ equipo.fechaCompra }}</td>-->
           <td>{{ equipo.estado }}</td>
           <td>
             <button *ngIf="isAdminOrModerador" class="btn btn-info btn-sm me-3" (click)="abrirModalEditar(equipo)"><i

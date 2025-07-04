@@ -25,16 +25,12 @@ export class PersonalListComponent implements OnInit {
   isModalVisible = false;
   isEditMode = false;
   searchNombre: string = '';
-
   userRole: string = '';
   ordenDescendente: boolean = true;
-
-
   mensajeExito: string = '';
   mensajeError: string = '';
   isConfirmDeleteVisible: boolean = false;
   idParaEliminar: string | null = null;
-
   loading = true;
 
 
@@ -166,7 +162,7 @@ export class PersonalListComponent implements OnInit {
     } else {
       this.idParaEliminar = id.toString();
     }
-    this.isConfirmDeleteVisible = true; // Muestra el modal
+    this.isConfirmDeleteVisible = true; 
   }
 
   // Método para confirmar la eliminación
@@ -176,14 +172,14 @@ export class PersonalListComponent implements OnInit {
         () => {
           this.cargarPersonal();
           this.mostrarNotificacion('Personal eliminado con éxito', 'success');
-          this.isConfirmDeleteVisible = false; // Oculta el modal
-          this.idParaEliminar = null; // Limpia el ID
+          this.isConfirmDeleteVisible = false; 
+          this.idParaEliminar = null; 
         },
         (error) => {
           console.error('Error al eliminar personal:', error);
           this.mostrarNotificacion('Error al eliminar personal', 'error');
-          this.isConfirmDeleteVisible = false; // Oculta el modal
-          this.idParaEliminar = null; // Limpia el ID
+          this.isConfirmDeleteVisible = false; 
+          this.idParaEliminar = null; 
         }
       );
     }
@@ -191,13 +187,13 @@ export class PersonalListComponent implements OnInit {
 
   // Método para cancelar la eliminación
   cancelarEliminacion(): void {
-    this.isConfirmDeleteVisible = false; // Oculta el modal
-    this.idParaEliminar = null; // Limpia el ID
+    this.isConfirmDeleteVisible = false; 
+    this.idParaEliminar = null; 
   }
 
   // Método para eliminar personal (actualizado para usar el modal de confirmación)
   eliminarPersonal(id: any): void {
-    this.abrirModalConfirmacionEliminar(id); // Abre el modal de confirmación
+    this.abrirModalConfirmacionEliminar(id); 
   }
 
 
@@ -237,27 +233,27 @@ export class PersonalListComponent implements OnInit {
   mostrarNotificacion(mensaje: string, tipo: 'success' | 'error') {
     if (tipo === 'success') {
       this.mensajeExito = mensaje;
-      setTimeout(() => this.mensajeExito = '', 3000); // Oculta el mensaje después de 3 segundos
+      setTimeout(() => this.mensajeExito = '', 3000);
     } else if (tipo === 'error') {
       this.mensajeError = mensaje;
-      setTimeout(() => this.mensajeError = '', 3000); // Oculta el mensaje después de 3 segundos
+      setTimeout(() => this.mensajeError = '', 3000);
     }
   }
 
   // Método para redirigir al Dashboard
   irAlDashboard(): void {
-    this.router.navigate(['/dashboard']); // Cambia la ruta según tu configuración de rutas
+    this.router.navigate(['/dashboard']); 
   }
 
   // Método para cerrar sesión
   cerrarSesion(): void {
-    this.loginService.logout(); // Llama al método de logout de tu servicio
-    this.router.navigate(['/login']); // Redirige al login después del logout
+    this.loginService.logout(); 
+    this.router.navigate(['/login']); 
   }
 
   alternarOrden(): void {
     this.ordenDescendente = !this.ordenDescendente;
-    this.personalList.reverse(); // invierte el orden actual del array
+    this.personalList.reverse(); 
   }
 
 

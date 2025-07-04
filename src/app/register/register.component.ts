@@ -60,12 +60,12 @@ export class RegisterComponent {
 
   // Método para redirigir al Dashboard
   irAlDashboard(): void {
-    this.router.navigate(['/dashboard']); // Cambia la ruta según tu configuración de rutas
+    this.router.navigate(['/dashboard']); 
   }
 
   // Método para cerrar sesión
   cerrarSesion(): void {
-    this.loginService.logout(); // Llama al método de logout de tu servicio
-    this.router.navigate(['/login']); // Redirige al login después del logout
+    this.loginService.logout(); 
+    this.router.navigate(['/login']);
   }
 }
