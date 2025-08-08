@@ -17,12 +17,12 @@ export interface RegisterRequest {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8080/auth';
-    private apiUrlUser = 'http://localhost:8080/api/user';
+  // private apiUrl = 'http://localhost:8080/auth';
+  //   private apiUrlUser = 'http://localhost:8080/api/user';
 
 
-  //private apiUrl = 'https://seseaz-backend.onrender.com/auth'; 
-  //private apiUrlUser = 'https://seseaz-backend.onrender.com/api/user';
+  private apiUrl = 'https://seseaz-backend.onrender.com/auth'; 
+  private apiUrlUser = 'https://seseaz-backend.onrender.com/api/user';
  // private apiUrl = 'http://192.168.100.32:8080/auth'; 
 
   constructor(private jwtHelper: JwtHelperService, private http: HttpClient) { }
