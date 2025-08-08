@@ -1,0 +1,22 @@
+<nav class="sidebar" [class.collapsed]="collapsed">
+
+ 
+
+  <button class="toggle-btn" (click)="toggleSidebar()">
+    <i class="bi " [class.bi-chevron-left]="!collapsed" [class.bi-chevron-right]="collapsed"></i>
+  </button>
+
+  <ul class="menu-list">
+    <li
+      *ngFor="let module of modules"
+      [routerLink]="module.routerLink"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="menu-item"
+      title="{{ module.title }}"
+    >
+      <i [class]="module.icon" [style.color]="module.color"></i>
+      <span *ngIf="!collapsed">{{ module.title }}</span>
+    </li>
+  </ul>
+</nav>

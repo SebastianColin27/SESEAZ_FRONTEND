@@ -1,0 +1,66 @@
+.sidebar {
+  width: 220px;
+  background-color: rgba(248,249,250,255);
+  color: #1e1e2f;
+  height: 100vh;
+  padding-top: 10px;
+  transition: width 0.3s ease;
+  overflow: hidden;
+  position: fixed;
+}
+
+.sidebar.collapsed {
+  width: 60px;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  color: #1e1e2f;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 100%;
+  height: 40px;
+ 
+}
+.toggle-btn i {
+  width: 100%;
+  height: 100%  ;
+}
+
+
+
+.menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  gap: 12px; 
+  transition: background-color 0.2s ease;
+}
+
+.menu-item i {
+  font-size: 1.3rem;
+  min-width: 24px; /* para que los iconos queden alineados */
+}
+
+.menu-item:hover {
+  background-color: #343454;
+}
+
+.menu-item.active {
+  background-color: #5757a2;
+}
+
+/* Ocultar texto cuando está colapsado */
+.sidebar.collapsed .menu-item span {
+  display: none;
+}

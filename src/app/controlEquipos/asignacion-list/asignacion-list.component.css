@@ -335,22 +335,9 @@ textarea:focus {
   background-color: #c82333;
 }
 
-.custom-date-input {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1em;
-  background-color: #fff;
-  color: #333;
-  cursor: pointer;
-  transition: border-color 0.3s ease;
-}
 
-.custom-date-input:focus {
-  border-color: #007bff;
-  outline: none;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-}
+
+
 
 
 
@@ -541,4 +528,25 @@ textarea:focus {
   display: inline-flex;
 
   align-items: center;
+}
+
+.custom-multiselect-container {
+  background-color: #f8f9fa;
+}
+
+.selected-items .badge {
+  font-size: 0.875rem;
+  padding: 0.5em 0.75em;
+  background-color: #0d6efd;
+  color: white;
+  border-radius: 20px;
+}
+
+.selected-items .badge span:hover {
+  color: #ffc107;
+}
+
+.custom-large-select {
+  height: 200px;
+  min-height: 200px;
 }

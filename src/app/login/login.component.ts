@@ -18,15 +18,15 @@ import { LoadingComponent } from '../controlEquipos/loading/loading.component';
 export class LoginComponent {
   loading = false;
   loginError: string = "";
-  isSubmitting = false; 
-mensajeExito: string = '';
-mensajeError: string = '';
+  isSubmitting = false;
+  mensajeExito: string = '';
+  mensajeError: string = '';
   formBuilder: FormBuilder = inject(FormBuilder);
   router: Router = inject(Router);
   loginService: LoginService = inject(LoginService);
 
   loginForm = this.formBuilder.group({
-  
+
     username: ['', [Validators.required]],
     password: ['', [Validators.required]]
   });
@@ -51,85 +51,72 @@ mensajeError: string = '';
     }
   }
 
+ 
+
   login() {
-    this.loading = true;
+  this.loading = true;
+  this.loginForm.markAllAsTouched();
 
-    this.loginForm.markAllAsTouched();
+  if (this.loginForm.valid && !this.isSubmitting) {
+    this.isSubmitting = true;
+    this.loginError = "";
 
-    if (this.loginForm.valid && !this.isSubmitting) {
-      this.isSubmitting = true; 
-      this.loginError = ""; 
-      console.log('[LoginComponent] Formulario válido. Iniciando llamada a loginService...');
+    this.loginService.login(this.loginForm.value as LoginRequest).subscribe({
+      next: (tokenDevueltoPorServicio) => {
+        const tokenEnStorage = sessionStorage.getItem('token');
 
-      this.loginService.login(this.loginForm.value as LoginRequest).subscribe({
-        next: (tokenDevueltoPorServicio) => {
-         
-          const tokenEnStorage = sessionStorage.getItem('token');
-         
-
-          if (tokenEnStorage) {
-          
-          } else {
-            console.error('[LoginComponent] ¡ERROR CRÍTICO! El token no se encontró en sessionStorage inmediatamente después de que el servicio lo procesó.');
-            this.loginError = "Error inesperado al iniciar sesión. Intente de nuevo.";
-            this.mostrarNotificacion(this.loginError, 'error');
-            this.isSubmitting = false; 
-          }
-        },
-       error: (errorData) => {
-  console.error('[LoginComponent] Callback ERROR ejecutado:', errorData);
-
-  if (errorData.status === 0) {
-    // No se puede contactar el servidor (por ejemplo, backend dormido en Render)
-    this.loginError = 'No se pudo conectar con el servidor. Intenta más tarde.';
-  } else if (errorData.status === 401 || errorData.status === 403) {
-    this.loginError = 'Usuario o contraseña incorrectos.';
-  } else if (errorData.status === 502) {
-    this.loginError = 'Servidor fuera de servicio temporalmente.';
-  } else if (errorData.error?.message) {
-    this.loginError = errorData.error.message;
-  } else {
-    this.loginError = 'Error inesperado. Intenta nuevamente.';
-  }
-
-  this.mostrarNotificacion(this.loginError, 'error');
-  this.loading = false;
-  this.isSubmitting = false;
-}
-,
-        complete: () => {
-          console.info("[LoginComponent] Callback COMPLETE ejecutado.");
-
-          const tokenAntesDeNavegar = sessionStorage.getItem('token');
-          console.log('[LoginComponent] Verificando sessionStorage DENTRO de COMPLETE (antes de navegar):', tokenAntesDeNavegar ? 'ENCONTRADO' : 'NO ENCONTRADO');
-
-          if (tokenAntesDeNavegar) {
-            console.log('[LoginComponent] Token confirmado. Navegando a /dashboard...');
-            this.router.navigateByUrl('/dashboard'); 
-          } else {
-            console.error('[LoginComponent] El token no está presente en COMPLETE. No se navegará.');
-            if (!this.loginError) {
-              this.loginError = "No se pudo completar el inicio de sesión.";
-              this.mostrarNotificacion(this.loginError, 'error');
-            }
-            this.loading = false;
-            this.isSubmitting = false; 
-          }
-        }
-      });
-
-    } else if (!this.isSubmitting) {
-      console.warn('[LoginComponent] Formulario inválido o ya se está enviando.');
-      if (!this.loginForm.valid) {
-        
-        if (this.username.errors?.['required'] || this.password.errors?.['required']) {
-          this.loginError = "Por favor, ingrese su usuario y contraseña.";
+        if (!tokenEnStorage) {
+          console.error('[LoginComponent] ¡ERROR CRÍTICO! El token no se encontró en sessionStorage inmediatamente después de que el servicio lo procesó.');
+          this.loginError = "Error inesperado al iniciar sesión. Intente de nuevo.";
           this.mostrarNotificacion(this.loginError, 'error');
+          this.loading = false; // 
+          this.isSubmitting = false;
+        }
+       
+      },
+
+      error: (errorData: Error) => {
+        console.error(' Callback ERROR ejecutado:', errorData);
+        this.loginError = errorData.message;
+        this.mostrarNotificacion(this.loginError, 'error');
+        this.loading = false; 
+        this.isSubmitting = false;
+      },
+
+      complete: () => {
+        const tokenAntesDeNavegar = sessionStorage.getItem('token');
+
+        if (tokenAntesDeNavegar) {
+          this.router.navigateByUrl('/dashboard');
         } else {
-          this.loginError = "Por favor, complete el formulario correctamente.";
-          this.mostrarNotificacion(this.loginError, 'error');
+          console.error(' El token no está presente en COMPLETE. No se navegará.');
+          if (!this.loginError) {
+            this.loginError = "No se pudo completar el inicio de sesión.";
+            this.mostrarNotificacion(this.loginError, 'error');
+          }
         }
+
+        this.loading = false; 
+        this.isSubmitting = false;
       }
+    });
+
+  } else if (!this.isSubmitting) {
+    this.loading = false; 
+    console.warn('Formulario inválido o ya se está enviando.');
+
+    if (!this.loginForm.valid) {
+      if (this.username.errors?.['required'] || this.password.errors?.['required']) {
+        console.warn('Campos requeridos no completados.');
+        this.loginError = "Por favor, ingrese su usuario y contraseña.";
+      } else {
+        this.loginError = "Por favor, complete el formulario correctamente.";
+        console.warn('Formulario incompleto o inválido.');
+      }
+
+      this.mostrarNotificacion(this.loginError, 'error');
     }
   }
+}
+
 }

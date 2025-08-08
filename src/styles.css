@@ -1,1 +1,39 @@
-/* You can add global styles to this file, and also import other style files */
+
+body, input, button, select, textarea {
+  font-family: 'Segoe UI', Arial, sans-serif !important;
+  font-size: 1rem !important;
+  
+}
+
+body {
+
+  
+}
+
+/* Contenedor principal que aloja sidebar y contenido */
+.layout-container {
+  display: flex;
+  height: 100vh; /* ocupa toda la pantalla vertical */
+  overflow: hidden;
+}
+
+/* Sidebar tiene ancho fijo */
+app-sidebar {
+  flex-shrink: 0; /* no se encoge */
+  
+}
+
+/* Contenido principal a la derecha del sidebar, ocupa el resto */
+.content-container {
+  flex-grow: 1;
+  overflow-y: auto; /* scroll vertical si contenido es largo */
+  padding-top: 10px;
+  background-color: #f8f9fa; /* color claro de fondo */
+}
+.CONTENIDO {
+  margin-left: 50px;
+  border: 2opx solid red;
+  width: 1auto;
+  
+  
+}

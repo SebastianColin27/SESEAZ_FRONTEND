@@ -2,17 +2,19 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PersonalService } from '../../services/personal.service';
 import { Personal } from '../../models/personal';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, NgForm, ReactiveFormsModule } from '@angular/forms';
 import { LoginService } from '../../auth/login.service';
 import { AuthService } from '../../auth/auth.service';
 import { Router } from '@angular/router';
 import { LoadingComponent } from "../loading/loading.component";
+import { Inject } from '@angular/core';
+import { SidebarComponent } from '../sidebar/sidebar.component';
 
 
 @Component({
   selector: 'app-personal-list',
   standalone: true,
-  imports: [FormsModule, CommonModule, ReactiveFormsModule, LoadingComponent],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule, LoadingComponent,  SidebarComponent],
   templateUrl: './personal-list.component.html',
   styleUrl: './personal-list.component.css',
 })
@@ -32,12 +34,19 @@ export class PersonalListComponent implements OnInit {
   isConfirmDeleteVisible: boolean = false;
   idParaEliminar: string | null = null;
   loading = true;
+  fechaLimite: Date = new Date();
 
+  itemsPerPage = 10;
+  currentPage = 1;
+   paginatedList: any[] = [];
 
 
   constructor(private personalService: PersonalService, private cdr: ChangeDetectorRef,
     private loginService: LoginService, public authService: AuthService,
-    private router: Router,) { }
+    private router: Router, @Inject('FECHA_HOY') public fechaHoy: String) { }
+  ngAfterViewInit(): void {
+    throw new Error('Method not implemented.');
+  }
 
   get isAdmin(): boolean {
     return this.authService.hasRole('ROLE_ADMIN');
@@ -68,7 +77,9 @@ export class PersonalListComponent implements OnInit {
           }
           return item;
         });
-        console.log('Lista de personal cargada:', this.personalList);
+        this.currentPage = 1
+        this.updatePaginatedList();
+        // console.log('Lista de personal cargada:', this.personalList);
       },
       (error) => {
         console.error('Error loading personal:', error);
@@ -98,7 +109,7 @@ export class PersonalListComponent implements OnInit {
       }
     }
 
-    console.log('ID procesado para edición:', this.selectedPersonal.id);
+    // console.log('ID procesado para edición:', this.selectedPersonal.id);
     this.isEditMode = true;
     this.isModalVisible = true;
   }
@@ -109,26 +120,92 @@ export class PersonalListComponent implements OnInit {
     this.selectedPersonal = null;
   }
 
-  guardarPersonal(): void {
+
+
+  guardarPersonal(form: NgForm): void {
+    if (form.invalid) {
+      form.control.markAllAsTouched(); // Para que se muestren los errores si hay campos vacíos
+      this.mostrarNotificacion('Completa todos los campos obligatorios', 'error');
+      return;
+    }
+    this.loading = true;
+
+    const fechaIngreso = new Date(this.selectedPersonal?.fechaIngreso || '');
+    const fechaEgreso = new Date(this.selectedPersonal?.fechaEgreso || '');
+    const hoy = new Date();
+    const fechaLimite = new Date();
+    fechaLimite.setFullYear(hoy.getFullYear() + 10);
+    const anioIngreso = fechaIngreso.getFullYear();
+    const anioEgreso = fechaEgreso.getFullYear();
+      const limite = this.fechaLimite.getFullYear();
+
+
+    if (anioIngreso < 2017 || anioIngreso > limite) {
+      this.mostrarNotificacion('El año de ingreso debe ser coherente', 'error');
+      this.loading = false;
+      return;
+    }
+
+    if (anioEgreso < 2017 || anioEgreso > limite) {
+      this.mostrarNotificacion('El año de egreso debe ser coherente', 'error');
+      this.loading = false;
+      return;
+    }
+
+    if (fechaEgreso < fechaIngreso) {
+      this.mostrarNotificacion('La fecha de egreso no puede ser anterior a la fecha de ingreso', 'error');
+      this.loading = false;
+      return;
+    }
+
     if (this.selectedPersonal) {
+      const nombre = this.selectedPersonal.nombre?.trim();
+
+      // Validar caracteres permitidos en el nombre
+      const regex = /^[a-zA-Z ]+$/;
+      if (!regex.test(nombre)) {
+        this.mostrarNotificacion(
+          'El nombre solo puede contener letras',
+          'error'
+        );
+        this.loading = false;
+        return;
+      }
+
+      // Validar duplicados (ignorando el mismo registro si se está editando)
+      const yaExiste = this.personalList.some(p =>
+        p.nombre?.trim().toLowerCase() === nombre.toLowerCase() &&
+        (!this.isEditMode || (this.selectedPersonal && p.id !== this.selectedPersonal.id))
+      );
+
+      if (yaExiste) {
+        this.mostrarNotificacion('El nombre ya está registrado para otro personal', 'error');
+        this.loading = false;
+        return;
+      }
+
       if (this.isEditMode && this.selectedPersonal.id) {
-        const idValido = typeof this.selectedPersonal.id === 'string' ? this.selectedPersonal.id : this.selectedPersonal.id.$oid;
+        const idValido = typeof this.selectedPersonal.id === 'string'
+          ? this.selectedPersonal.id
+          : this.selectedPersonal.id.$oid;
 
         if (!idValido) {
           console.error('Error: ID inválido para actualización');
+          this.loading = false;
           return;
         }
 
-        console.log('Usando ID para actualización:', idValido);
         this.personalService.actualizarPersonal(idValido, this.selectedPersonal).subscribe(
           (personalActualizado) => {
             this.cargarPersonal();
             this.cerrarModal();
             this.mostrarNotificacion('Personal actualizado con éxito', 'success');
+            this.loading = false;
           },
           (error) => {
             console.error('Error al actualizar personal:', error);
             this.mostrarNotificacion('Error al actualizar personal', 'error');
+            this.loading = false;
           }
         );
       } else {
@@ -137,14 +214,15 @@ export class PersonalListComponent implements OnInit {
 
         this.personalService.crearPersonal(nuevoPersonal).subscribe(
           (nuevoPersonalCreado) => {
-            console.log('Personal creado:', nuevoPersonalCreado);
             this.cargarPersonal();
             this.cerrarModal();
             this.mostrarNotificacion('Personal agregado con éxito', 'success');
+            this.loading = false;
           },
           (error) => {
             console.error('Error al crear personal:', error);
             this.mostrarNotificacion('Error al crear personal', 'error');
+            this.loading = false;
           }
         );
       }
@@ -162,7 +240,7 @@ export class PersonalListComponent implements OnInit {
     } else {
       this.idParaEliminar = id.toString();
     }
-    this.isConfirmDeleteVisible = true; 
+    this.isConfirmDeleteVisible = true;
   }
 
   // Método para confirmar la eliminación
@@ -172,14 +250,14 @@ export class PersonalListComponent implements OnInit {
         () => {
           this.cargarPersonal();
           this.mostrarNotificacion('Personal eliminado con éxito', 'success');
-          this.isConfirmDeleteVisible = false; 
-          this.idParaEliminar = null; 
+          this.isConfirmDeleteVisible = false;
+          this.idParaEliminar = null;
         },
         (error) => {
           console.error('Error al eliminar personal:', error);
           this.mostrarNotificacion('Error al eliminar personal', 'error');
-          this.isConfirmDeleteVisible = false; 
-          this.idParaEliminar = null; 
+          this.isConfirmDeleteVisible = false;
+          this.idParaEliminar = null;
         }
       );
     }
@@ -187,13 +265,13 @@ export class PersonalListComponent implements OnInit {
 
   // Método para cancelar la eliminación
   cancelarEliminacion(): void {
-    this.isConfirmDeleteVisible = false; 
-    this.idParaEliminar = null; 
+    this.isConfirmDeleteVisible = false;
+    this.idParaEliminar = null;
   }
 
   // Método para eliminar personal (actualizado para usar el modal de confirmación)
   eliminarPersonal(id: any): void {
-    this.abrirModalConfirmacionEliminar(id); 
+    this.abrirModalConfirmacionEliminar(id);
   }
 
 
@@ -205,6 +283,8 @@ export class PersonalListComponent implements OnInit {
       this.personalService.buscarPersonalPorNombre(nombre).subscribe({
         next: (data: Personal[]) => {
           this.personalList = data;
+          this.currentPage = 1;
+          this.updatePaginatedList();
         },
         error: (err) => {
           console.error('Error al buscar personal por nombre:', err);
@@ -213,6 +293,11 @@ export class PersonalListComponent implements OnInit {
     } else {
       this.cargarPersonal();
     }
+  }
+
+  limpiarYMostrarTodo(): void {
+    this.searchNombre = '';
+    this.cargarPersonal();
   }
 
 
@@ -242,23 +327,49 @@ export class PersonalListComponent implements OnInit {
 
   // Método para redirigir al Dashboard
   irAlDashboard(): void {
-    this.router.navigate(['/dashboard']); 
-  }
-
-  // Método para cerrar sesión
-  cerrarSesion(): void {
-    this.loginService.logout(); 
-    this.router.navigate(['/login']); 
-  }
-
-  alternarOrden(): void {
-    this.ordenDescendente = !this.ordenDescendente;
-    this.personalList.reverse(); 
+    this.router.navigate(['/dashboard']);
   }
 
 
+  // Paginación
 
 
+  updatePaginatedList() {
+  const start = (this.currentPage - 1) * this.itemsPerPage;
+  const end = start + this.itemsPerPage;
+  this.paginatedList = this.personalList.slice(start, end);
+}
 
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePaginatedList();
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePaginatedList();
+    }
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.personalList.length / this.itemsPerPage);
+  }
+
+  get startIndex(): number {
+  return (this.currentPage - 1) * this.itemsPerPage + 1;
+}
+
+get endIndex(): number {
+  const end = this.startIndex + this.paginatedList.length - 1;
+  return end > this.personalList.length ? this.personalList.length : end;
+} 
+onItemsPerPageChange() {
+  this.currentPage = 1; // reiniciar a la primera página
+  this.updatePaginatedList();
+}
 
 }
+

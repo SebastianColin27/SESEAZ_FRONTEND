@@ -1,18 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LicenciaService } from '../../services/licencia.service';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormsModule, NgForm, ReactiveFormsModule } from '@angular/forms';
 import { Licencia } from '../../models/licencia';
 import { Router } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
 import { LoginService } from '../../auth/login.service';
-import { catchError, debounceTime, distinctUntilChanged, of, Subscription, switchMap } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, of, Subscription, switchMap, tap } from 'rxjs';
 import { LoadingComponent } from '../loading/loading.component';
+import { evitarNegativos } from '../../input-utils';  
+import { SidebarComponent } from '../sidebar/sidebar.component';
 
 @Component({
   selector: 'app-licencia-list',
   standalone: true,
-  imports: [FormsModule, CommonModule, ReactiveFormsModule, LoadingComponent],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule, LoadingComponent, SidebarComponent],
   templateUrl: './licencia-list.component.html',
   styleUrl: './licencia-list.component.css',
 })
@@ -31,8 +33,14 @@ export class LicenciaListComponent implements OnInit {
   idParaEliminar: string | null = null;
   ultimaFechaVencimiento: string | null = null;
   searchControl = new FormControl('');
+  fechaLimite: Date = new Date();
+  evitarNegativos = evitarNegativos;
 
   private searchSubscription?: Subscription;
+
+  paginatedList: any[] = [];
+  itemsPerPage = 10;
+  currentPage = 1;
 
   constructor(private licenciaService: LicenciaService,
     private loginService: LoginService, public authService: AuthService,
@@ -56,31 +64,39 @@ export class LicenciaListComponent implements OnInit {
 
 
   ngOnInit(): void {
-    setTimeout(() => this.loading = false, 500); 
+    setTimeout(() => this.loading = false, 500);
     this.cargarLicencias();
-
     this.searchSubscription = this.searchControl.valueChanges
       .pipe(
         debounceTime(300),
         distinctUntilChanged(),
         switchMap((value) => {
-          if (!value || !value.trim()) {
+          const trimmedValue = value?.trim();
+          if (!trimmedValue) {
             this.cargarLicencias();
             return of(null);
           }
-          return this.licenciaService.buscarLicenciasPorNombre(value.trim()).pipe(
+
+          return this.licenciaService.buscarLicenciasPorNombre(trimmedValue).pipe(
+            tap((licencias: Licencia[]) => {
+              this.licenciaList = licencias;
+              this.currentPage = 1;
+              this.updatePaginatedList();
+              this.mensajeError = '';
+            }),
             catchError(err => {
               console.error('Error al buscar licencia:', err);
               this.mensajeError = 'No se encontró la licencia con la serie ingresada.';
+              this.licenciaList = [];
+              this.updatePaginatedList();
               return of(null);
             })
           );
         })
       )
-      .subscribe((licencia) => {
-        if (licencia) {
-          this.licenciaList = licencia || [];
-          this.mensajeError = '';
+      .subscribe((licencias) => {
+        if (!licencias && this.searchControl.value?.trim()) {
+          this.mensajeError = 'No se encontró la licencia con la serie ingresada.';
         }
       });
   }
@@ -90,10 +106,13 @@ export class LicenciaListComponent implements OnInit {
   }
 
   cargarLicencias(): void {
+    this.searchControl.setValue('');
     this.licenciaService.obtenerTodasLasLicencias().subscribe(
       (data: Licencia[]) => {
         this.licenciaList = data;
-        console.log('Lista de licencias cargada:', this.licenciaList);
+        this.currentPage = 1;
+        this.updatePaginatedList();
+        // console.log('Lista de licencias cargada:', this.licenciaList);
       },
       (error) => {
         console.error('Error al cargar licencias:', error);
@@ -120,38 +139,88 @@ export class LicenciaListComponent implements OnInit {
     this.selectedLicencia = null;
   }
 
-  guardarLicencia(): void {
+
+  guardarLicencia(form: NgForm): void {
+    if (form.invalid) {
+      form.control.markAllAsTouched(); // Para que se muestren los errores si hay campos vacíos
+      this.mostrarNotificacion('Completa todos los campos obligatorios', 'error');
+      return;
+    }
+    this.loading = true;
+
+    const fecha = new Date(this.selectedLicencia?.fechaVencimiento || '');
+    const anio = fecha.getFullYear();
+    const hoy = new Date();
+    this.fechaLimite.setFullYear(hoy.getFullYear() + 10);
+    const limite = this.fechaLimite.getFullYear();
+
+    if (anio < 2017 || anio > limite) {
+      this.mostrarNotificacion('El año de vencimineto debe ser coherente', 'error');
+      this.loading = false;
+      return;
+    }
+    
     if (this.selectedLicencia) {
- 
+      const numeroSerie = (this.selectedLicencia.numeroSerie ?? '').trim();
+
+      // Validar que el número de serie no contenga caracteres especiales
+      const regex = /^[a-zA-Z0-9 _-]+$/;
+      if (!regex.test(numeroSerie)) {
+        this.mostrarNotificacion('El número de serie solo puede contener letras, números, guiones o guiones bajos', 'error');
+        this.loading = false;
+        return;
+      }
+
+      // Validar que no se duplique el número de serie (ignorando si es edición del mismo objeto)
+      const yaExiste = this.licenciaList.some(lic =>
+        lic.numeroSerie === numeroSerie &&
+        (!this.isEditMode || (this.selectedLicencia && lic.id !== this.selectedLicencia.id)) // evitar conflicto si es la misma licencia en edición
+      );
+
+      if (yaExiste) {
+        this.mostrarNotificacion('El número de serie ya existe', 'error');
+        this.loading = false;
+        return;
+      }
+
       if (this.isEditMode && this.selectedLicencia.id) {
         this.licenciaService.actualizarLicencia(this.selectedLicencia.id, this.selectedLicencia).subscribe(
           (licenciaActualizada) => {
             this.cargarLicencias();
             this.cerrarModal();
-            console.log('Licencia actualizada:', licenciaActualizada);
             this.mostrarNotificacion('Licencia actualizada con éxito', 'success');
+            this.loading = false;
           },
           (error) => {
             console.error('Error al actualizar licencia:', error);
             this.mostrarNotificacion('Error al actualizar licencia', 'error');
+            this.loading = false;
           }
         );
       } else {
         this.licenciaService.crearLicencia(this.selectedLicencia).subscribe(
           (nuevaLicencia) => {
-            console.log('Licencia creada:', nuevaLicencia);
             this.cargarLicencias();
             this.cerrarModal();
             this.mostrarNotificacion('Licencia agregada con éxito', 'success');
+            this.loading = false;
           },
           (error) => {
             console.error('Error al crear licencia:', error);
             this.mostrarNotificacion('Error al crear licencia', 'error');
+            this.loading = false;
           }
         );
       }
     }
+    if (!this.selectedLicencia || this.selectedLicencia.numeroUsuarios == null || this.selectedLicencia.numeroUsuarios <= 0) {
+      this.mostrarNotificacion('El número de usuarios soportados debe ser mayor a cero', 'error');
+      this.loading = false;
+      return;
+    }
+    
   }
+
   // Método para abrir el modal de confirmación
   abrirModalConfirmacionEliminar(id: any): void {
     if (typeof id === 'object') {
@@ -181,7 +250,7 @@ export class LicenciaListComponent implements OnInit {
           console.error('Error al eliminar licencial:', error);
           this.mostrarNotificacion('Error al eliminar licencia', 'error');
           this.isConfirmDeleteVisible = false;
-          this.idParaEliminar = null; 
+          this.idParaEliminar = null;
         }
       );
     }
@@ -189,13 +258,13 @@ export class LicenciaListComponent implements OnInit {
 
   // Método para cancelar la eliminación
   cancelarEliminacion(): void {
-    this.isConfirmDeleteVisible = false; 
-    this.idParaEliminar = null; 
+    this.isConfirmDeleteVisible = false;
+    this.idParaEliminar = null;
   }
 
   // Método para eliminar personal (actualizado para usar el modal de confirmación)
   eliminarLicencia(id: any): void {
-    this.abrirModalConfirmacionEliminar(id); 
+    this.abrirModalConfirmacionEliminar(id);
   }
 
   buscarPorNombre(): void {
@@ -203,6 +272,8 @@ export class LicenciaListComponent implements OnInit {
       this.licenciaService.buscarLicenciasPorNombre(this.searchNombre).subscribe(
         (data: Licencia[]) => {
           this.licenciaList = data;
+          this.currentPage = 1;
+          this.updatePaginatedList();
         },
         (error) => {
           console.error('Error al buscar licencias:', error);
@@ -230,38 +301,68 @@ export class LicenciaListComponent implements OnInit {
   mostrarNotificacion(mensaje: string, tipo: 'success' | 'error') {
     if (tipo === 'success') {
       this.mensajeExito = mensaje;
-      setTimeout(() => this.mensajeExito = '', 3000); 
+      setTimeout(() => this.mensajeExito = '', 3000);
     } else if (tipo === 'error') {
       this.mensajeError = mensaje;
-      setTimeout(() => this.mensajeError = '', 3000); 
+      setTimeout(() => this.mensajeError = '', 3000);
     }
   }
 
   // Método para redirigir al Dashboard
   irAlDashboard(): void {
-    this.router.navigate(['/dashboard']); 
-  }
-
-  // Método para cerrar sesión
-  cerrarSesion(): void {
-    this.loginService.logout(); 
-    this.router.navigate(['/login']); 
+    this.router.navigate(['/dashboard']);
   }
 
 
-  // Método para alternar el orden de la tabla
-  alternarOrden(): void {
-    this.ordenDescendente = !this.ordenDescendente;
-    this.licenciaList.reverse(); // invierte el orden actual del array
-  }
 
   // Método llamado cuando cambia la selección de suscripción
   onSubscriptionChange(): void {
     if (this.selectedLicencia && this.selectedLicencia.subcripcion === 'PERMANENTE') {
-      
+
       this.selectedLicencia.fechaVencimiento = undefined; // O null
     }
     // Si la suscripción NO es permanente, no hacemos nada aquí.
     // El input de fecha se habilita automáticamente y el usuario puede ingresar una fecha.
   }
+
+  updatePaginatedList() {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    this.paginatedList = this.licenciaList.slice(start, end);
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePaginatedList();
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePaginatedList();
+    }
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.licenciaList.length / this.itemsPerPage);
+  }
+
+  get startIndex(): number {
+  return (this.currentPage - 1) * this.itemsPerPage + 1;
 }
+
+get endIndex(): number {
+  const end = this.startIndex + this.paginatedList.length - 1;
+  return end > this.licenciaList.length ? this.licenciaList.length : end;
+}
+
+onItemsPerPageChange() {
+  this.currentPage = 1; // reiniciar a la primera página
+  this.updatePaginatedList();
+}
+
+ 
+}
+

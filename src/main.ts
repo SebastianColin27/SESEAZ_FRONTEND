@@ -1,5 +1,5 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
+import { appConfig, appConfigProviders } from './app/app.config';
 import { AppComponent } from './app/app.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
@@ -9,6 +9,7 @@ import { environment } from './environments/environment';
 
 import { JwtInterceptor } from './app/auth/jwt.interceptor'; 
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
+
 
 export function tokenGetter() {
   
@@ -33,7 +34,8 @@ bootstrapApplication(AppComponent, {
       provide: HTTP_INTERCEPTORS,
       useClass: JwtInterceptor,
       multi: true
-    }
+    },
+    ...appConfigProviders
   ]
 })
   .then(() => console.log('Application started'))

@@ -3,52 +3,61 @@
 <!-- Mensajes de éxito -->
   <!-- Contenedor de notificaciones -->
   <div class="notifications-container">
-    <!-- Notificación de éxito -->
-    <div *ngIf="mensajeExito" class="notification success">
-      <span class="notification-icon"></span>
-      {{ mensajeExito }}
-    </div>
+    <!-- Notificación de Éxito -->
+<div *ngIf="mensajeExito" class="notification success">
+  <span class="notification-icon">✅</span>
+  <span class="notification-message">{{ mensajeExito }}</span>
+</div>
 
-    <!-- Notificación de error -->
-    <div *ngIf="mensajeError" class="notification error">
-      <span class="notification-icon"></span>
-      {{ mensajeError }}
-    </div>
+<!-- Notificación de Error -->
+<div *ngIf="mensajeError" class="notification error">
+  <span class="notification-icon">⚠️</span>
+  <span class="notification-message">{{ mensajeError }}</span>
+</div>
   </div>
-
-
 
 <div *ngIf="!loading">
   <div class="container">
     <h2 id="Titulo1">SESEAZ</h2>
     <p id="Titulo2">Sistema de Control de Equipos</p>
-    <form [formGroup]="loginForm">
+    <form [formGroup]="loginForm" (ngSubmit)="login()">
       <div class="form-group">
-        <label for="username">Username</label>
+        <label for="username">Usuario</label>
         <input formControlName="username" type="text" id="username" name="username"
-          placeholder="Ingrese su nombre de usuario">
+          placeholder="Ingrese su nombre de usuario" class="form-control"
+           [class.is-invalid]="username.touched && username.invalid">
         <div *ngIf="username.invalid && (username.dirty || username.touched)" class="text-danger">
-          <div *ngIf="username.hasError('required')">
-            El nombre de usuarioes requerido.
-          </div>
+          <div *ngIf="username.touched && username.hasError('required')" class="invalid-feedback">
+      El nombre de usuario es obligatorio.
+    </div>
           <div *ngIf="username.hasError('username')">
             El formato del nombre de usuario es incorrecto.
           </div>
         </div>
       </div>
+
       <div class="form-group">
         <label for="password">Contraseña</label>
         <input type="password" id="password" name="password" formControlName="password"
-          placeholder="Ingrese su contraseña">
+          placeholder="Ingrese su contraseña" class="form-control"
+           [class.is-invalid]="password.touched && password.invalid">
         <div *ngIf="password.invalid && (password.dirty || password.touched)" class="text-danger">
-          <div *ngIf="password.hasError('required')">
-            La contraseña es requerida.
-          </div>
+          <div *ngIf="password.touched && password.hasError('required')" class="invalid-feedback">
+      La contraseña es obligatoria.
+    </div>
         </div>
       </div>
+      
       <div class="d-grid gap-2">
-        <button type="submit" class="btn btn-primary btn-efecto" (click)="login()">Iniciar sesión</button>
-      </div>
+    <button type="submit" class="btn btn-primary btn-efecto" >Iniciar sesión</button>
+  </div>
+
+  <div *ngIf="mensajeError" class="alert alert-danger mt-3">
+    {{ mensajeError }}
+  </div>
+  <div *ngIf="mensajeExito" class="alert alert-success mt-3">
+    {{ mensajeExito }}
+  </div>
     </form>
   </div>
 </div>

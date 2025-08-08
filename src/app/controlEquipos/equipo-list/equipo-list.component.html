@@ -1,328 +1,400 @@
-<div class="ps-3 pe-3">
-  <h2 class="text-center mt-3 mb-3 bi bi-laptop"> Equipos</h2>
+<div class="layout-container">
+  <app-sidebar></app-sidebar>
+  <div class="ps-3 pe-3 CONTENIDO content-container">
+    <h1 class="text-center mt-3 mb-3 bi bi-laptop"> Equipos</h1>
 
 
-  <!-- Spinner de carga -->
-  <app-loading [loading]="loading"></app-loading>
+    <!-- Spinner de carga -->
+    <app-loading [loading]="loading"></app-loading>
 
-  <div class="search-container m-3">
-    <label for="searchControlInput">Buscar por Número de Serie:</label>
-    <input type="text" [formControl]="searchControl" placeholder="Buscar por serie.." />
-    <button type="button" class="btn btn-secondary" (click)="cargarEquipos()">Ver Todos</button>
-  </div>
-
-  <!-- BOTÓN PARA ABRIR EL MODAL EXCEL -->
-  <div *ngIf="isAdmin">
-    <button class="btn btn-outline-primary bi bi-file-earmark-excel-fill" (click)="abrirModalExportar()">
-      Exportar Equipos por Estado
-    </button>
-  </div>
-
-  <div class="d-flex justify-content-between align-items-start">
-
-    <!-- Botón para agregar personal (solo visible para administradores) -->
-    <div *ngIf="isAdmin" class="m-3 w-25">
-      <button class="btn btn-success m-3 w-100 bi bi-plus-circle" (click)="abrirModalAgregar()"> Agregar</button>
+    <div class="search-container m-3">
+      <label for="searchControlInput">Buscar por Número de Serie:</label>
+      <input type="text" [formControl]="searchControl" placeholder="Buscar por serie.." />
+      <button type="button" class="btn btn-secondary" (click)="cargarEquipos()">Ver Todos</button>
     </div>
 
-    <!-- Botones alineados a la izquierda -->
-    <div>
-      <!-- Botón para alternar orden -->
-      <button class="btn btn-secondary bi bi-arrow-down-up m-3" (click)="alternarOrden()"></button>
-      <!-- Botón para ir al Dashboard -->
-      <button class="btn btn-primary m-3 bi bi-house-fill" (click)="irAlDashboard()"> Inicio</button>
-      <!-- Botón para cerrar sesión -->
-      <button class="btn btn-danger m-3 bi bi-door-closed-fill" (click)="cerrarSesion()"> Salir</button>
-
+    <!-- BOTÓN PARA ABRIR EL MODAL EXCEL -->
+    <div *ngIf="isAdmin">
+      <button class="btn btn-outline-primary bi bi-file-earmark-excel-fill" (click)="abrirModalExportar()">
+        Exportar Equipos por Estado
+      </button>
     </div>
 
-  </div>
-  <!-- Mensajes de éxito -->
-  <!-- Contenedor de notificaciones -->
-  <div class="notifications-container">
-    <!-- Notificación de éxito -->
-    <div *ngIf="mensajeExito" class="notification success">
-      <span class="notification-icon"></span>
-      {{ mensajeExito }}
-    </div>
+    <div class="d-flex justify-content-between align-items-start">
 
-    <!-- Notificación de error -->
-    <div *ngIf="mensajeError" class="notification error">
-      <span class="notification-icon"></span>
-      {{ mensajeError }}
-    </div>
-  </div>
-
-  <!-- Filtros -->
-  <div class="filtros" style="width: 350px; display: flex; align-items: center; gap: 10px;">
-    <label>Tipo:
-      <select class="custom-select" [(ngModel)]="filtroTipo" (change)="filtrarEquipos()">
-        <option value="">TODOS</option>
-        <option value="LAPTOP">LAPTOP</option>
-        <option value="PC ESCRITORIO">PC ESCRITORIO</option>
-        <option value="IMPRESORA">IMPRESORA</option>
-        <option value="TABLETA">TABLET</option>
-
-      </select>
-    </label>
-
-    <label>Estado:
-      <select class="custom-select" [(ngModel)]="filtroEstado" (change)="filtrarEquipos()">
-        <option value="">TODOS</option>
-        <option value="EN USO">EN USO</option>
-        <option value="BAJA">DE BAJA</option>
-        <option value="EN REPARACIÓN">EN REPARACIÓN</option>
-        <option value="DISPONIBLE">DISPONIBLE</option>
-      </select>
-    </label>
-  </div>
-
-
-  <!-- Spinner de carga -->
-  <div *ngIf="!loading">
-    <table class="table table-striped m-3 ">
-      <thead>
-        <tr>
-          <th>Número de Serie</th>
-          <th>Tipo</th>
-          <th>Marca</th>
-          <th>Modelo</th>
-          <th>Color</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody class="table-group-divider">
-        <tr *ngFor="let equipo of equiposFiltrados">
-          <td>{{ equipo.numeroSerie }}</td>
-          <td>{{ equipo.tipo }}</td>
-          <td>{{ equipo.marca }}</td>
-          <td>{{ equipo.modelo }}</td>
-          <td>{{ equipo.color }}</td>
-          <td>{{ equipo.estado }}</td>
-          <td>
-            <button *ngIf="isAdminOrModerador" class="btn btn-info btn-sm me-3" (click)="abrirModalEditar(equipo)"><i
-                class="bi bi-pencil"></i></button>
-            <button *ngIf="isAdmin" class="btn btn-danger btn-sm me-3" (click)="eliminarEquipo(equipo.id!)"><i
-                class="bi bi-trash"></i></button>
-            <button class="btn btn-primary" (click)="abrirModalVer(equipo)"><i class="bi bi-eye"></i></button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <p>Total mostrados: {{ equiposFiltrados.length }}</p>
-  </div>
-  <!------------------------------------------ Modal-------------------------------- -->
-  <div *ngIf="isModalVisible" class="modal">
-    <div class="modal-content">
-      <span class="close" (click)="cerrarModal()">×</span>
-      <h3>{{ isEditMode ? 'Editar Equipo' : 'Agregar Equipo' }}</h3>
-
-      <form (ngSubmit)="guardarEquipo()" enctype="multipart/form-data" *ngIf="selectedEquipo">
-        <input type="hidden" [(ngModel)]="selectedEquipo.id" name="id">
-
-
-        <div>
-          <label for="numeroSerie">Número de Serie:</label>
-          <input type="text" id="numeroSerie" name="numeroSerie" [(ngModel)]="selectedEquipo.numeroSerie" required>
-        </div>
-        <div>
-          <label for="numeroInventario">Número de Inventario:</label>
-          <input type="text" id="numeroInventario" name="numeroInventario" [(ngModel)]="selectedEquipo.numeroInventario"
-            required>
-        </div>
-
-
-        <div>
-          <label for="tipo">Tipo:</label>
-          <select class="custom-select" id="tipo" name="tipo" [(ngModel)]="selectedEquipo.tipo" required>
-            <option value="LAPTOP">LAPTOP</option>
-            <option value="PC ESCRITORIO">PC DE ESCRITORIO</option>
-            <option value="TABLETA">TABLETA</option>
-            <option value="IMPRESORA">IMPRESORA</option>
-          </select>
-        </div>
-
-        <div>
-          <label for="marca">Marca:</label>
-          <input type="text" id="marca" name="marca" [(ngModel)]="selectedEquipo.marca" required>
-        </div>
-        <div>
-          <label for="marca">Color:</label>
-          <input type="text" id="color" name="color" [(ngModel)]="selectedEquipo.color" required>
-        </div>
-        <div>
-          <label for="modelo">Modelo:</label>
-          <input type="text" id="modelo" name="modelo" [(ngModel)]="selectedEquipo.modelo" required>
-        </div>
-        <div>
-          <label for="procesador">Procesador:</label>
-          <input type="text" id="procesador" name="procesador" [(ngModel)]="selectedEquipo.procesador">
-        </div>
-        <div>
-          <label for="ram">RAM (GB):</label>
-          <input type="number" id="ram" name="ram" [(ngModel)]="selectedEquipo.ram" required>
-        </div>
-        <div>
-          <label for="almacenamiento">HDD (GB):</label>
-          <input type="number" id="almacenamientoHDD" name="almacenamientoHDD" [(ngModel)]="selectedEquipo.hdd"
-            required>
-        </div>
-        <div>
-          <label for="almacenamiento">SDD (GB):</label>
-          <input type="number" id="almacenamientoSDD" name="almacenamientoSDD" [(ngModel)]="selectedEquipo.sdd"
-            required>
-        </div>
-        <div>
-          <label for="estado">Estado:</label>
-          <select id="estado" name="estado" [(ngModel)]="selectedEquipo.estado">
-            <option value="DISPONIBLE">DISPONIBLE</option>
-            <option value="EN USO">EN USO</option>
-            <option value="EN REPARACIÓN">EN REPARACIÓN</option>
-            <option value="BAJA">BAJA</option>
-          </select>
-        </div>
-        <div>
-          <label for="fechaCompra">Fecha de compra:</label>
-          <input type="date" id="fechaCompra" name="fechaIngreso" [(ngModel)]="selectedEquipo.fechaCompra" required>
-        </div>
-
-        <!-- Campos para los puertos -->
-        <div *ngIf="selectedEquipo.puertos">
-          <label>Puertos:</label>
-          <div class="puertos-container">
-            <div *ngFor="let port of ['usb', 'ethernet', 'hdmi', 'tipoC', 'jack_35', 'vga', 'sd']">
-              <label>
-                <input type="checkbox" [(ngModel)]="selectedEquipo.puertos[port + 'Check']" [name]="port + 'Check'">
-                {{ port.toUpperCase() }}
-              </label>
-              <input type="number" [id]="port" [name]="port" [(ngModel)]="selectedEquipo.puertos[port]"
-                [disabled]="!selectedEquipo.puertos[port + 'Check']">
-            </div>
-          </div>
-        </div>
-
-        <!-- Imagen -->
-        <div class="form-group" *ngIf="isAdminOrModerador">
-          <label for="imagenFile">Imagen:</label>
-          <input type="file" id="imagenFile" (change)="onFileSelected($event)" accept="image/*" class="form-control">
-        </div>
-
-        <!-- Imagen Preview  -->
-        <div *ngIf="imagenPreview" class="form-group image-preview-container">
-          <label class="form-label">Previsualización:</label>
-          <img [src]="imagenPreview" alt="Imagen seleccionada" class="img-preview">
-        </div>
-
-
-        <div class="buttons">
-          <button class="btn btn-success me-3" type="submit">Guardar</button>
-          <button class="btn btn-danger" type="button" (click)="cancelarEdicion()">Cancelar</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-
-  <!-- Modal para visualizar detalles  -->
-  <div *ngIf="isViewModalVisible" class="modal">
-    <div class="modal-content">
-      <span class="close" (click)="cerrarModalVer()">&times;</span>
-      <h3 class="text-center">Detalles de los Equipos</h3>
-      <p><strong>Numero de Serie:</strong> {{ selectedEquipo?.numeroSerie }}</p>
-      <p><strong>Numero de Inventario:</strong> {{ selectedEquipo?.numeroInventario }}</p>
-      <p><strong>Tipo:</strong> {{ selectedEquipo?.tipo}}</p>
-      <p><strong>Marca:</strong> {{ selectedEquipo?.marca }}</p>
-      <p><strong>Modelo:</strong> {{ selectedEquipo?.modelo }}</p>
-      <p><strong>Color:</strong> {{ selectedEquipo?.color }}</p>
-      <p><strong>Procesador:</strong> {{ selectedEquipo?.procesador }}</p>
-      <p><strong>RAM:</strong> {{ selectedEquipo?.ram}} GB</p>
-      <p><strong>Almacenamiento de HDD</strong> {{ selectedEquipo?.hdd }} GB</p>
-      <p><strong>Almacenamiento de SDD</strong> {{ selectedEquipo?.sdd }} GB</p>
-      <p><strong>Estado:</strong> {{ selectedEquipo?.estado }}</p>
-      <p><strong>Fecha de Compra:</strong> {{ selectedEquipo?.fechaCompra }}</p>
-      <p><strong>Puertos:</strong> </p>
-      <p>
-        <span *ngIf="selectedEquipo?.puertos">
-          <select class="form-select">
-            <option disabled value="" selected>Puertos</option>
-            <option disabled *ngFor="let puerto of getPuertosList(selectedEquipo)" [value]="puerto.nombre">
-              {{ puerto.nombre }}: {{ puerto.cantidad }}
-            </option>
-          </select>
-          <span *ngIf="getPuertosList(selectedEquipo).length === 0">Sin puertos</span>
-        </span>
-      </p>
-      <p><strong>Imagen</strong></p>
-      <div *ngIf="selectedEquipo?.imagenUrl">
-        <p>Imagen disponible</p>
-        <button (click)="cargarImagen()" type="button" class="btn btn-secondary">Ver imagen</button>
-        <img *ngIf="imagenPreview" [src]="imagenPreview" alt="..." class="img-fluid">
+      <!-- Botón para agregar personal (solo visible para administradores) -->
+      <div *ngIf="isAdmin" class="m-3 w-25">
+        <button class="btn btn-success m-3 w-100 bi bi-plus-circle" (click)="abrirModalAgregar()"> Agregar</button>
       </div>
 
-      <p *ngIf="!selectedEquipo?.imagenUrl">No hay imagen disponible</p>
+      <!-- Botones alineados a la izquierda -->
+      <div>
+        <!-- Botón para ir al Dashboard -->
+        <button class="btn btn-primary m-3 bi bi-house-fill" (click)="irAlDashboard()"> Inicio</button>
+      </div>
+
     </div>
-  </div>
+    <!-- Mensajes de éxito -->
+    <!-- Contenedor de notificaciones -->
+    <div class="notifications-container">
+      <!-- Notificación de éxito -->
+      <div *ngIf="mensajeExito" class="notification success">
+        <span class="notification-icon"></span>
+        {{ mensajeExito }}
+      </div>
 
-
-
-
-
-  <!-- Modal de confirmación para eliminar -->
-  <div *ngIf="isConfirmDeleteVisible" class="modal-overlay">
-    <div class="modal-container">
-      <span class="close-btn" (click)="cancelarEliminacion()">&times;</span>
-      <h3 class="modal-title">Confirmar Eliminación</h3>
-      <p>¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.</p>
-      <div class="modal-buttons">
-        <button class="btn btn-danger" (click)="confirmarEliminacion()">Eliminar</button>
-        <button class="btn btn-secondary" (click)="cancelarEliminacion()">Cancelar</button>
+      <!-- Notificación de error -->
+      <div *ngIf="mensajeError" class="notification error">
+        <span class="notification-icon"></span>
+        {{ mensajeError }}
       </div>
     </div>
-  </div>
+
+    <!-- Filtros -->
+    <div class="filtros" style="width: 350px; display: flex; align-items: center; gap: 10px;">
+      <label>Tipo:
+        <select class="custom-select" [(ngModel)]="filtroTipo" (change)="filtrarEquipos()">
+          <option value="">TODOS</option>
+          <option value="LAPTOP">LAPTOP</option>
+          <option value="PC ESCRITORIO">PC ESCRITORIO</option>
+          <option value="IMPRESORA">IMPRESORA</option>
+          <option value="TABLETA">TABLET</option>
+
+        </select>
+      </label>
+
+      <label>Estado:
+        <select class="custom-select" [(ngModel)]="filtroEstado" (change)="filtrarEquipos()">
+          <option value="">TODOS</option>
+          <option value="EN USO">EN USO</option>
+          <option value="BAJA">DE BAJA</option>
+          <option value="EN REPARACIÓN">EN REPARACIÓN</option>
+          <option value="DISPONIBLE">DISPONIBLE</option>
+        </select>
+      </label>
+    </div>
 
 
-  <!-- MODAL para exportar a excel  -->
-  <div class="modal" [class.show]="modalExportarVisible" [style.display]="modalExportarVisible ? 'block' : 'none'">
-    <div class="modal-dialog modal-lg">
+    <!-- Spinner de carga -->
+    <div *ngIf="!loading">
+      <table class="table table-striped m-3 ">
+        <thead>
+          <tr>
+            <th>Número de Serie</th>
+            <th>Tipo</th>
+            <th>Marca</th>
+            <th>Modelo</th>
+            <th>Color</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="table-group-divider">
+          <tr *ngFor="let equipo of paginatedList">
+            <td>{{ equipo.numeroSerie }}</td>
+            <td>{{ equipo.tipo }}</td>
+            <td>{{ equipo.marca }}</td>
+            <td>{{ equipo.modelo }}</td>
+            <td>{{ equipo.color }}</td>
+            <td>{{ equipo.estado }}</td>
+            <td>
+              <button *ngIf="isAdminOrModerador" class="btn btn-info btn-sm me-2 mb-2"
+                (click)="abrirModalEditar(equipo)"><i class="bi bi-pencil"></i></button>
+              <button *ngIf="isAdmin" class="btn btn-danger btn-sm me-2 mb-2" (click)="eliminarEquipo(equipo.id!)"><i
+                  class="bi bi-trash"></i></button>
+              <button class="btn btn-primary mb-2" (click)="abrirModalVer(equipo)"><i class="bi bi-eye"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <p>Elementos filtrados: {{ equiposFiltrados.length }}</p>
+
+      <!-- Paginación -->
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <!-- Mostrar cantidad actual -->
+        <div>
+          Mostrando del {{ startIndex }} al {{ endIndex }} de {{ equipoList.length }} elementos
+        </div>
+
+        <!-- Selector de elementos por página -->
+        <div class="d-flex align-items-center">
+          <label for="itemsPerPage" class="me-2 mb-0">Ver:</label>
+          <select id="itemsPerPage" [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange()"
+            class="form-select form-select-sm w-auto ">
+            <option [value]="10">10</option>
+            <option [value]="15">15</option>
+            <option [value]="20">20</option>
+          </select>
+        </div>
+      </div>
+
+
+      <nav class="d-flex justify-content-center">
+        <ul class="pagination">
+          <li class="page-item" [class.disabled]="currentPage === 1">
+            <a class="page-link" (click)="prevPage()">Anterior</a>
+          </li>
+          <li class="page-item disabled">
+            <span class="page-link">Página {{ currentPage }} de {{ totalPages }}</span>
+          </li>
+          <li class="page-item" [class.disabled]="currentPage === totalPages">
+            <a class="page-link" (click)="nextPage()">Siguiente</a>
+          </li>
+        </ul>
+      </nav>
+
+    </div>
+    <!------------------------------------------ Modal-------------------------------- -->
+    <div *ngIf="isModalVisible" class="modal">
       <div class="modal-content">
 
-        <div class="modal-header">
-          <h5 class="modal-title">Exportar equipos por estado</h5>
-          <button type="button" class="btn-close" (click)="cerrarModalExportar()"></button>
+        <div class="modal-header sticky-top bg-white">
+          <h3 class="modal-title">{{ isEditMode ? 'Editar Equipo' : 'Agregar Equipo' }}</h3>
+          <button type="button" class="btn-close" (click)="cerrarModal()"></button>
         </div>
 
-        <div class="modal-body">
-          <h5>Selecciona los campos a exportar:</h5>
-          <div class="row">
-            <div class="col-md-6" *ngFor="let campo of camposDisponibles">
-              <label class="form-check-label">
-                <input type="checkbox" class="form-check-input" [value]="campo.campo"
-                  [checked]="camposSeleccionados.includes(campo.campo)"
-                  (change)="onCheckboxChange($event, campo.campo)" />
-                {{ campo.nombre }}
-              </label>
+
+        <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+          <form (ngSubmit)="guardarEquipo(form)" enctype="multipart/form-data" *ngIf="selectedEquipo" #form="ngForm">
+            <input type="hidden" [(ngModel)]="selectedEquipo.id" name="id">
+
+
+            <div>
+              <label for="numeroSerie">Número de Serie:<span class="text-danger"
+                  title="Campo obligatorio">*</span></label>
+              <input type="text" id="numeroSerie" name="numeroSerie" [(ngModel)]="selectedEquipo.numeroSerie" required>
+            </div>
+            <div>
+              <label for="numeroInventario">Número de Inventario:<span class="text-danger"
+                  title="Campo obligatorio">*</span></label>
+              <input type="text" id="numeroInventario" name="numeroInventario"
+                [(ngModel)]="selectedEquipo.numeroInventario" required>
+            </div>
+
+
+            <div>
+              <label for="tipo">Tipo:<span class="text-danger" title="Campo obligatorio">*</span></label>
+              <select class="custom-select" id="tipo" name="tipo" [(ngModel)]="selectedEquipo.tipo" required>
+                <option value="LAPTOP">LAPTOP</option>
+                <option value="PC ESCRITORIO">PC DE ESCRITORIO</option>
+                <option value="TABLETA">TABLETA</option>
+                <option value="IMPRESORA">IMPRESORA</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="marca">Marca:<span class="text-danger" title="Campo obligatorio">*</span></label>
+              <input type="text" id="marca" name="marca" [(ngModel)]="selectedEquipo.marca" required>
+            </div>
+            <div>
+              <label for="marca">Color:<span class="text-danger" title="Campo obligatorio">*</span></label>
+              <input type="text" id="color" name="color" [(ngModel)]="selectedEquipo.color" required>
+            </div>
+            <div>
+              <label for="modelo">Modelo:<span class="text-danger" title="Campo obligatorio">*</span></label>
+              <input type="text" id="modelo" name="modelo" [(ngModel)]="selectedEquipo.modelo" required>
+            </div>
+            <div>
+              <label for="procesador">Procesador:<span class="text-danger" title="Campo obligatorio">*</span></label>
+              <input type="text" id="procesador" name="procesador" [(ngModel)]="selectedEquipo.procesador" required>
+            </div>
+            <div>
+              <label for="ram">RAM (GB):<span class="text-danger" title="Campo obligatorio">*</span></label>
+              <input type="number" id="ram" name="ram" [(ngModel)]="selectedEquipo.ram" required min="0" step="1"
+                (keydown)="evitarNegativos($event)" (keydown)="evitarEntradaInvalidaNumeros($event)">
+            </div>
+            <div>
+              <label for="almacenamiento">HDD (GB):<span class="text-danger" title="Campo obligatorio">*</span></label>
+              <input type="number" id="almacenamientoHDD" name="almacenamientoHDD" [(ngModel)]="selectedEquipo.hdd"
+                required min="0" step="1" (keydown)="evitarNegativos($event)"
+                (keydown)="evitarEntradaInvalidaNumeros($event)">
+            </div>
+            <div>
+              <label for="almacenamiento">SDD (GB):<span class="text-danger" title="Campo obligatorio">*</span></label>
+              <input type="number" id="almacenamientoSDD" name="almacenamientoSDD" [(ngModel)]="selectedEquipo.sdd"
+                required min="0" step="1" (keydown)="evitarNegativos($event)"
+                (keydown)="evitarEntradaInvalidaNumeros($event)">
+            </div>
+            <div>
+              <label for="estado">Estado:<span class="text-danger" title="Campo obligatorio">*</span></label>
+              <select id="estado" name="estado" [(ngModel)]="selectedEquipo.estado" required>
+                <option value="DISPONIBLE">DISPONIBLE</option>
+                <option value="EN USO">EN USO</option>
+                <option value="EN REPARACIÓN">EN REPARACIÓN</option>
+                <option value="BAJA">BAJA</option>
+              </select>
+            </div>
+            <div>
+              <label for="fechaCompra">Fecha de compra:<span class="text-danger"
+                  title="Campo obligatorio">*</span></label>
+              <input type="date" min="2018-01-01" [max]="fechaHoy" id="fechaCompra" name="fechaIngreso"
+                [(ngModel)]="selectedEquipo.fechaCompra" required>
+            </div>
+
+            <!-- Campos para los puertos -->
+            <div *ngIf="selectedEquipo.puertos">
+              <label>Puertos:<span class="text-danger" title="Campo obligatorio">*</span></label>
+              <div class="puertos-container">
+                <div *ngFor="let port of ['usb', 'ethernet', 'hdmi', 'tipoC', 'jack_35', 'vga', 'sd']">
+                  <label>
+                    <input type="checkbox" [(ngModel)]="selectedEquipo.puertos[port + 'Check']" [name]="port + 'Check'">
+                    {{ port.toUpperCase() }}
+                  </label>
+                  <input type="number" [id]="port" [name]="port" [(ngModel)]="selectedEquipo.puertos[port]"
+                    [disabled]="!selectedEquipo.puertos[port + 'Check']">
+                </div>
+              </div>
+            </div>
+
+            <!-- Imagen -->
+            <div class="form-group" *ngIf="isAdminOrModerador">
+              <label for="imagenFile">Imagen:</label>
+              <input type="file" id="imagenFile" (change)="onFileSelected($event)" accept="image/*"
+                class="form-control">
+            </div>
+
+            <!-- Imagen Preview  -->
+            <div *ngIf="imagenPreview" class="form-group image-preview-container">
+              <label class="form-label">Previsualización:</label>
+              <img [src]="imagenPreview" alt="Imagen seleccionada" class="img-preview ">
+            </div>
+
+
+            <div class="buttons">
+              <button class="btn btn-success me-3" type="submit">Guardar</button>
+              <button class="btn btn-danger" type="button" (click)="cancelarEdicion()">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Modal para visualizar detalles  -->
+    <div *ngIf="isViewModalVisible" class="modal">
+      <div class="modal-content">
+
+        <div class="modal-header sticky-top bg-white mb-3 z-3">
+          <h3 class="modal-title">Detalles del Equipo</h3>
+          <button type="button" class="btn-close" (click)="cerrarModalVer()"></button>
+        </div>
+
+        <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+          <p><strong>Numero de Serie:</strong> {{ selectedEquipo?.numeroSerie }}</p>
+          <p><strong>Numero de Inventario:</strong> {{ selectedEquipo?.numeroInventario }}</p>
+          <p><strong>Tipo:</strong> {{ selectedEquipo?.tipo}}</p>
+          <p><strong>Marca:</strong> {{ selectedEquipo?.marca }}</p>
+          <p><strong>Modelo:</strong> {{ selectedEquipo?.modelo }}</p>
+          <p><strong>Color:</strong> {{ selectedEquipo?.color }}</p>
+          <p><strong>Procesador:</strong> {{ selectedEquipo?.procesador }}</p>
+          <p><strong>RAM:</strong> {{ selectedEquipo?.ram}} GB</p>
+          <p><strong>Almacenamiento de HDD</strong> {{ selectedEquipo?.hdd }} GB</p>
+          <p><strong>Almacenamiento de SDD</strong> {{ selectedEquipo?.sdd }} GB</p>
+          <p><strong>Estado:</strong> {{ selectedEquipo?.estado }}</p>
+          <p><strong>Fecha de Compra:</strong> {{ selectedEquipo?.fechaCompra }}</p>
+          <p><strong>Puertos:</strong> </p>
+
+          <div *ngIf="selectedEquipo?.puertos">
+            <div *ngIf="getPuertosList(selectedEquipo).length > 0; else sinPuertos">
+              <table class="table table-sm table-bordered">
+                <thead class="table-light">
+                  <tr>
+                    <th>Puerto</th>
+                    <th>Cantidad</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let puerto of getPuertosList(selectedEquipo)">
+                    <td>{{ puerto.nombre }}</td>
+                    <td>{{ puerto.cantidad }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <ng-template #sinPuertos>
+              <p class="text-muted">Sin puertos disponibles</p>
+            </ng-template>
+          </div>
+
+          <p><strong>Imagen</strong></p>
+          <div *ngIf="selectedEquipo?.imagenUrl">
+            <p>Imagen disponible</p>
+            <img *ngIf="imagenPreview" [src]="imagenPreview" alt="Imagen del equipo" class="img-thumbnail"
+              style="max-width: 100%; max-height: 300px; justify-content: center; ">
+          </div>
+
+          <p *ngIf="!selectedEquipo?.imagenUrl">No hay imagen disponible</p>
+        </div>
+      </div>
+
+    </div>
+
+
+
+    <!-- Modal de confirmación para eliminar -->
+    <div *ngIf="isConfirmDeleteVisible" class="modal-overlay">
+      <div class="modal-container">
+        <span class="close-btn" (click)="cancelarEliminacion()">&times;</span>
+        <h3 class="modal-title">Confirmar Eliminación</h3>
+        <p>¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.</p>
+        <div class="modal-buttons">
+          <button class="btn btn-danger" (click)="confirmarEliminacion()">Eliminar</button>
+          <button class="btn btn-secondary" (click)="cancelarEliminacion()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- MODAL para exportar a excel  -->
+    <div class="modal" [class.show]="modalExportarVisible" [style.display]="modalExportarVisible ? 'block' : 'none'">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+          <div class="modal-header">
+            <h3 class="modal-title">Exportar equipos por estado</h3>
+            <button type="button" class="btn-close" (click)="cerrarModalExportar()"></button>
+          </div>
+
+          <div class="modal-body">
+            <h5>Selecciona los campos a exportar:</h5>
+
+            <!-- Botón para seleccionar/deseleccionar todos -->
+            <button class="btn btn-sm btn-outline-secondary mb-3" (click)="toggleSeleccionarTodosCampos()">
+              {{ todosLosCamposSeleccionados ? 'Deseleccionar todos' : 'Seleccionar todos' }}
+            </button>
+
+            <div class="row">
+              <div class="col-md-6" *ngFor="let campo of camposDisponibles">
+                <label class="form-check-label">
+                  <input type="checkbox" class="form-check-input" [value]="campo.campo"
+                    [checked]="camposSeleccionados.includes(campo.campo)"
+                    (change)="onCheckboxChange($event, campo.campo)" />
+                  {{ campo.nombre }}
+                </label>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="modal-footer">
-          <button class="btn btn-success" (click)="exportarEquiposPorEstado('EN USO')">
-            Exportar EN USO
-          </button>
-          <button class="btn btn-danger" (click)="exportarEquiposPorEstado('BAJA')">
-            Exportar BAJA
-          </button>
-          <button class="btn btn-primary" (click)="exportarEquiposPorEstado('DISPONIBLE')">
-            Exportar DISPONIBLE
-          </button>
-          <button class="btn btn-warning" (click)="exportarEquiposPorEstado('EN REPARACIÓN')">
-            Exportar EN REPARACIÓN
-          </button>
-          <button class="btn btn-info" (click)="exportarTodosLosEquipos()">
-            Exportar Todos
-          </button>
-          <button class="btn btn-secondary" (click)="cerrarModalExportar()">Cancelar</button>
+          <div class="modal-footer">
+            <button class="btn btn-success" (click)="exportarEquiposPorEstado('EN USO')">
+              Exportar EN USO
+            </button>
+            <button class="btn btn-danger" (click)="exportarEquiposPorEstado('BAJA')">
+              Exportar BAJA
+            </button>
+            <button class="btn btn-primary" (click)="exportarEquiposPorEstado('DISPONIBLE')">
+              Exportar DISPONIBLE
+            </button>
+            <button class="btn btn-warning" (click)="exportarEquiposPorEstado('EN REPARACIÓN')">
+              Exportar EN REPARACIÓN
+            </button>
+            <button class="btn btn-info" (click)="exportarTodosLosEquipos()">
+              Exportar Todos
+            </button>
+            <button class="btn btn-secondary" (click)="cerrarModalExportar()">Cancelar</button>
+          </div>
         </div>
       </div>
     </div>

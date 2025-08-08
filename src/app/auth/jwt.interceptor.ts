@@ -51,8 +51,7 @@ export class JwtInterceptor implements HttpInterceptor {
       const now = Date.now() / 1000;
       return payload.exp < now;
     } catch (error) {
-      console.error('Error verificando expiración del token:', error);
-      return true; // Si hay error, consideramos el token como expirado
+      return true; 
     }
   }
 

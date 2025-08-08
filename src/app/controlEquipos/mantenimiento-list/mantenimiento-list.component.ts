@@ -1,27 +1,28 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MantenimientoService } from '../../services/mantenimiento.service';
 import { AsignacionService } from '../../services/asignacion.service';
 import { Mantenimiento } from '../../models/mantenimiento';
 import { Asignacion } from '../../models/asignacion';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormsModule, NgForm, ReactiveFormsModule } from '@angular/forms';
 import { LoginService } from '../../auth/login.service';
 import { AuthService } from '../../auth/auth.service';
 import { Router } from '@angular/router';
 import { PdfService } from '../../services/pdf.service';
 import { Equipo } from '../../models/equipo';
 import { EquipoService } from '../../services/equipo.service';
-import { catchError, debounceTime, distinctUntilChanged, EMPTY, filter, of, Subscription, switchMap } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, EMPTY, filter, of, Subscription, switchMap, tap } from 'rxjs';
 import { Personal } from '../../models/personal';
 import { PersonalService } from '../../services/personal.service';
 import { LoadingComponent } from '../loading/loading.component';
 import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
+import { SidebarComponent } from '../sidebar/sidebar.component';
 
 @Component({
   selector: 'app-mantenimiento-list',
   standalone: true,
-  imports: [FormsModule, CommonModule, ReactiveFormsModule, LoadingComponent],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule, LoadingComponent, SidebarComponent],
   templateUrl: './mantenimiento-list.component.html',
   styleUrl: './mantenimiento-list.component.css',
 })
@@ -45,10 +46,11 @@ export class MantenimientoListComponent implements OnInit {
   searchControl = new FormControl();
   searchSubscription!: Subscription;
   fechaInicio: Date | null = null;
-fechaFin: Date | null = null;
+  fechaFin: Date | null = null;
 
-
-
+  paginatedList: any[] = [];
+  itemsPerPage = 10;
+  currentPage = 1;
 
   constructor(
     private mantenimientoService: MantenimientoService,
@@ -57,7 +59,8 @@ fechaFin: Date | null = null;
     private personalService: PersonalService,
     private loginService: LoginService, public authService: AuthService,
     private router: Router,
-    private pdfService: PdfService
+    private pdfService: PdfService,
+    @Inject('FECHA_HOY') public fechaHoy: String
   ) { }
 
 
@@ -87,42 +90,44 @@ fechaFin: Date | null = null;
 
     this.cargarPersonal();
 
-
     this.searchSubscription = this.searchControl.valueChanges
       .pipe(
         debounceTime(300),
         distinctUntilChanged(),
         switchMap((value) => {
           const trimmedValue = value?.trim();
+
           if (!trimmedValue) {
-            this.cargarMantenimientos(); 
-            return EMPTY; 
+            this.cargarMantenimientos();
+            return EMPTY;
           }
 
           return this.mantenimientoService.buscarPorNumeroSerie(trimmedValue).pipe(
+            tap((data: Mantenimiento[]) => {
+              this.mantenimientosList = data;
+              this.currentPage = 1;
+              this.updatePaginatedList();
+              this.mensajeError = '';
+            }),
             catchError(err => {
               console.error('Error al buscar asignaciones:', err);
               this.mensajeError = 'Ocurrió un error al buscar asignaciones.';
-              return of([]); 
+              this.mantenimientosList = [];
+              this.updatePaginatedList();
+              return of([]);
             })
           );
         })
       )
       .subscribe((mantenimientos) => {
-        if (mantenimientos.length > 0) {
-          this.mantenimientosList = mantenimientos;
-          this.mensajeError = '';
-        } else {
-          this.mantenimientosList = [];
+        if (mantenimientos.length === 0 && this.searchControl.value?.trim()) {
           this.mensajeError = 'No se encontró ninguna asignación con esa serie.';
         }
       });
 
 
 
-
   }
-
 
 
   cargarEquipos(): void {
@@ -141,10 +146,13 @@ fechaFin: Date | null = null;
 
 
   cargarMantenimientos(): void {
+    this.searchControl.setValue(''); // Limpiar el campo de búsqueda al cargar los equipos
     this.mantenimientoService.getMantenimientos().subscribe(
       (data: Mantenimiento[]) => {
         this.mantenimientosList = data;
-        console.log('Lista de mantenimientos cargada:', this.mantenimientosList);
+        this.currentPage = 1;
+        this.updatePaginatedList();
+        // console.log('Lista de mantenimientos cargada:', this.mantenimientosList);
       },
       (error) => {
         console.error('Error cargando mantenimientos:', error);
@@ -167,12 +175,10 @@ fechaFin: Date | null = null;
   }
 
   abrirModalEditar(mantenimiento: Mantenimiento): void {
-
-    this.selectedMantenimiento = {
-      ...mantenimiento,
-
-      equipo: mantenimiento.equipo ? { ...mantenimiento.equipo } as Equipo : {} as Equipo
-    };
+    this.selectedMantenimiento = JSON.parse(JSON.stringify(mantenimiento));
+    if (this.selectedMantenimiento) {
+      this.selectedMantenimiento.equipo = this.equiposList.find(e => e.id === mantenimiento.equipo?.id) || null;
+    }
     this.isEditMode = true;
     this.isModalVisible = true;
   }
@@ -182,41 +188,51 @@ fechaFin: Date | null = null;
     this.selectedMantenimiento = null;
   }
 
-  guardarMantenimiento(): void {
-  if (this.selectedMantenimiento) {
-    const mantenimientoParaGuardar: any = {
-      ...this.selectedMantenimiento,
-      equipo: this.selectedMantenimiento.equipo?.id ? { id: this.selectedMantenimiento.equipo.id } : null,
-      personal: this.selectedMantenimiento.personal?.id ? { id: this.selectedMantenimiento.personal.id } : null
-    };
+  guardarMantenimiento(form: NgForm): void {
+    if (form.invalid) {
+      form.control.markAllAsTouched(); // Para que se muestren los errores si hay campos vacíos
+      this.mostrarNotificacion('Completa todos los campos obligatorios', 'error');
+      return;
+    }
+    this.loading = true;
+    if (this.selectedMantenimiento) {
+      const mantenimientoParaGuardar: any = {
+        ...this.selectedMantenimiento,
+        equipo: this.selectedMantenimiento.equipo?.id ? { id: this.selectedMantenimiento.equipo.id } : null,
+        personal: this.selectedMantenimiento.personal?.id ? { id: this.selectedMantenimiento.personal.id } : null
+      };
 
-    if (this.isEditMode && this.selectedMantenimiento.id) {
-      this.mantenimientoService.updateMantenimiento(this.selectedMantenimiento.id, mantenimientoParaGuardar).subscribe(
-        () => {
-          this.cargarMantenimientos();
-          this.cerrarModal();
-          this.mostrarNotificacion('Mantenimiento actualizado con éxito', 'success');
-        },
-        (error) => {
-          console.error('Error al actualizar mantenimiento:', error);
-          this.mostrarNotificacion('Error al actualizar mantenimiento', 'error');
-        }
-      );
-    } else {
-      this.mantenimientoService.createMantenimiento(mantenimientoParaGuardar).subscribe(
-        () => {
-          this.cargarMantenimientos();
-          this.cerrarModal();
-          this.mostrarNotificacion('Mantenimiento agregado con éxito', 'success');
-        },
-        (error) => {
-          console.error('Error al crear mantenimiento:', error);
-          this.mostrarNotificacion('Error al crear mantenimiento', 'error');
-        }
-      );
+      if (this.isEditMode && this.selectedMantenimiento.id) {
+        this.mantenimientoService.updateMantenimiento(this.selectedMantenimiento.id, mantenimientoParaGuardar).subscribe(
+          () => {
+            this.cargarMantenimientos();
+            this.cerrarModal();
+            this.mostrarNotificacion('Mantenimiento actualizado con éxito', 'success');
+            this.loading = false;
+          },
+          (error) => {
+            console.error('Error al actualizar mantenimiento:', error);
+            this.mostrarNotificacion('Error al actualizar mantenimiento', 'error');
+            this.loading = false;
+          }
+        );
+      } else {
+        this.mantenimientoService.createMantenimiento(mantenimientoParaGuardar).subscribe(
+          () => {
+            this.cargarMantenimientos();
+            this.cerrarModal();
+            this.mostrarNotificacion('Mantenimiento agregado con éxito', 'success');
+            this.loading = false;
+          },
+          (error) => {
+            console.error('Error al crear mantenimiento:', error);
+            this.mostrarNotificacion('Error al crear mantenimiento', 'error');
+            this.loading = false;
+          }
+        );
+      }
     }
   }
-}
 
 
 
@@ -227,7 +243,7 @@ fechaFin: Date | null = null;
     } else {
       this.idParaEliminar = id.toString();
     }
-    this.isConfirmDeleteVisible = true; 
+    this.isConfirmDeleteVisible = true;
   }
 
   // Método para confirmar la eliminación
@@ -237,14 +253,14 @@ fechaFin: Date | null = null;
         () => {
           this.cargarMantenimientos();
           this.mostrarNotificacion('Mantenimiento eliminado con éxito', 'success');
-          this.isConfirmDeleteVisible = false; 
-          this.idParaEliminar = null; 
+          this.isConfirmDeleteVisible = false;
+          this.idParaEliminar = null;
         },
         (error) => {
           console.error('Error al eliminar mantenimiento:', error);
           this.mostrarNotificacion('Error al eliminar mantenimiento', 'error');
-          this.isConfirmDeleteVisible = false; 
-          this.idParaEliminar = null; 
+          this.isConfirmDeleteVisible = false;
+          this.idParaEliminar = null;
         }
       );
     }
@@ -252,13 +268,13 @@ fechaFin: Date | null = null;
 
   // Método para cancelar la eliminación
   cancelarEliminacion(): void {
-    this.isConfirmDeleteVisible = false; 
-    this.idParaEliminar = null; 
+    this.isConfirmDeleteVisible = false;
+    this.idParaEliminar = null;
   }
 
   // Método para eliminar (actualizado para usar el modal de confirmación)
   eliminarMantenimiento(id: any): void {
-    this.abrirModalConfirmacionEliminar(id); 
+    this.abrirModalConfirmacionEliminar(id);
   }
 
 
@@ -298,47 +314,38 @@ fechaFin: Date | null = null;
   mostrarNotificacion(mensaje: string, tipo: 'success' | 'error') {
     if (tipo === 'success') {
       this.mensajeExito = mensaje;
-      setTimeout(() => this.mensajeExito = '', 3000); 
+      setTimeout(() => this.mensajeExito = '', 3000);
     } else if (tipo === 'error') {
       this.mensajeError = mensaje;
-      setTimeout(() => this.mensajeError = '', 3000); 
+      setTimeout(() => this.mensajeError = '', 3000);
     }
   }
 
   // Método para redirigir al Dashboard
   irAlDashboard(): void {
-    this.router.navigate(['/dashboard']); 
-  }
-
-  // Método para cerrar sesión
-  cerrarSesion(): void {
-    this.loginService.logout(); 
-    this.router.navigate(['/login']); 
-  }
-
-  // Método para alternar el orden de la tabla
-  alternarOrden(): void {
-    this.ordenDescendente = !this.ordenDescendente;
-    this.mantenimientosList.reverse(); 
+    this.router.navigate(['/dashboard']);
   }
 
 
   // Método para descargar el reporte general de Mantenimientos
-  descargarPdfMantenimiento(): void { 
-    this.pdfService.downloadMantenimientosPdfGeneral().subscribe( 
+  descargarPdfMantenimiento(): void {
+    this.loading = true;
+    this.pdfService.downloadMantenimientosPdfGeneral().subscribe(
       blob => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'reporte_mantenimientos_general.pdf'; // Nombre de archivo más descriptivo para general
+        a.download = 'reporte_mantenimientos_general.pdf';
         a.click();
         window.URL.revokeObjectURL(url);
+        this.mostrarNotificacion('Reporte general de mantenimientos general generado con éxito.', 'success');
+        this.loading = false;
 
-        this.mostrarNotificacion('Reporte general de mantenimientos generado con éxito.', 'success');
       },
       error => {
         console.error('Error al descargar el reporte general de mantenimientos:', error);
         this.mostrarNotificacion('Error al generar el reporte general de mantenimientos.', 'error');
+        this.loading = false;
       }
     );
   }
@@ -346,6 +353,7 @@ fechaFin: Date | null = null;
 
   // Método para descargar el reporte de Mantenimientos por Equipo
   descargarReporteMantenimientosPorEquipo(mantenimiento: Mantenimiento): void {
+    this.loading = true;
     if (mantenimiento.equipo && mantenimiento.equipo.id) {
 
       const equipoIdString = typeof mantenimiento.equipo.id === 'string' ? mantenimiento.equipo.id : mantenimiento.equipo.id.$oid; // Ajusta según cómo esté representado el ObjectId
@@ -360,111 +368,195 @@ fechaFin: Date | null = null;
             a.download = `reporte_mantenimientos_equipo_${equipoIdString}.pdf`; // Nombre del archivo
             a.click();
             window.URL.revokeObjectURL(url); // Limpiar la URL del blob
-            this.mostrarNotificacion('Reporte de mantenimientos generado con éxito.', 'success');
+            this.mostrarNotificacion('Reporte de mantenimiento del equipo generado con éxito.', 'success');
+            this.loading = false;
           },
           error => {
             console.error('Error al descargar el reporte de mantenimientos:', error);
             this.mostrarNotificacion('Error al generar el reporte de mantenimientos.', 'error');
+            this.loading = false;
           }
         );
       } else {
         console.error('ID de equipo no válido para generar reporte.');
         this.mostrarNotificacion('No se pudo generar el reporte: ID de equipo inválido.', 'error');
+        this.loading = false;
       }
 
     } else {
       console.warn('No hay equipo asociado a este mantenimiento para generar reporte.');
       this.mostrarNotificacion('Este mantenimiento no tiene un equipo asociado para generar reporte.', 'error');
+      this.loading = false;
     }
   }
 
   exportarMantenimientosAExcel(): void {
-  let dataFiltrada = this.mantenimientosList;
+    this.loading = true;
 
-  // Filtrado por fechas si están definidas
-  if (this.fechaInicio && this.fechaFin) {
-    const inicio = new Date(this.fechaInicio).getTime();
-    const fin = new Date(this.fechaFin).getTime();
 
-    dataFiltrada = dataFiltrada.filter(m => {
-      const fechaMantenimiento = new Date(m.fecha).getTime();
-      return fechaMantenimiento >= inicio && fechaMantenimiento <= fin;
-    });
+    setTimeout(() => {
+      let dataFiltrada = this.mantenimientosList;
+
+      const hoy = new Date();
+      const fechaInicio = new Date(this.fechaInicio || '');
+      const fechaFin = new Date(this.fechaFin || '');
+      const anioInicio = fechaInicio.getFullYear();
+      const anioFin = fechaFin.getFullYear();
+
+      if (anioInicio < 2017 || anioInicio > hoy.getFullYear()) {
+        this.mostrarNotificacion('El año de inicio debe ser coherente', 'error');
+        this.loading = false;
+        return;
+      }
+
+      if (anioFin < 2017 || anioFin > hoy.getFullYear()) {
+        this.mostrarNotificacion('El año de fin debe ser coherente', 'error');
+        this.loading = false;
+        return;
+      }
+
+      // Validar que la fecha de egreso no sea anterior a la de ingreso
+      if (fechaFin < fechaInicio) {
+        this.mostrarNotificacion('La fecha de fin no puede ser anterior a la fecha de inicio', 'error');
+        this.loading = false;
+        return;
+      }
+
+      // Filtrado por fechas si están definidas
+      if (this.fechaInicio && this.fechaFin) {
+        const inicio = new Date(this.fechaInicio).getTime();
+        const fin = new Date(this.fechaFin).getTime();
+
+        dataFiltrada = dataFiltrada.filter(m => {
+          const fechaMantenimiento = new Date(m.fecha).getTime();
+          return fechaMantenimiento >= inicio && fechaMantenimiento <= fin;
+        });
+      }
+
+      const dataParaExcel = dataFiltrada.map(m => ({
+        Fecha: m.fecha,
+        Actividad: m.actividadRealizada,
+        Equipo: `${m.equipo?.numeroSerie || ''} / ${m.equipo?.modelo || ''} / ${m.equipo?.marca || ''} / ${m.equipo?.tipo || ''} / ${m.equipo?.color || ''} -> ${m.equipo?.estado || ''}`,
+        Responsable: this.getPersonaAsignada(m.equipo?.id, m.fecha)
+      }));
+
+      try {
+        const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataParaExcel);
+        const workbook: XLSX.WorkBook = { Sheets: { 'Mantenimientos': worksheet }, SheetNames: ['Mantenimientos'] };
+        const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+
+        const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+        FileSaver.saveAs(blob, 'MantenimientosFiltrados.xlsx');
+
+        this.mostrarNotificacion('Mantenimientos exportados a Excel con éxito.', 'success');
+      } catch (error) {
+        console.error('Error al exportar mantenimientos:', error);
+        this.mostrarNotificacion('Ocurrió un error al exportar los mantenimientos.', 'error');
+      }
+
+      this.loading = false;
+    }, 300); // pequeño delay para permitir que se vea el spinner
   }
 
-  const dataParaExcel = dataFiltrada.map(m => ({
-    Fecha: m.fecha,
-    Actividad: m.actividadRealizada,
-    Equipo: `${m.equipo?.numeroSerie || ''} / ${m.equipo?.modelo || ''} / ${m.equipo?.marca || ''} / ${m.equipo?.tipo|| ''} / ${m.equipo?.color || ''} -> ${m.equipo?.estado || ''}`,
-    Responsable: this.getPersonaAsignada(m.equipo?.id, m.fecha)
 
-
-  }));
-
-  const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataParaExcel);
-  const workbook: XLSX.WorkBook = { Sheets: { 'Mantenimientos': worksheet }, SheetNames: ['Mantenimientos'] };
-  const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-
-  const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
-  FileSaver.saveAs(blob, 'MantenimientosFiltrados.xlsx');
-}
-
-cargarAsignaciones(): void {
-  this.asignacionService.obtenerTodasLasAsignaciones().subscribe(
-    (data) => {
-      this.asignacionesList = data;
-    },
-    (error) => {
-      console.error('Error al cargar asignaciones:', error);
-    }
-  );
-}
-
-getPersonaAsignada(equipoId: string | undefined, fechaMantenimientoStr?: string): string {
-  if (!equipoId) return 'Sin asignar';
-
-  const fechaMantenimiento = fechaMantenimientoStr ? new Date(fechaMantenimientoStr) : new Date();
-
-  // Filtra las asignaciones del equipo
-  const asignacionesDelEquipo = this.asignacionesList.filter(a =>
-    a.equipo?.id === equipoId
-  );
-
-  if (asignacionesDelEquipo.length === 0) return 'Sin asignar';
-
-  // Encuentra las asignaciones activas en la fecha del mantenimiento
-  const asignacionesValidas = asignacionesDelEquipo.filter(a => {
-    const inicio = new Date(a.fechaAsignacion);
-    const fin = a.fechaFinAsignacion ? new Date(a.fechaFinAsignacion) : null;
-
-    return (
-      fechaMantenimiento >= inicio &&
-      (!fin || fechaMantenimiento <= fin)
+  cargarAsignaciones(): void {
+    this.asignacionService.obtenerTodasLasAsignaciones().subscribe(
+      (data) => {
+        this.asignacionesList = data;
+      },
+      (error) => {
+        console.error('Error al cargar asignaciones:', error);
+      }
     );
-  });
-
-  // Si hay asignaciones válidas, tomar la más reciente (mayor fechaAsignacion)
-  if (asignacionesValidas.length > 0) {
-    const asignacionMasReciente = asignacionesValidas.sort((a, b) =>
-      new Date(b.fechaAsignacion).getTime() - new Date(a.fechaAsignacion).getTime()
-    )[0];
-
-    return asignacionMasReciente.personal?.nombre || 'Sin asignar';
   }
 
-  // Si no hay asignaciones activas, tomar la última sin fechaFin
-  const sinFechaFin = asignacionesDelEquipo.filter(a => !a.fechaFinAsignacion);
-  if (sinFechaFin.length > 0) {
-    const asignacionMasReciente = sinFechaFin.sort((a, b) =>
-      new Date(b.fechaAsignacion).getTime() - new Date(a.fechaAsignacion).getTime()
-    )[0];
+  getPersonaAsignada(equipoId: string | undefined, fechaMantenimientoStr?: string): string {
+    if (!equipoId) return 'Sin asignar';
 
-    return asignacionMasReciente.personal?.nombre || 'Sin asignar';
+    const fechaMantenimiento = fechaMantenimientoStr ? new Date(fechaMantenimientoStr) : new Date();
+
+    // Filtra las asignaciones del equipo
+    const asignacionesDelEquipo = this.asignacionesList.filter(a =>
+      a.equipo?.id === equipoId
+    );
+
+    if (asignacionesDelEquipo.length === 0) return 'Sin asignar';
+
+    // Encuentra las asignaciones activas en la fecha del mantenimiento
+    const asignacionesValidas = asignacionesDelEquipo.filter(a => {
+      const inicio = new Date(a.fechaAsignacion);
+      const fin = a.fechaFinAsignacion ? new Date(a.fechaFinAsignacion) : null;
+
+      return (
+        fechaMantenimiento >= inicio &&
+        (!fin || fechaMantenimiento <= fin)
+      );
+    });
+
+    // Si hay asignaciones válidas, tomar la más reciente (mayor fechaAsignacion)
+    if (asignacionesValidas.length > 0) {
+      const asignacionMasReciente = asignacionesValidas.sort((a, b) =>
+        new Date(b.fechaAsignacion).getTime() - new Date(a.fechaAsignacion).getTime()
+      )[0];
+
+      return asignacionMasReciente.personal?.nombre || 'Sin asignar';
+    }
+
+    // Si no hay asignaciones activas, tomar la última sin fechaFin
+    const sinFechaFin = asignacionesDelEquipo.filter(a => !a.fechaFinAsignacion);
+    if (sinFechaFin.length > 0) {
+      const asignacionMasReciente = sinFechaFin.sort((a, b) =>
+        new Date(b.fechaAsignacion).getTime() - new Date(a.fechaAsignacion).getTime()
+      )[0];
+
+      return asignacionMasReciente.personal?.nombre || 'Sin asignar';
+    }
+
+    return 'Sin asignar';
   }
 
-  return 'Sin asignar';
+  ensureHttp(url: string): string {
+    if (!url) return '';
+    return url.startsWith('http://') || url.startsWith('https://')
+      ? url
+      : `https://${url}`;
+  }
+
+  updatePaginatedList() {
+  const start = (this.currentPage - 1) * this.itemsPerPage;
+  const end = start + this.itemsPerPage;
+  this.paginatedList = this.mantenimientosList.slice(start, end);
 }
 
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePaginatedList();
+    }
+  }
 
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePaginatedList();
+    }
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.mantenimientosList.length / this.itemsPerPage);
+  }
+
+  get startIndex(): number {
+  return (this.currentPage - 1) * this.itemsPerPage + 1;
+}
+
+get endIndex(): number {
+  const end = this.startIndex + this.paginatedList.length - 1;
+  return end > this.mantenimientosList.length ? this.mantenimientosList.length : end;
+}
+onItemsPerPageChange() {
+  this.currentPage = 1; // reiniciar a la primera página
+  this.updatePaginatedList();
+}
 
 }
