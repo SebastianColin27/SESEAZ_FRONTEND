@@ -375,8 +375,10 @@
                 <th>Nombre de licencia</th>
                 <th>Numero de serie de licencia</th>
                 <th><i class="bi bi-exclamation-triangle-fill me-1"></i>Fecha de vencimiento</th>
-                <th>Equipo asignado No. Inventario</th>
                 <th>Número de serie del equipo</th>
+                <th>Modelo del equipo</th>
+                <th>Color del equipo</th>
+                <th>Marca del equipo</th>
                 <th>Personal asignado</th>
               </tr>
             </thead>
@@ -385,12 +387,12 @@
                 <td>{{ item.licencia.nombreLicencia }}</td>
                 <td>{{item.licencia.numeroSerie}}</td>
                 <td class="fw-bold text-danger bg-warning">
-
                   {{ item.licencia.fechaVencimiento | date:'yyyy-MM-dd' }}
                 </td>
-                <!-- <td>{{ item.licencia.fechaVencimiento | date:'yyyy-MM-dd' }}</td> -->
-                <td>{{ item.equipo?.numeroInventario }}</td>
                 <td>{{ item.equipo?.numeroSerie ?? 'N/A' }}</td>
+                <td>{{ item.equipo?.modelo ?? 'N/A' }}</td>
+                <td>{{ item.equipo?.color ?? 'N/A' }}</td>
+                <td>{{ item.equipo?.marca ?? 'N/A' }}</td>
                 <td>{{ item.personal?.nombre ?? 'Sin asignar' }}</td>
               </tr>
             </tbody>
